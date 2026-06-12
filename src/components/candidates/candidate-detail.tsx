@@ -227,12 +227,12 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
 
               <div className="pt-4 flex gap-3">
                 {candidate.cv_link && (
-                  <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" asChild>
-                    <a href={candidate.cv_link} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
-                      <ExternalLink className="h-4 w-4" />
+                  <a href={candidate.cv_link} target="_blank" rel="noopener noreferrer" className="w-full">
+                    <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+                      <ExternalLink className="h-4 w-4 mr-2" />
                       View CV
-                    </a>
-                  </Button>
+                    </Button>
+                  </a>
                 )}
               </div>
             </CardContent>
