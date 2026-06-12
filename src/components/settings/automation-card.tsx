@@ -163,7 +163,7 @@ export function AutomationCard({ dcmType, initialSetting, onSave, delay = 0 }: A
 
           <div className="space-y-2">
             <Label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Timezone</Label>
-            <Select value={timezone} onValueChange={setTimezone}>
+            <Select value={timezone} onValueChange={(val) => val && setTimezone(val)}>
               <SelectTrigger className="bg-background/50">
                 <SelectValue placeholder="Select timezone" />
               </SelectTrigger>
