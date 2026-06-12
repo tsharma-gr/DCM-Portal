@@ -188,7 +188,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
         
         <div className="flex flex-wrap w-full sm:w-auto gap-3 items-center">
           <SlidersHorizontal className="h-4 w-4 text-muted-foreground hidden sm:block" />
-          <Select value={classification} onValueChange={(v) => { setClassification(v); setPage(1); }}>
+          <Select value={classification} onValueChange={(v) => { if (v) { setClassification(v); setPage(1); } }}>
             <SelectTrigger className="w-[140px] bg-background/50 border-border/50">
               <SelectValue placeholder="Classification" />
             </SelectTrigger>
@@ -200,7 +200,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
             </SelectContent>
           </Select>
 
-          <Select value={dcmType} onValueChange={(v) => { setDcmType(v); setPage(1); }}>
+          <Select value={dcmType} onValueChange={(v) => { if (v) { setDcmType(v); setPage(1); } }}>
             <SelectTrigger className="w-[160px] bg-background/50 border-border/50">
               <SelectValue placeholder="DCM Type" />
             </SelectTrigger>
@@ -213,7 +213,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
             </SelectContent>
           </Select>
 
-          <Select value={limit} onValueChange={(v) => { setLimit(v); setPage(1); }}>
+          <Select value={limit} onValueChange={(v) => { if (v) { setLimit(v); setPage(1); } }}>
             <SelectTrigger className="w-[130px] bg-background/50 border-border/50">
               <SelectValue placeholder="Per Page" />
             </SelectTrigger>
