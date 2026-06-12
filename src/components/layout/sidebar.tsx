@@ -1,0 +1,120 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import {
+  LayoutDashboard,
+  Users,
+  Briefcase,
+  Home,
+  Building,
+  Calculator,
+  BarChart,
+  Settings,
+} from "lucide-react";
+
+const mainNavItems = [
+  { title: "Dashboard", href: "/", icon: LayoutDashboard },
+  { title: "Candidates", href: "/candidates", icon: Users },
+];
+
+const dcmNavItems = [
+  { title: "Exterior DCM", href: "/candidates?dcm=exterior", icon: Building },
+  { title: "Interior DCM", href: "/candidates?dcm=interior", icon: Home },
+  { title: "Quantity Surveyor DCM", href: "/candidates?dcm=qs", icon: Calculator },
+  { title: "Project Manager DCM", href: "/candidates?dcm=pm", icon: Briefcase },
+];
+
+const bottomNavItems = [
+  { title: "Reports", href: "/reports", icon: BarChart },
+  { title: "Settings", href: "/settings", icon: Settings },
+];
+
+export function Sidebar() {
+  const pathname = usePathname();
+
+  return (
+    <div className="flex h-full w-64 flex-col border-r bg-card/50 backdrop-blur-xl print:hidden">
+      <div className="flex h-16 items-center border-b px-6">
+        <span className="text-xl font-bold font-heading bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          TalentVerse AI
+        </span>
+      </div>
+      
+      <div className="flex-1 overflow-y-auto py-6">
+        <nav className="space-y-6 px-4">
+          <div>
+            <p className="px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+              Overview
+            </p>
+            <div className="space-y-1">
+              {mainNavItems.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-accent hover:text-accent-foreground",
+                      isActive ? "bg-primary text-primary-foreground hover:bg-primary/90" : "text-muted-foreground"
+                    )}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.title}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <p className="px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+              DCM Systems
+            </p>
+            <div className="space-y-1">
+              {dcmNavItems.map((item) => {
+                // Approximate active state for DCM links
+                const isActive = pathname === "/candidates" && false; // We can improve this later with searchParams
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-accent hover:text-accent-foreground",
+                      isActive ? "bg-primary text-primary-foreground hover:bg-primary/90" : "text-muted-foreground"
+                    )}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.title}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </nav>
+      </div>
+
+      <div className="border-t p-4">
+        <nav className="space-y-1">
+          {bottomNavItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-accent hover:text-accent-foreground",
+                  isActive ? "bg-primary text-primary-foreground hover:bg-primary/90" : "text-muted-foreground"
+                )}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.title}
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+    </div>
+  );
+}
