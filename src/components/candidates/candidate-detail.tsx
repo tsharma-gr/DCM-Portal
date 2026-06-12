@@ -100,7 +100,7 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
 
   const handleStatusChange = async (newStatus: string) => {
     setIsUpdatingStatus(true);
-    setStatus(newStatus as Candidate["status"]);
+    setStatus(newStatus as NonNullable<Candidate["status"]>);
     try {
       const { candidateService } = await import("@/services/candidateService");
       await candidateService.updateCandidateStatus(candidate.id, newStatus);
@@ -154,7 +154,7 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
         
         <div className="flex items-center gap-2 bg-card/50 backdrop-blur p-1 rounded-md border border-border/50">
           <span className="text-sm text-muted-foreground font-medium pl-2">Status:</span>
-          <Select value={status} onValueChange={handleStatusChange} disabled={isUpdatingStatus}>
+          <Select value={status} onValueChange={(val) => val && handleStatusChange(val)} disabled={isUpdatingStatus}>
             <SelectTrigger className="w-[180px] bg-background border-none shadow-none h-8 focus:ring-1 focus:ring-primary">
               {isUpdatingStatus ? (
                 <div className="flex items-center gap-2">
