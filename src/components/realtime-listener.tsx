@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 
+import { toast } from "sonner";
+
 export function RealtimeListener() {
   const router = useRouter();
   const supabase = createClient();
@@ -13,11 +15,30 @@ export function RealtimeListener() {
     const candidatesChannel = supabase.channel("public:candidates")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "candidates" },
-        () => {
-          // Tell Next.js to re-fetch Server Components when data changes
+        { event: "INSERT", schema: "public", table: "candidates" },
+        (payload) => {
+          const newCandidate = payload.new;
+          if (newCandidate.classification === "FIT") {
+            toast.success(`🎉 AI found a new FIT candidate for ${newCandidate.dcm_type || 'a DCM'}!`, {
+              description: newCandidate.candidate_name || "New resume processed.",
+            });
+          } else {
+            toast.info(`New candidate processed: ${newCandidate.classification || 'Pending'}`, {
+              description: newCandidate.candidate_name || "New resume processed.",
+            });
+          }
           router.refresh();
         }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "candidates" },
+        () => router.refresh()
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "candidates" },
+        () => router.refresh()
       )
       .subscribe();
 

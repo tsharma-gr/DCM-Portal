@@ -12,6 +12,7 @@ export default function CandidatesPage() {
     search: searchParams.get("search") || undefined,
     classification: searchParams.get("classification") || undefined,
     dcmType: searchParams.get("dcmType") || undefined,
+    platform: searchParams.get("platform") || undefined,
     page: searchParams.get("page") || "1",
     limit: searchParams.get("limit") || "10",
   };

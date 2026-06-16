@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { User } from "lucide-react";
 import {
   DropdownMenu,
@@ -16,6 +17,23 @@ import { useRouter } from "next/navigation";
 export function Header() {
   const router = useRouter();
   const supabase = createClient();
+  const [userEmail, setUserEmail] = useState<string>("Loading...");
+  const [userName, setUserName] = useState<string>("Loading...");
+
+  useEffect(() => {
+    async function fetchUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserEmail(user.email || "No email");
+        const fallbackName = user.email ? user.email.split('@')[0] : "User";
+        setUserName(user.user_metadata?.full_name || user.user_metadata?.name || fallbackName);
+      } else {
+        setUserEmail("Not logged in");
+        setUserName("Guest");
+      }
+    }
+    fetchUser();
+  }, [supabase]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -37,9 +55,9 @@ export function Header() {
             <DropdownMenuGroup>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">Admin User</p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    admin@gmail.com
+                  <p className="text-sm font-medium leading-none">{userName}</p>
+                  <p className="text-xs leading-none text-muted-foreground truncate">
+                    {userEmail}
                   </p>
                 </div>
               </DropdownMenuLabel>

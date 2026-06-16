@@ -15,6 +15,7 @@ const poppins = Poppins({
 });
 
 import { RealtimeListener } from "@/components/realtime-listener";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "TalentVerse DCM Dashboard",
@@ -31,10 +32,11 @@ export default function RootLayout({
       <body className={`${inter.variable} ${poppins.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme="light"
           enableSystem={false}
           disableTransitionOnChange
         >
+          <Toaster theme="light" position="bottom-right" />
           <RealtimeListener />
           {children}
         </ThemeProvider>

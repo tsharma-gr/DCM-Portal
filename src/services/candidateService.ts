@@ -155,5 +155,44 @@ export const candidateService = {
   async deleteCandidate(id: string): Promise<void> {
     const { error } = await supabase.from("candidates").delete().eq("id", id);
     if (error) throw error;
+  },
+
+  async updateCandidate(id: string, updates: Partial<Candidate>): Promise<Candidate> {
+    const { data, error } = await supabase
+      .from("candidates")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error("Supabase Error (updateCandidate):", error.message);
+      throw new Error(`Failed to update candidate: ${error.message}`);
+    }
+    return data;
+  },
+
+  async bulkUpdateCandidates(ids: string[], updates: Partial<Candidate>): Promise<void> {
+    const { error } = await supabase
+      .from("candidates")
+      .update(updates)
+      .in("id", ids);
+
+    if (error) {
+      console.error("Supabase Error (bulkUpdateCandidates):", error.message);
+      throw new Error(`Failed to bulk update candidates: ${error.message}`);
+    }
+  },
+
+  async bulkDeleteCandidates(ids: string[]): Promise<void> {
+    const { error } = await supabase
+      .from("candidates")
+      .delete()
+      .in("id", ids);
+
+    if (error) {
+      console.error("Supabase Error (bulkDeleteCandidates):", error.message);
+      throw new Error(`Failed to bulk delete candidates: ${error.message}`);
+    }
   }
 };

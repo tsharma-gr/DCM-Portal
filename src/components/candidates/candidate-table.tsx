@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Candidate } from "@/types/candidate";
-import { Search, ChevronLeft, ChevronRight, SlidersHorizontal, MoreHorizontal, Eye, Trash, MessageSquare } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, SlidersHorizontal, MoreHorizontal, Eye, Trash, MessageSquare, Download, CheckSquare, Loader2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,12 +45,94 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [classification, setClassification] = useState(searchParams.get("classification") || "All");
   const [dcmType, setDcmType] = useState(searchParams.get("dcmType") || "All");
+  const [platform, setPlatform] = useState(searchParams.get("platform") || "All");
   const [limit, setLimit] = useState(searchParams.get("limit") || "10");
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   
   // Local state for optimistic updates
   const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates);
   const [localTotalCount, setLocalTotalCount] = useState(totalCount);
+
+  // Bulk Actions & Export State
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === candidates.length && candidates.length > 0) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(candidates.map(c => c.id)));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    const newSet = new Set(selectedIds);
+    if (newSet.has(id)) newSet.delete(id);
+    else newSet.add(id);
+    setSelectedIds(newSet);
+  };
+
+  const handleBulkStatusUpdate = async (newStatus: string) => {
+    if (selectedIds.size === 0) return;
+    setIsBulkUpdating(true);
+    try {
+      const { candidateService } = await import("@/services/candidateService");
+      await candidateService.bulkUpdateCandidates(Array.from(selectedIds), { status: newStatus });
+      setCandidates(prev => prev.map(c => selectedIds.has(c.id) ? { ...c, status: newStatus } : c));
+      setSelectedIds(new Set());
+      router.refresh();
+    } catch (err) {
+      console.error("Failed to bulk update", err);
+      alert("Failed to update status.");
+    } finally {
+      setIsBulkUpdating(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (!confirm(`Are you sure you want to delete ${selectedIds.size} candidates?`)) return;
+    setIsBulkUpdating(true);
+    try {
+      const { candidateService } = await import("@/services/candidateService");
+      await candidateService.bulkDeleteCandidates(Array.from(selectedIds));
+      setCandidates(prev => prev.filter(c => !selectedIds.has(c.id)));
+      setLocalTotalCount(prev => Math.max(0, prev - selectedIds.size));
+      setSelectedIds(new Set());
+      router.refresh();
+    } catch (err) {
+      console.error("Failed to bulk delete", err);
+      alert("Failed to delete candidates.");
+    } finally {
+      setIsBulkUpdating(false);
+    }
+  };
+
+  const handleExportCSV = () => {
+    if (!candidates.length) return;
+    const headers = ["ID", "Name", "Position", "Classification", "Status", "Location", "DCM Type", "Platform", "Date Processed"];
+    const csvRows = candidates.map(c => [
+      c.id,
+      `"${(c.candidate_name || '').replace(/"/g, '""')}"`,
+      `"${(c.current_position || '').replace(/"/g, '""')}"`,
+      c.classification || '',
+      c.status || '',
+      `"${(c.location || '').replace(/"/g, '""')}"`,
+      c.dcm_type || '',
+      c.platform_name || '',
+      new Date(c.processed_timestamp).toISOString()
+    ].join(","));
+    const csvContent = [headers.join(","), ...csvRows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `candidates_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   // Sync when server data changes
   useEffect(() => {
@@ -119,13 +201,14 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
       if (search) params.set("search", search);
       if (classification && classification !== "All") params.set("classification", classification);
       if (dcmType && dcmType !== "All") params.set("dcmType", dcmType);
+      if (platform && platform !== "All") params.set("platform", platform);
       if (limit && limit !== "10") params.set("limit", limit);
       if (page > 1) params.set("page", page.toString());
       
       router.push(`/candidates?${params.toString()}`);
     }, 500);
     return () => clearTimeout(handler);
-  }, [search, classification, dcmType, limit, page, router]);
+  }, [search, classification, dcmType, platform, limit, page, router]);
 
   const getClassificationBadge = (c: string) => {
     switch (c) {
@@ -189,11 +272,12 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
         <div className="flex flex-wrap w-full sm:w-auto gap-3 items-center">
           <SlidersHorizontal className="h-4 w-4 text-muted-foreground hidden sm:block" />
           <Select value={classification} onValueChange={(v) => { if (v) { setClassification(v); setPage(1); } }}>
-            <SelectTrigger className="w-[140px] bg-background/50 border-border/50">
-              <SelectValue placeholder="Classification" />
+            <SelectTrigger className="w-[160px] bg-background/50 border-border/50">
+              <span className="text-muted-foreground font-medium mr-1">Status:</span>
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="All">All Status</SelectItem>
+              <SelectItem value="All">All</SelectItem>
               <SelectItem value="FIT">FIT</SelectItem>
               <SelectItem value="UNFIT">UNFIT</SelectItem>
               <SelectItem value="Pending">Pending</SelectItem>
@@ -201,15 +285,26 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
           </Select>
 
           <Select value={dcmType} onValueChange={(v) => { if (v) { setDcmType(v); setPage(1); } }}>
-            <SelectTrigger className="w-[160px] bg-background/50 border-border/50">
-              <SelectValue placeholder="DCM Type" />
+            <SelectTrigger className="w-[180px] bg-background/50 border-border/50">
+              <span className="text-muted-foreground font-medium mr-1">DCM:</span>
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="All">All DCMs</SelectItem>
+              <SelectItem value="All">All</SelectItem>
               <SelectItem value="Exterior">Exterior</SelectItem>
-              <SelectItem value="Interior">Interior</SelectItem>
-              <SelectItem value="Quantity Surveyor">Quantity Surveyor</SelectItem>
-              <SelectItem value="Project Manager">Project Manager</SelectItem>
+              <SelectItem value="Structural">Structural</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={platform} onValueChange={(v) => { if (v) { setPlatform(v); setPage(1); } }}>
+            <SelectTrigger className="w-[180px] bg-background/50 border-border/50">
+              <span className="text-muted-foreground font-medium mr-1">Platform:</span>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="All">All</SelectItem>
+              <SelectItem value="CV-Library">CV-Library</SelectItem>
+              <SelectItem value="Totaljobs">Totaljobs</SelectItem>
             </SelectContent>
           </Select>
 
@@ -221,12 +316,47 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
               <SelectItem value="10">10 / page</SelectItem>
               <SelectItem value="20">20 / page</SelectItem>
               <SelectItem value="50">50 / page</SelectItem>
+              <SelectItem value="100">100 / page</SelectItem>
             </SelectContent>
           </Select>
+
+          <Button variant="outline" onClick={handleExportCSV} className="bg-background/50 border-border/50 hidden sm:flex">
+            <Download className="h-4 w-4 mr-2" />
+            Export CSV
+          </Button>
         </div>
       </div>
 
-      {/* Table */}
+      {selectedIds.size > 0 && (
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between bg-primary/10 border border-primary/20 rounded-xl p-3 px-4 shadow-sm"
+        >
+          <div className="flex items-center gap-2">
+            <CheckSquare className="h-5 w-5 text-primary" />
+            <span className="font-medium text-sm text-primary">{selectedIds.size} candidates selected</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Select onValueChange={handleBulkStatusUpdate} disabled={isBulkUpdating}>
+              <SelectTrigger className="h-8 w-[140px] bg-background text-xs">
+                <SelectValue placeholder="Change Status..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="New">New</SelectItem>
+                <SelectItem value="Under Review">Under Review</SelectItem>
+                <SelectItem value="Contacted">Contacted</SelectItem>
+                <SelectItem value="Rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="destructive" size="sm" onClick={handleBulkDelete} disabled={isBulkUpdating} className="h-8 text-xs">
+              {isBulkUpdating ? <Loader2 className="h-3 w-3 mr-2 animate-spin" /> : <Trash className="h-3 w-3 mr-2" />}
+              Delete Selected
+            </Button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Table Section */}
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -235,48 +365,61 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
       >
         <Table>
           <TableHeader>
-            <TableRow className="hover:bg-transparent border-b-border/50">
-              <TableHead className="w-[200px] py-4">Candidate Name</TableHead>
+            <TableRow className="hover:bg-transparent border-border/50">
+              <TableHead className="w-[50px] px-4">
+                <input 
+                  type="checkbox" 
+                  className="h-4 w-4 rounded border-border text-primary focus:ring-primary accent-primary translate-y-[2px]" 
+                  checked={candidates.length > 0 && selectedIds.size === candidates.length}
+                  onChange={toggleSelectAll}
+                />
+              </TableHead>
+              <TableHead className="w-[250px]">Candidate</TableHead>
+              <TableHead>Location</TableHead>
               <TableHead>Classification</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Position</TableHead>
               <TableHead>Platform</TableHead>
-              <TableHead>DCM Type</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead className="text-right">Processed Date</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="hidden md:table-cell">Processed</TableHead>
+              <TableHead className="text-right pr-4">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {candidates.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="h-32 text-center text-muted-foreground">
+                <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
                   No candidates found matching your criteria.
                 </TableCell>
               </TableRow>
             ) : (
-              candidates.map((candidate) => (
-                <TableRow 
-                  key={candidate.id} 
-                  className="hover:bg-muted/50 border-b-border/50 cursor-pointer transition-colors"
+              candidates.map((candidate, idx) => (
+                <motion.tr
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, delay: idx * 0.05 }}
+                  key={candidate.id}
+                  className="border-border/50 hover:bg-muted/30 transition-colors group cursor-pointer"
                   onClick={() => router.push(`/candidates/${candidate.id}`)}
                 >
+                  <TableCell className="w-[50px] px-4" onClick={(e) => e.stopPropagation()}>
+                    <input 
+                      type="checkbox" 
+                      className="h-4 w-4 rounded border-border text-primary focus:ring-primary accent-primary translate-y-[2px]" 
+                      checked={selectedIds.has(candidate.id)}
+                      onChange={() => toggleSelect(candidate.id)}
+                    />
+                  </TableCell>
                   <TableCell className="font-medium">{candidate.candidate_name}</TableCell>
+                  <TableCell className="text-muted-foreground max-w-[150px] truncate" title={candidate.location}>
+                    {candidate.location || "N/A"}
+                  </TableCell>
                   <TableCell>{getClassificationBadge(candidate.classification)}</TableCell>
                   <TableCell>{getStatusBadge(candidate.status)}</TableCell>
-                  <TableCell className="text-muted-foreground max-w-[200px] truncate" title={candidate.current_position}>
-                    {candidate.current_position || "N/A"}
-                  </TableCell>
                   <TableCell>
                     <Badge variant="outline" className="text-xs font-normal">
                       {candidate.platform_name}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{candidate.dcm_type || "N/A"}</TableCell>
-                  <TableCell className="text-muted-foreground max-w-[150px] truncate" title={candidate.location}>
-                    {candidate.location || "N/A"}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground whitespace-nowrap text-right">
+                  <TableCell className="text-muted-foreground whitespace-nowrap hidden md:table-cell">
                     {candidate.processed_timestamp ? new Date(candidate.processed_timestamp).toLocaleString(undefined, {
                       month: 'short',
                       day: 'numeric',
@@ -285,9 +428,9 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
                       minute: '2-digit'
                     }) : "N/A"}
                   </TableCell>
-                  <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                  <TableCell className="text-right pr-4" onClick={(e) => e.stopPropagation()}>
                     <DropdownMenu>
-                      <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary">
+                      <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary ml-auto">
                         <span className="sr-only">Open menu</span>
                         <MoreHorizontal className="h-4 w-4" />
                       </DropdownMenuTrigger>
@@ -311,7 +454,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
-                </TableRow>
+                </motion.tr>
               ))
             )}
           </TableBody>

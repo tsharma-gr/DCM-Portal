@@ -62,6 +62,7 @@ export function useCandidatesList(searchParams: Record<string, string | undefine
           search: searchParams.search,
           classification: searchParams.classification,
           dcmType: searchParams.dcmType,
+          platform: searchParams.platform,
         });
         
         if (mounted) {
@@ -81,7 +82,7 @@ export function useCandidatesList(searchParams: Record<string, string | undefine
 
     fetchData();
     return () => { mounted = false; };
-  }, [searchParams.search, searchParams.classification, searchParams.dcmType, searchParams.page, searchParams.limit]);
+  }, [searchParams.search, searchParams.classification, searchParams.dcmType, searchParams.platform, searchParams.page, searchParams.limit]);
 
   return { candidates, count, isLoading, isFetching };
 }

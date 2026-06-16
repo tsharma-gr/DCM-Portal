@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -56,6 +58,47 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
 
   const [status, setStatus] = useState(candidate.status || "New");
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
+  // Candidate Details Edit State
+  const [isEditingDetails, setIsEditingDetails] = useState(false);
+  const [isSavingDetails, setIsSavingDetails] = useState(false);
+  const [editForm, setEditForm] = useState({
+    candidate_name: candidate.candidate_name || "",
+    current_position: candidate.current_position || "",
+    classification: candidate.classification || "Pending",
+    location: candidate.location || "",
+    dcm_type: candidate.dcm_type || "",
+    platform_name: candidate.platform_name || "",
+    cv_link: candidate.cv_link || "",
+  });
+
+  const handleSaveDetails = async () => {
+    setIsSavingDetails(true);
+    try {
+      const { candidateService } = await import("@/services/candidateService");
+      await candidateService.updateCandidate(candidate.id, editForm);
+      router.refresh();
+      setIsEditingDetails(false);
+    } catch (err) {
+      console.error("Failed to update candidate details", err);
+      alert("Failed to update details.");
+    } finally {
+      setIsSavingDetails(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditForm({
+      candidate_name: candidate.candidate_name || "",
+      current_position: candidate.current_position || "",
+      classification: candidate.classification || "Pending",
+      location: candidate.location || "",
+      dcm_type: candidate.dcm_type || "",
+      platform_name: candidate.platform_name || "",
+      cv_link: candidate.cv_link || "",
+    });
+    setIsEditingDetails(false);
+  };
 
   const handleDeleteComment = async (commentId: string) => {
     if (!confirm("Are you sure you want to delete this comment?")) return;
@@ -185,57 +228,119 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
           transition={{ duration: 0.4 }}
           className="md:col-span-1"
         >
-          <Card className="bg-card/50 backdrop-blur border-border/50">
-            <CardHeader className="text-center pb-4">
-              <div className="mx-auto bg-primary/10 w-24 h-24 rounded-full flex items-center justify-center mb-4 border border-primary/20">
-                <User className="h-12 w-12 text-primary" />
+          <Card className="bg-card/50 backdrop-blur border-border/50 relative">
+            {!isEditingDetails && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="absolute top-2 right-2 text-muted-foreground hover:text-primary z-10"
+                onClick={() => setIsEditingDetails(true)}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+            )}
+            {isEditingDetails ? (
+              <div className="p-6 space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase text-muted-foreground font-semibold">Candidate Name</Label>
+                  <Input value={editForm.candidate_name} onChange={(e) => setEditForm({...editForm, candidate_name: e.target.value})} className="bg-background/50" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase text-muted-foreground font-semibold">Current Position</Label>
+                  <Input value={editForm.current_position} onChange={(e) => setEditForm({...editForm, current_position: e.target.value})} className="bg-background/50" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase text-muted-foreground font-semibold">Classification</Label>
+                  <Select value={editForm.classification} onValueChange={(v) => setEditForm({...editForm, classification: v})}>
+                    <SelectTrigger className="bg-background/50"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="FIT">FIT</SelectItem>
+                      <SelectItem value="UNFIT">UNFIT</SelectItem>
+                      <SelectItem value="Pending">Pending</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase text-muted-foreground font-semibold">Location</Label>
+                  <Input value={editForm.location} onChange={(e) => setEditForm({...editForm, location: e.target.value})} className="bg-background/50" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase text-muted-foreground font-semibold">DCM Type</Label>
+                  <Input value={editForm.dcm_type} onChange={(e) => setEditForm({...editForm, dcm_type: e.target.value})} className="bg-background/50" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase text-muted-foreground font-semibold">Platform</Label>
+                  <Input value={editForm.platform_name} onChange={(e) => setEditForm({...editForm, platform_name: e.target.value})} className="bg-background/50" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase text-muted-foreground font-semibold">CV Link</Label>
+                  <Input value={editForm.cv_link} onChange={(e) => setEditForm({...editForm, cv_link: e.target.value})} className="bg-background/50" />
+                </div>
+                <div className="flex gap-2 pt-4">
+                  <Button onClick={handleSaveDetails} disabled={isSavingDetails} className="flex-1">
+                    {isSavingDetails ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Check className="h-4 w-4 mr-2" />}
+                    Save
+                  </Button>
+                  <Button onClick={handleCancelEdit} variant="outline" disabled={isSavingDetails} className="flex-1">
+                    <X className="h-4 w-4 mr-2" />
+                    Cancel
+                  </Button>
+                </div>
               </div>
-              <CardTitle className="text-2xl font-heading">{candidate.candidate_name}</CardTitle>
-              <CardDescription className="text-base mt-1">
-                {candidate.current_position || "Position Not Specified"}
-              </CardDescription>
-              <div className="mt-4">
-                {getClassificationBadge(candidate.classification)}
-              </div>
-            </CardHeader>
-            <Separator className="bg-border/50" />
-            <CardContent className="pt-6 space-y-4">
-              <div className="flex items-center gap-3 text-sm">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <span>{candidate.location || "Location Not Specified"}</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <Building2 className="h-4 w-4 text-muted-foreground" />
-                <span>{candidate.dcm_type || "DCM Unknown"}</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <Briefcase className="h-4 w-4 text-muted-foreground" />
-                <span>{candidate.platform_name || "Platform Unknown"}</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span>
-                  Processed on {new Date(candidate.processed_timestamp).toLocaleString(undefined, {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </span>
-              </div>
+            ) : (
+              <>
+                <CardHeader className="text-center pb-4">
+                  <div className="mx-auto bg-primary/10 w-24 h-24 rounded-full flex items-center justify-center mb-4 border border-primary/20">
+                    <User className="h-12 w-12 text-primary" />
+                  </div>
+                  <CardTitle className="text-2xl font-heading">{candidate.candidate_name}</CardTitle>
+                  <CardDescription className="text-base mt-1">
+                    {candidate.current_position || "Position Not Specified"}
+                  </CardDescription>
+                  <div className="mt-4">
+                    {getClassificationBadge(candidate.classification)}
+                  </div>
+                </CardHeader>
+                <Separator className="bg-border/50" />
+                <CardContent className="pt-6 space-y-4">
+                  <div className="flex items-center gap-3 text-sm">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span>{candidate.location || "Location Not Specified"}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                    <span>{candidate.dcm_type || "DCM Unknown"}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <Briefcase className="h-4 w-4 text-muted-foreground" />
+                    <span>{candidate.platform_name || "Platform Unknown"}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span>
+                      Processed on {new Date(candidate.processed_timestamp).toLocaleString(undefined, {
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </span>
+                  </div>
 
-              <div className="pt-4 flex gap-3">
-                {candidate.cv_link && (
-                  <a href={candidate.cv_link} target="_blank" rel="noopener noreferrer" className="w-full">
-                    <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      View CV
-                    </Button>
-                  </a>
-                )}
-              </div>
-            </CardContent>
+                  <div className="pt-4 flex gap-3">
+                    {candidate.cv_link && (
+                      <a href={candidate.cv_link} target="_blank" rel="noopener noreferrer" className="w-full">
+                        <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          View CV
+                        </Button>
+                      </a>
+                    )}
+                  </div>
+                </CardContent>
+              </>
+            )}
           </Card>
         </motion.div>
 

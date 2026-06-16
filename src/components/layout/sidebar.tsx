@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -20,10 +20,8 @@ const mainNavItems = [
 ];
 
 const dcmNavItems = [
-  { title: "Exterior DCM", href: "/candidates?dcm=exterior", icon: Building },
-  { title: "Interior DCM", href: "/candidates?dcm=interior", icon: Home },
-  { title: "Quantity Surveyor DCM", href: "/candidates?dcm=qs", icon: Calculator },
-  { title: "Project Manager DCM", href: "/candidates?dcm=pm", icon: Briefcase },
+  { title: "Exterior DCM", href: "/candidates?dcmType=Exterior", icon: Building },
+  { title: "Structural DCM", href: "/candidates?dcmType=Structural", icon: Briefcase },
 ];
 
 const bottomNavItems = [
@@ -33,6 +31,8 @@ const bottomNavItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentDcmType = searchParams.get("dcmType");
 
   return (
     <div className="flex h-full w-64 flex-col border-r bg-card/50 backdrop-blur-xl print:hidden">
@@ -74,8 +74,7 @@ export function Sidebar() {
             </p>
             <div className="space-y-1">
               {dcmNavItems.map((item) => {
-                // Approximate active state for DCM links
-                const isActive = pathname === "/candidates" && false; // We can improve this later with searchParams
+                const isActive = pathname === "/candidates" && currentDcmType && item.href.includes(`dcmType=${currentDcmType}`);
                 return (
                   <Link
                     key={item.href}
