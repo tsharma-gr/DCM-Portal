@@ -78,7 +78,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
     try {
       const { candidateService } = await import("@/services/candidateService");
       await candidateService.bulkUpdateCandidates(Array.from(selectedIds), { status: newStatus as "New" | "Under Review" | "Contacted" | "Rejected" });
-      setCandidates(prev => prev.map(c => selectedIds.has(c.id) ? { ...c, status: newStatus } : c));
+      setCandidates(prev => prev.map(c => selectedIds.has(c.id) ? { ...c, status: newStatus as "New" | "Under Review" | "Contacted" | "Rejected" } : c));
       setSelectedIds(new Set());
       router.refresh();
       toast.success(`Updated ${selectedIds.size} candidates to ${newStatus}`);
