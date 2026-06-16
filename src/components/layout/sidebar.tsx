@@ -7,9 +7,7 @@ import {
   LayoutDashboard,
   Users,
   Briefcase,
-  Home,
   Building,
-  Calculator,
   BarChart,
   Settings,
 } from "lucide-react";

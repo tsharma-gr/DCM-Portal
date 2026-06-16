@@ -251,7 +251,7 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs uppercase text-muted-foreground font-semibold">Classification</Label>
-                  <Select value={editForm.classification} onValueChange={(v) => setEditForm({...editForm, classification: v})}>
+                  <Select value={editForm.classification || "Pending"} onValueChange={(v) => setEditForm({...editForm, classification: v as "FIT" | "UNFIT" | "Pending"})}>
                     <SelectTrigger className="bg-background/50"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="FIT">FIT</SelectItem>
