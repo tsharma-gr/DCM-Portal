@@ -4,8 +4,9 @@ import { useSearchParams } from "next/navigation";
 import { useCandidatesList } from "@/hooks/use-candidates";
 import { CandidateTable } from "@/components/candidates/candidate-table";
 import CandidatesLoading from "./loading";
+import { Suspense } from "react";
 
-export default function CandidatesPage() {
+function CandidatesContent() {
   const searchParams = useSearchParams();
   
   const params = {
@@ -28,11 +29,19 @@ export default function CandidatesPage() {
       <div>
         <h1 className="text-3xl font-bold font-heading tracking-tight">Candidates</h1>
         <p className="text-muted-foreground mt-2">
-          Manage and review AI-classified CVs across all your active DCMs.
+          Review and manage parsed candidates from the AI pipeline.
         </p>
       </div>
 
       <CandidateTable candidates={candidates} totalCount={count} />
     </div>
+  );
+}
+
+export default function CandidatesPage() {
+  return (
+    <Suspense fallback={<CandidatesLoading />}>
+      <CandidatesContent />
+    </Suspense>
   );
 }

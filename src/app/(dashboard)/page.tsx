@@ -5,8 +5,9 @@ import { StatCards } from "@/components/dashboard/stat-cards";
 import { DashboardCharts } from "@/components/dashboard/charts";
 import { RecentCandidates } from "@/components/dashboard/recent-candidates";
 import DashboardLoading from "./loading";
+import { Suspense } from "react";
 
-export default function DashboardPage() {
+function DashboardContent() {
   const { stats, chartData, recentCandidates, isLoading } = useDashboardData();
 
   if (isLoading || !stats) {
@@ -26,5 +27,13 @@ export default function DashboardPage() {
       <DashboardCharts data={chartData} />
       <RecentCandidates candidates={recentCandidates} />
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <DashboardContent />
+    </Suspense>
   );
 }

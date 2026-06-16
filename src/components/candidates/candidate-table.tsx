@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 import {
   Table,
   TableBody,
@@ -338,7 +339,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
             <span className="font-medium text-sm text-primary">{selectedIds.size} candidates selected</span>
           </div>
           <div className="flex items-center gap-2">
-            <Select onValueChange={handleBulkStatusUpdate} disabled={isBulkUpdating}>
+            <Select onValueChange={(v: string | null) => { if (v) handleBulkStatusUpdate(v); }} disabled={isBulkUpdating}>
               <SelectTrigger className="h-8 w-[140px] bg-background text-xs">
                 <SelectValue placeholder="Change Status..." />
               </SelectTrigger>
