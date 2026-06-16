@@ -27,7 +27,9 @@ const bottomNavItems = [
   { title: "Settings", href: "/settings", icon: Settings },
 ];
 
-export function Sidebar() {
+import { Suspense } from "react";
+
+function SidebarContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentDcmType = searchParams.get("dcmType");
@@ -113,5 +115,19 @@ export function Sidebar() {
         </nav>
       </div>
     </div>
+  );
+}
+
+export function Sidebar() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-full w-64 flex-col border-r bg-card/50 backdrop-blur-xl print:hidden">
+        <div className="flex h-16 items-center border-b px-6">
+          <span className="text-xl font-bold font-heading text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">TalentVerse AI</span>
+        </div>
+      </div>
+    }>
+      <SidebarContent />
+    </Suspense>
   );
 }
