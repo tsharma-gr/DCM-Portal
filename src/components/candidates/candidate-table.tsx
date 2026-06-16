@@ -77,13 +77,14 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
     setIsBulkUpdating(true);
     try {
       const { candidateService } = await import("@/services/candidateService");
-      await candidateService.bulkUpdateCandidates(Array.from(selectedIds), { status: newStatus });
+      await candidateService.bulkUpdateCandidates(Array.from(selectedIds), { status: newStatus as any });
       setCandidates(prev => prev.map(c => selectedIds.has(c.id) ? { ...c, status: newStatus } : c));
       setSelectedIds(new Set());
       router.refresh();
-    } catch (err) {
-      console.error("Failed to bulk update", err);
-      alert("Failed to update status.");
+      toast.success(`Updated ${selectedIds.size} candidates to ${newStatus}`);
+    } catch (error) {
+      console.error("Bulk update failed:", error);
+      toast.error("Failed to update candidates");
     } finally {
       setIsBulkUpdating(false);
     }
