@@ -47,6 +47,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
   const [classification, setClassification] = useState(searchParams.get("classification") || "All");
   const [dcmType, setDcmType] = useState(searchParams.get("dcmType") || "All");
   const [platform, setPlatform] = useState(searchParams.get("platform") || "All");
+  const [date, setDate] = useState(searchParams.get("date") || "");
   const [limit, setLimit] = useState(searchParams.get("limit") || "10");
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
 
@@ -56,6 +57,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
     setClassification(searchParams.get("classification") || "All");
     setDcmType(searchParams.get("dcmType") || "All");
     setPlatform(searchParams.get("platform") || "All");
+    setDate(searchParams.get("date") || "");
     setLimit(searchParams.get("limit") || "10");
     setPage(Number(searchParams.get("page")) || 1);
   }, [searchParams]);
@@ -255,13 +257,14 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
       if (classification && classification !== "All") params.set("classification", classification);
       if (dcmType && dcmType !== "All") params.set("dcmType", dcmType);
       if (platform && platform !== "All") params.set("platform", platform);
+      if (date) params.set("date", date);
       if (limit && limit !== "10") params.set("limit", limit);
       if (page > 1) params.set("page", page.toString());
       
       router.push(`/candidates?${params.toString()}`);
     }, 500);
     return () => clearTimeout(handler);
-  }, [search, classification, dcmType, platform, limit, page, router]);
+  }, [search, classification, dcmType, platform, date, limit, page, router]);
 
   const getClassificationBadge = (c: string) => {
     switch (c) {
@@ -309,6 +312,20 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
 
   return (
     <div className="space-y-4">
+      {/* Header and Export Button */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
+        <div>
+          <h1 className="text-3xl font-bold font-heading tracking-tight">Candidates</h1>
+          <p className="text-muted-foreground mt-2">
+            Review and manage parsed candidates from the AI pipeline.
+          </p>
+        </div>
+        <Button variant="outline" onClick={handleExportCSV} className="bg-background/50 border-border/50 shrink-0">
+          <Download className="h-4 w-4 mr-2" />
+          Export CSV
+        </Button>
+      </div>
+
       {/* Filters Bar */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-card/50 backdrop-blur p-4 rounded-xl border border-border/50 shadow-sm">
         <div className="relative w-full sm:w-72">
@@ -375,10 +392,12 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
             </SelectContent>
           </Select>
 
-          <Button variant="outline" onClick={handleExportCSV} className="bg-background/50 border-border/50 hidden sm:flex">
-            <Download className="h-4 w-4 mr-2" />
-            Export CSV
-          </Button>
+          <Input 
+            type="date"
+            value={date}
+            onChange={(e) => { setDate(e.target.value); setPage(1); }}
+            className="w-[140px] bg-background/50 border-border/50 text-muted-foreground"
+          />
         </div>
       </div>
 

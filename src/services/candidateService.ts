@@ -10,6 +10,7 @@ export const candidateService = {
       platform?: string;
       dcmType?: string;
       search?: string;
+      date?: string;
     }
   ) {
     let query = supabase
@@ -28,6 +29,15 @@ export const candidateService = {
     }
     if (filters?.search) {
       query = query.ilike("candidate_name", `%${filters.search}%`);
+    }
+    if (filters?.date) {
+      // filters.date is expected to be "YYYY-MM-DD"
+      const startOfDay = new Date(filters.date);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(filters.date);
+      endOfDay.setHours(23, 59, 59, 999);
+      query = query.gte("processed_timestamp", startOfDay.toISOString());
+      query = query.lte("processed_timestamp", endOfDay.toISOString());
     }
 
     const from = (page - 1) * limit;
