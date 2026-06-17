@@ -3,7 +3,7 @@ import { candidateService } from "@/services/candidateService";
 import { Candidate, CandidateStats } from "@/types/candidate";
 
 // Simple global cache for dashboard to prevent UI collapse
-let dashboardCache: { stats: CandidateStats; chartData: any[]; recentCandidates: Candidate[] } | null = null;
+let dashboardCache: { stats: CandidateStats; chartData: Pick<Candidate, "classification" | "platform_name" | "dcm_type" | "processed_timestamp">[]; recentCandidates: Candidate[] } | null = null;
 
 export function useDashboardData() {
   const [stats, setStats] = useState<CandidateStats | null>(dashboardCache?.stats || null);
@@ -96,7 +96,7 @@ export function useCandidatesList(searchParams: Record<string, string | undefine
 
     fetchData();
     return () => { mounted = false; };
-  }, [searchParams.search, searchParams.classification, searchParams.dcmType, searchParams.platform, searchParams.page, searchParams.limit]);
+  }, [searchParams.search, searchParams.classification, searchParams.dcmType, searchParams.platform, searchParams.page, searchParams.limit, cacheKey]);
 
   return { candidates, count, isLoading, isFetching };
 }
