@@ -2,17 +2,22 @@ import { useState, useEffect, useRef } from "react";
 import { candidateService } from "@/services/candidateService";
 import { Candidate, CandidateStats } from "@/types/candidate";
 
+// Simple global cache for dashboard to prevent UI collapse
+let dashboardCache: { stats: CandidateStats; chartData: any[]; recentCandidates: Candidate[] } | null = null;
+
 export function useDashboardData() {
-  const [stats, setStats] = useState<CandidateStats | null>(null);
-  const [chartData, setChartData] = useState<Pick<Candidate, "classification" | "platform_name" | "dcm_type" | "processed_timestamp">[]>([]);
-  const [recentCandidates, setRecentCandidates] = useState<Candidate[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState<CandidateStats | null>(dashboardCache?.stats || null);
+  const [chartData, setChartData] = useState<Pick<Candidate, "classification" | "platform_name" | "dcm_type" | "processed_timestamp">[]>(dashboardCache?.chartData || []);
+  const [recentCandidates, setRecentCandidates] = useState<Candidate[]>(dashboardCache?.recentCandidates || []);
+  const [isLoading, setIsLoading] = useState(!dashboardCache);
 
   useEffect(() => {
     let mounted = true;
     
     const fetchData = async () => {
-      setIsLoading(true);
+      if (!dashboardCache) {
+        setIsLoading(true);
+      }
       try {
         const [statsData, chart, { data: recent }] = await Promise.all([
           candidateService.getDashboardStats(),
@@ -20,6 +25,8 @@ export function useDashboardData() {
           candidateService.getCandidates(1, 10),
         ]);
         
+        dashboardCache = { stats: statsData, chartData: chart, recentCandidates: recent };
+
         if (mounted) {
           setStats(statsData);
           setChartData(chart);
@@ -39,12 +46,17 @@ export function useDashboardData() {
   return { stats, chartData, recentCandidates, isLoading };
 }
 
+// Simple global cache to prevent UI collapse on router.back() scroll restoration
+const candidatesCache: Record<string, { data: Candidate[]; count: number }> = {};
+
 export function useCandidatesList(searchParams: Record<string, string | undefined>) {
-  const [candidates, setCandidates] = useState<Candidate[]>([]);
-  const [count, setCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const cacheKey = JSON.stringify(searchParams);
+  
+  const [candidates, setCandidates] = useState<Candidate[]>(candidatesCache[cacheKey]?.data || []);
+  const [count, setCount] = useState(candidatesCache[cacheKey]?.count || 0);
+  const [isLoading, setIsLoading] = useState(!candidatesCache[cacheKey]);
   const [isFetching, setIsFetching] = useState(false);
-  const initialLoad = useRef(true);
+  const initialLoad = useRef(!candidatesCache[cacheKey]);
 
   useEffect(() => {
     let mounted = true;
@@ -65,6 +77,8 @@ export function useCandidatesList(searchParams: Record<string, string | undefine
           platform: searchParams.platform,
         });
         
+        candidatesCache[cacheKey] = { data, count: totalCount };
+
         if (mounted) {
           setCandidates(data);
           setCount(totalCount);
