@@ -30,7 +30,9 @@ import {
   Pencil,
   Check,
   X,
-  Trash
+  Trash,
+  Target,
+  Tag
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -70,6 +72,8 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
     dcm_type: candidate.dcm_type || "",
     platform_name: candidate.platform_name || "",
     cv_link: candidate.cv_link || "",
+    job_title: candidate.job_title || "",
+    desired_role: candidate.desired_role || "",
   });
 
   const handleSaveDetails = async () => {
@@ -96,6 +100,8 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
       dcm_type: candidate.dcm_type || "",
       platform_name: candidate.platform_name || "",
       cv_link: candidate.cv_link || "",
+      job_title: candidate.job_title || "",
+      desired_role: candidate.desired_role || "",
     });
     setIsEditingDetails(false);
   };
@@ -273,6 +279,14 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
                   <Input value={editForm.platform_name} onChange={(e) => setEditForm({...editForm, platform_name: e.target.value})} className="bg-background/50" />
                 </div>
                 <div className="space-y-2">
+                  <Label className="text-xs uppercase text-muted-foreground font-semibold">Job Title</Label>
+                  <Input value={editForm.job_title} onChange={(e) => setEditForm({...editForm, job_title: e.target.value})} className="bg-background/50" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase text-muted-foreground font-semibold">Desired Role</Label>
+                  <Input value={editForm.desired_role} onChange={(e) => setEditForm({...editForm, desired_role: e.target.value})} className="bg-background/50" />
+                </div>
+                <div className="space-y-2">
                   <Label className="text-xs uppercase text-muted-foreground font-semibold">CV Link</Label>
                   <Input value={editForm.cv_link} onChange={(e) => setEditForm({...editForm, cv_link: e.target.value})} className="bg-background/50" />
                 </div>
@@ -315,6 +329,18 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
                     <Briefcase className="h-4 w-4 text-muted-foreground" />
                     <span>{candidate.platform_name || "Platform Unknown"}</span>
                   </div>
+                  {candidate.job_title && (
+                    <div className="flex items-center gap-3 text-sm">
+                      <Tag className="h-4 w-4 text-muted-foreground" />
+                      <span>Job Title: {candidate.job_title}</span>
+                    </div>
+                  )}
+                  {candidate.desired_role && (
+                    <div className="flex items-center gap-3 text-sm">
+                      <Target className="h-4 w-4 text-muted-foreground" />
+                      <span>Desired: {candidate.desired_role}</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-3 text-sm">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span>

@@ -122,11 +122,13 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
 
   const handleExportCSV = () => {
     if (!candidates.length) return;
-    const headers = ["ID", "Name", "Position", "Classification", "Status", "Location", "DCM Type", "Platform", "Date Processed"];
+    const headers = ["ID", "Name", "Position", "Job Title", "Desired Role", "Classification", "Status", "Location", "DCM Type", "Platform", "Date Processed"];
     const csvRows = candidates.map(c => [
       c.id,
       `"${(c.candidate_name || '').replace(/"/g, '""')}"`,
       `"${(c.current_position || '').replace(/"/g, '""')}"`,
+      `"${(c.job_title || '').replace(/"/g, '""')}"`,
+      `"${(c.desired_role || '').replace(/"/g, '""')}"`,
       c.classification || '',
       c.status || '',
       `"${(c.location || '').replace(/"/g, '""')}"`,
