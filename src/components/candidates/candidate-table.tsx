@@ -207,6 +207,20 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
     };
   }, []);
 
+  // Restore scroll position when candidates load
+  useEffect(() => {
+    if (candidates.length > 0) {
+      const savedScrollY = sessionStorage.getItem("candidatesScrollY");
+      if (savedScrollY) {
+        // Use a short timeout to ensure DOM is fully painted
+        setTimeout(() => {
+          window.scrollTo(0, parseInt(savedScrollY, 10));
+          sessionStorage.removeItem("candidatesScrollY");
+        }, 100);
+      }
+    }
+  }, [candidates.length]);
+
   useEffect(() => {
     const handler = setTimeout(() => {
       const params = new URLSearchParams();
@@ -410,7 +424,10 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
                   transition={{ duration: 0.2, delay: idx * 0.05 }}
                   key={candidate.id}
                   className="border-border/50 hover:bg-muted/30 transition-colors group cursor-pointer"
-                  onClick={() => router.push(`/candidates/${candidate.id}`)}
+                  onClick={() => {
+                    sessionStorage.setItem("candidatesScrollY", window.scrollY.toString());
+                    router.push(`/candidates/${candidate.id}`);
+                  }}
                 >
                   <TableCell className="w-[50px] px-4" onClick={(e) => e.stopPropagation()}>
                     <input 
@@ -449,11 +466,17 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
                       <DropdownMenuContent align="end" className="w-[160px]">
                         <DropdownMenuGroup>
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => router.push(`/candidates/${candidate.id}`)}>
+                          <DropdownMenuItem onClick={() => {
+                            sessionStorage.setItem("candidatesScrollY", window.scrollY.toString());
+                            router.push(`/candidates/${candidate.id}`);
+                          }}>
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => router.push(`/candidates/${candidate.id}#comments`)}>
+                          <DropdownMenuItem onClick={() => {
+                            sessionStorage.setItem("candidatesScrollY", window.scrollY.toString());
+                            router.push(`/candidates/${candidate.id}#comments`);
+                          }}>
                             <MessageSquare className="mr-2 h-4 w-4" />
                             Comments
                           </DropdownMenuItem>
