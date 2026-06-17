@@ -49,6 +49,16 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
   const [platform, setPlatform] = useState(searchParams.get("platform") || "All");
   const [limit, setLimit] = useState(searchParams.get("limit") || "10");
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
+
+  // Sync external URL changes (like Sidebar clicks) to local state
+  useEffect(() => {
+    setSearch(searchParams.get("search") || "");
+    setClassification(searchParams.get("classification") || "All");
+    setDcmType(searchParams.get("dcmType") || "All");
+    setPlatform(searchParams.get("platform") || "All");
+    setLimit(searchParams.get("limit") || "10");
+    setPage(Number(searchParams.get("page")) || 1);
+  }, [searchParams]);
   
   // Local state for optimistic updates
   const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates);
