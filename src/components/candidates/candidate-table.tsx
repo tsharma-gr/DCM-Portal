@@ -392,12 +392,25 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
             </SelectContent>
           </Select>
 
-          <Input 
-            type="date"
-            value={date}
-            onChange={(e) => { setDate(e.target.value); setPage(1); }}
-            className="w-[140px] bg-background/50 border-border/50 text-muted-foreground"
-          />
+          <div className="flex items-center gap-1">
+            <Input 
+              type="date"
+              value={date}
+              onChange={(e) => { setDate(e.target.value); setPage(1); }}
+              className="w-[140px] bg-background/50 border-border/50 text-muted-foreground"
+            />
+            {date && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => { setDate(""); setPage(1); }}
+                className="h-9 w-9 shrink-0 text-muted-foreground hover:text-destructive"
+                title="Clear date filter"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
