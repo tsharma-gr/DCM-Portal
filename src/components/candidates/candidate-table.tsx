@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Candidate } from "@/types/candidate";
-import { Search, ChevronLeft, ChevronRight, SlidersHorizontal, MoreHorizontal, Eye, Trash, MessageSquare, Download, CheckSquare, Loader2, Check, X } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, SlidersHorizontal, MoreHorizontal, Eye, Trash, MessageSquare, Download, CheckSquare, Loader2, Check, X, CalendarIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,6 +42,7 @@ interface CandidateTableProps {
 export function CandidateTable({ candidates: initialCandidates, totalCount }: CandidateTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const dateInputRef = useRef<HTMLInputElement>(null);
   
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [classification, setClassification] = useState(searchParams.get("classification") || "All");
@@ -392,24 +393,31 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
             </SelectContent>
           </Select>
 
-          <div className="flex items-center gap-1">
+          <div className="relative flex items-center">
             <Input 
+              ref={dateInputRef}
               type="date"
               value={date}
               onChange={(e) => { setDate(e.target.value); setPage(1); }}
-              className="w-[140px] bg-background/50 border-border/50 text-muted-foreground"
+              className="w-[140px] bg-background/50 border-border/50 text-muted-foreground pr-8 [&::-webkit-calendar-picker-indicator]:hidden"
             />
-            {date && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => { setDate(""); setPage(1); }}
-                className="h-9 w-9 shrink-0 text-muted-foreground hover:text-destructive"
-                title="Clear date filter"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={(e) => {
+                if (date) {
+                  e.preventDefault();
+                  setDate("");
+                  setPage(1);
+                } else {
+                  dateInputRef.current?.showPicker();
+                }
+              }}
+              className={`absolute right-0 h-9 w-9 shrink-0 ${date ? 'text-destructive hover:bg-destructive/10' : 'text-muted-foreground hover:text-foreground'}`}
+              title={date ? "Clear date filter" : "Select date"}
+            >
+              <CalendarIcon className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </div>
