@@ -75,6 +75,7 @@ export function useCandidatesList(searchParams: Record<string, string | undefine
           classification: searchParams.classification,
           dcmType: searchParams.dcmType,
           platform: searchParams.platform,
+          date: searchParams.date,
         });
         
         candidatesCache[cacheKey] = { data, count: totalCount };
@@ -96,7 +97,7 @@ export function useCandidatesList(searchParams: Record<string, string | undefine
 
     fetchData();
     return () => { mounted = false; };
-  }, [searchParams.search, searchParams.classification, searchParams.dcmType, searchParams.platform, searchParams.page, searchParams.limit, cacheKey]);
+  }, [searchParams.search, searchParams.classification, searchParams.dcmType, searchParams.platform, searchParams.date, searchParams.page, searchParams.limit, cacheKey]);
 
   return { candidates, count, isLoading, isFetching };
 }
