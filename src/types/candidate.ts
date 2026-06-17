@@ -10,7 +10,7 @@ export interface Candidate {
   platform_name: string;
   dcm_type: string; // 'Exterior', 'Interior', 'Quantity Surveyor', etc.
   processed_timestamp: string; // ISO timestamp
-  status?: "New" | "Under Review" | "Contacted" | "Interview Scheduled" | "Rejected" | "Hired";
+  status?: string;
   job_title?: string;
   desired_role?: string;
 }

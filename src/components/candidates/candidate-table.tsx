@@ -64,9 +64,10 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
   const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates);
   const [localTotalCount, setLocalTotalCount] = useState(totalCount);
 
-  // Bulk Actions & Export State
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+  const [showBulkCustomStatus, setShowBulkCustomStatus] = useState(false);
+  const [bulkCustomStatus, setBulkCustomStatus] = useState("");
 
   const toggleSelectAll = () => {
     if (selectedIds.size === candidates.length && candidates.length > 0) {
@@ -85,11 +86,15 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
 
   const handleBulkStatusUpdate = async (newStatus: string) => {
     if (selectedIds.size === 0) return;
+    if (newStatus === "Other") {
+      setShowBulkCustomStatus(true);
+      return;
+    }
     setIsBulkUpdating(true);
     try {
       const { candidateService } = await import("@/services/candidateService");
-      await candidateService.bulkUpdateCandidates(Array.from(selectedIds), { status: newStatus as "New" | "Under Review" | "Contacted" | "Rejected" });
-      setCandidates(prev => prev.map(c => selectedIds.has(c.id) ? { ...c, status: newStatus as "New" | "Under Review" | "Contacted" | "Rejected" } : c));
+      await candidateService.bulkUpdateCandidates(Array.from(selectedIds), { status: newStatus });
+      setCandidates(prev => prev.map(c => selectedIds.has(c.id) ? { ...c, status: newStatus } : c));
       setSelectedIds(new Set());
       router.refresh();
       toast.success(`Updated ${selectedIds.size} candidates to ${newStatus}`);
@@ -98,7 +103,14 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
       toast.error("Failed to update candidates");
     } finally {
       setIsBulkUpdating(false);
+      setShowBulkCustomStatus(false);
+      setBulkCustomStatus("");
     }
+  };
+
+  const handleApplyBulkCustomStatus = () => {
+    if (!bulkCustomStatus.trim()) return;
+    handleBulkStatusUpdate(bulkCustomStatus.trim());
   };
 
   const handleBulkDelete = async () => {
@@ -265,12 +277,14 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
   const getStatusBadge = (status?: string) => {
     switch (status) {
       case "New": return <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20">New</Badge>;
-      case "Under Review": return <Badge variant="outline" className="bg-purple-500/10 text-purple-500 border-purple-500/20">Reviewing</Badge>;
+      case "Under review": return <Badge variant="outline" className="bg-purple-500/10 text-purple-500 border-purple-500/20">Under review</Badge>;
       case "Contacted": return <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20">Contacted</Badge>;
-      case "Interview Scheduled": return <Badge variant="outline" className="bg-indigo-500/10 text-indigo-500 border-indigo-500/20">Interview</Badge>;
+      case "Relevant": return <Badge variant="outline" className="bg-indigo-500/10 text-indigo-500 border-indigo-500/20">Relevant</Badge>;
       case "Rejected": return <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20">Rejected</Badge>;
       case "Hired": return <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">Hired</Badge>;
-      default: return <Badge variant="outline" className="bg-slate-500/10 text-slate-500 border-slate-500/20">New</Badge>;
+      default: 
+        if (status) return <Badge variant="outline" className="bg-slate-500/10 text-slate-500 border-slate-500/20">{status}</Badge>;
+        return <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20">New</Badge>;
     }
   };
 
@@ -378,17 +392,39 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
             <span className="font-medium text-sm text-primary">{selectedIds.size} candidates selected</span>
           </div>
           <div className="flex items-center gap-2">
-            <Select onValueChange={(v: string | null) => { if (v) handleBulkStatusUpdate(v); }} disabled={isBulkUpdating}>
-              <SelectTrigger className="h-8 w-[140px] bg-background text-xs">
-                <SelectValue placeholder="Change Status..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="New">New</SelectItem>
-                <SelectItem value="Under Review">Under Review</SelectItem>
-                <SelectItem value="Contacted">Contacted</SelectItem>
-                <SelectItem value="Rejected">Rejected</SelectItem>
-              </SelectContent>
-            </Select>
+            {showBulkCustomStatus ? (
+              <div className="flex items-center gap-2">
+                <Input 
+                  value={bulkCustomStatus} 
+                  onChange={e => setBulkCustomStatus(e.target.value)} 
+                  placeholder="Others" 
+                  className="h-8 w-[140px] text-xs bg-background"
+                  onKeyDown={e => e.key === 'Enter' && handleApplyBulkCustomStatus()}
+                  autoFocus
+                />
+                <Button size="icon" variant="outline" className="h-8 w-8 bg-background" onClick={handleApplyBulkCustomStatus} disabled={isBulkUpdating}>
+                  {isBulkUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                </Button>
+                <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground" onClick={() => setShowBulkCustomStatus(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <Select onValueChange={(v: string | null) => { if (v) handleBulkStatusUpdate(v); }} disabled={isBulkUpdating}>
+                <SelectTrigger className="h-8 w-[140px] bg-background text-xs">
+                  <SelectValue placeholder="Change Status..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="New">New</SelectItem>
+                  <SelectItem value="Under review">Under review</SelectItem>
+                  <SelectItem value="Contacted">Contacted</SelectItem>
+                  <SelectItem value="Relevant">Relevant</SelectItem>
+                  <SelectItem value="Hired">Hired</SelectItem>
+                  <SelectItem value="Rejected">Rejected</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
             <Button variant="destructive" size="sm" onClick={handleBulkDelete} disabled={isBulkUpdating} className="h-8 text-xs">
               {isBulkUpdating ? <Loader2 className="h-3 w-3 mr-2 animate-spin" /> : <Trash className="h-3 w-3 mr-2" />}
               Delete Selected

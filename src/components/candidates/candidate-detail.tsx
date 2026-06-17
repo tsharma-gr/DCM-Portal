@@ -60,6 +60,8 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
 
   const [status, setStatus] = useState(candidate.status || "New");
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [showCustomStatusInput, setShowCustomStatusInput] = useState(false);
+  const [customStatusInput, setCustomStatusInput] = useState("");
 
   // Candidate Details Edit State
   const [isEditingDetails, setIsEditingDetails] = useState(false);
@@ -148,18 +150,29 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
   };
 
   const handleStatusChange = async (newStatus: string) => {
+    if (newStatus === "Other") {
+      setShowCustomStatusInput(true);
+      return;
+    }
     setIsUpdatingStatus(true);
-    setStatus(newStatus as NonNullable<Candidate["status"]>);
+    setStatus(newStatus);
     try {
       const { candidateService } = await import("@/services/candidateService");
       await candidateService.updateCandidateStatus(candidate.id, newStatus);
       router.refresh();
+      setShowCustomStatusInput(false);
+      setCustomStatusInput("");
     } catch (err) {
       console.error("Failed to update status", err);
       setStatus(candidate.status || "New"); // revert on error
     } finally {
       setIsUpdatingStatus(false);
     }
+  };
+
+  const handleCustomStatusSave = async () => {
+    if (!customStatusInput.trim()) return;
+    await handleStatusChange(customStatusInput.trim());
   };
 
   const handleAddComment = async () => {
@@ -203,26 +216,55 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
         
         <div className="flex items-center gap-2 bg-card/50 backdrop-blur p-1 rounded-md border border-border/50">
           <span className="text-sm text-muted-foreground font-medium pl-2">Status:</span>
-          <Select value={status} onValueChange={(val) => val && handleStatusChange(val)} disabled={isUpdatingStatus}>
-            <SelectTrigger className="w-[180px] bg-background border-none shadow-none h-8 focus:ring-1 focus:ring-primary">
-              {isUpdatingStatus ? (
-                <div className="flex items-center gap-2">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  Updating...
-                </div>
-              ) : (
-                <SelectValue placeholder="Status" />
-              )}
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="New">New</SelectItem>
-              <SelectItem value="Under Review">Under Review</SelectItem>
-              <SelectItem value="Contacted">Contacted</SelectItem>
-              <SelectItem value="Interview Scheduled">Interview Scheduled</SelectItem>
-              <SelectItem value="Rejected">Rejected</SelectItem>
-              <SelectItem value="Hired">Hired</SelectItem>
-            </SelectContent>
-          </Select>
+          {showCustomStatusInput ? (
+            <div className="flex items-center gap-2">
+              <Input 
+                value={customStatusInput} 
+                onChange={e => setCustomStatusInput(e.target.value)} 
+                placeholder="Others" 
+                className="h-8 w-[140px] text-sm bg-background"
+                onKeyDown={e => e.key === 'Enter' && handleCustomStatusSave()}
+                autoFocus
+              />
+              <Button size="icon" variant="outline" className="h-8 w-8 text-primary bg-background" onClick={handleCustomStatusSave} disabled={isUpdatingStatus}>
+                {isUpdatingStatus ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+              </Button>
+              <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground" onClick={() => setShowCustomStatusInput(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <Select 
+              value={["New", "Under review", "Contacted", "Hired", "Rejected", "Relevant"].includes(status) ? status : (status ? "Other" : "New")} 
+              onValueChange={(val) => val && handleStatusChange(val)} 
+              disabled={isUpdatingStatus}
+            >
+              <SelectTrigger className="w-[180px] bg-background border-none shadow-none h-8 focus:ring-1 focus:ring-primary">
+                {isUpdatingStatus ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Updating...
+                  </div>
+                ) : (
+                  <SelectValue placeholder="Status">
+                    {status}
+                  </SelectValue>
+                )}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="New">New</SelectItem>
+                <SelectItem value="Under review">Under review</SelectItem>
+                <SelectItem value="Contacted">Contacted</SelectItem>
+                <SelectItem value="Relevant">Relevant</SelectItem>
+                <SelectItem value="Hired">Hired</SelectItem>
+                <SelectItem value="Rejected">Rejected</SelectItem>
+                {!["New", "Under review", "Contacted", "Hired", "Rejected", "Relevant", "Other"].includes(status) && status && (
+                  <SelectItem value={status}>{status}</SelectItem>
+                )}
+                <SelectItem value="Other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
       </div>
 
