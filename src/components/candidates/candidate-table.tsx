@@ -62,6 +62,12 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
     setLimit(searchParams.get("limit") || "10");
     setPage(Number(searchParams.get("page")) || 1);
   }, [searchParams]);
+
+  // Keep a ref to the latest filters so the WebSocket callback can access them
+  const filtersRef = useRef({ search, classification, dcmType, platform, date });
+  useEffect(() => {
+    filtersRef.current = { search, classification, dcmType, platform, date };
+  }, [search, classification, dcmType, platform, date]);
   
   // Local state for optimistic updates
   const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates);
@@ -186,6 +192,18 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
           (payload) => {
             console.log("REALTIME INSERT RECEIVED:", payload);
             const newCandidate = payload.new as Candidate;
+            const filters = filtersRef.current;
+
+            // Check if the new candidate matches the currently active filters
+            if (filters.classification !== "All" && newCandidate.classification !== filters.classification) return;
+            if (filters.dcmType !== "All" && newCandidate.dcm_type !== filters.dcmType) return;
+            if (filters.platform !== "All" && !newCandidate.platform_name?.toLowerCase().includes(filters.platform.toLowerCase())) return;
+            if (filters.search && !newCandidate.candidate_name?.toLowerCase().includes(filters.search.toLowerCase())) return;
+            if (filters.date) {
+               const newDate = new Date(newCandidate.processed_timestamp).toISOString().split('T')[0];
+               if (newDate !== filters.date) return;
+            }
+
             // Instantly add to top of table
             setCandidates(prev => [newCandidate, ...prev]);
             setLocalTotalCount(prev => prev + 1);
