@@ -22,7 +22,7 @@ export const candidateService = {
       query = query.eq("classification", filters.classification);
     }
     if (filters?.platform && filters.platform !== "All") {
-      query = query.eq("platform_name", filters.platform);
+      query = query.ilike("platform_name", `%${filters.platform}%`);
     }
     if (filters?.dcmType && filters.dcmType !== "All") {
       query = query.eq("dcm_type", filters.dcmType);
