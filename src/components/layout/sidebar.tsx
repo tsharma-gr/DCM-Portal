@@ -52,7 +52,7 @@ function SidebarContent() {
             </p>
             <div className="space-y-1">
               {mainNavItems.map((item) => {
-                const isActive = pathname === item.href;
+                const isActive = pathname === item.href && (item.href !== "/candidates" || !currentDcmType);
                 return (
                   <Link
                     key={item.href}
@@ -76,7 +76,8 @@ function SidebarContent() {
             </p>
             <div className="space-y-1">
               {dcmNavItems.map((item) => {
-                const isActive = pathname === "/candidates" && currentDcmType && item.href.includes(`dcmType=${currentDcmType}`);
+                const itemDcmType = new URL(item.href, "http://localhost").searchParams.get("dcmType");
+                const isActive = pathname === "/candidates" && currentDcmType === itemDcmType;
                 return (
                   <Link
                     key={item.href}
