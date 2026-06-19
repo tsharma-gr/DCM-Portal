@@ -7,7 +7,8 @@ import { RefreshCw, Bot } from "lucide-react";
 
 const DCM_TYPES = [
   "Exterior DCM",
-  "Structural DCM"
+  "Structural DCM",
+  "Windows and Doors DCM"
 ];
 
 export function AutomationSection() {
