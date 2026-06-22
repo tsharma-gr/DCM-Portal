@@ -11,6 +11,7 @@ import {
   BarChart,
   Settings,
   DoorOpen,
+  FileText,
 } from "lucide-react";
 
 const mainNavItems = [
@@ -22,6 +23,7 @@ const dcmNavItems = [
   { title: "Exterior DCM", href: "/candidates?dcmType=Exterior", icon: Building },
   { title: "Structural DCM", href: "/candidates?dcmType=Structural", icon: Briefcase },
   { title: "Windows & Doors DCM", href: "/candidates?dcmType=Windows+and+Doors", icon: DoorOpen },
+  { title: "BID DCM", href: "/candidates?dcmType=BID+DCM", icon: FileText },
 ];
 
 const bottomNavItems = [
