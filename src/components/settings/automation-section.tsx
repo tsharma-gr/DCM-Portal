@@ -9,7 +9,8 @@ const DCM_TYPES = [
   "Exterior DCM",
   "Structural DCM",
   "Windows and Doors DCM",
-  "BID DCM"
+  "BID DCM",
+  "Estimator DCM"
 ];
 
 export function AutomationSection() {
