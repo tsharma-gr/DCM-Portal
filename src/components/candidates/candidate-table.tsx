@@ -387,6 +387,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
               <SelectItem value="Windows and Doors">Windows and Doors</SelectItem>
               <SelectItem value="BID">BID</SelectItem>
               <SelectItem value="Estimator">Estimator</SelectItem>
+              <SelectItem value="QS">QS</SelectItem>
             </SelectContent>
           </Select>
 

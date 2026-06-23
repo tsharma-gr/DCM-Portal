@@ -25,6 +25,7 @@ const dcmNavItems = [
   { title: "Windows & Doors DCM", href: "/candidates?dcmType=Windows+and+Doors", icon: DoorOpen },
   { title: "BID DCM", href: "/candidates?dcmType=BID", icon: FileText },
   { title: "Estimator DCM", href: "/candidates?dcmType=Estimator", icon: FileText },
+  { title: "QS DCM", href: "/candidates?dcmType=QS", icon: Briefcase },
 ];
 
 const bottomNavItems = [
