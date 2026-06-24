@@ -73,14 +73,24 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
   const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates);
   const [localTotalCount, setLocalTotalCount] = useState(totalCount);
 
-  // Use useLayoutEffect to restore scroll instantly before the browser paints, avoiding the glitch
-  const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
-  useIsomorphicLayoutEffect(() => {
+  // Restore scroll position when returning from candidate details
+  useEffect(() => {
     const savedScrollY = sessionStorage.getItem("candidatesScrollY");
     if (savedScrollY && candidates.length > 0) {
-      window.scrollTo({ top: parseInt(savedScrollY, 10), behavior: "instant" });
-      // Keep it around for just a moment in case Next.js tries to reset the scroll asynchronously
-      setTimeout(() => sessionStorage.removeItem("candidatesScrollY"), 500);
+      const targetY = parseInt(savedScrollY, 10);
+      
+      // Force scroll position for a brief period to override Next.js layout shifts
+      let attempts = 0;
+      const interval = setInterval(() => {
+        window.scrollTo({ top: targetY, behavior: "instant" });
+        attempts++;
+        if (attempts >= 8) { // 800ms total
+          clearInterval(interval);
+          sessionStorage.removeItem("candidatesScrollY");
+        }
+      }, 100);
+
+      return () => clearInterval(interval);
     }
   }, [candidates]);
 
