@@ -36,7 +36,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface CandidateDetailProps {
   candidate: Candidate;
@@ -62,6 +62,13 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [showCustomStatusInput, setShowCustomStatusInput] = useState(false);
   const [customStatusInput, setCustomStatusInput] = useState("");
+
+  // Automatically mark as Opened when viewed if it is currently New
+  useEffect(() => {
+    if (status === "New" || !status) {
+      handleStatusChange("Opened");
+    }
+  }, []);
 
   // Candidate Details Edit State
   const [isEditingDetails, setIsEditingDetails] = useState(false);
@@ -235,7 +242,7 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
             </div>
           ) : (
             <Select 
-              value={["New", "Under review", "Contacted", "Hired", "Rejected", "Relevant"].includes(status) ? status : (status ? "Other" : "New")} 
+              value={["New", "Opened"].includes(status) ? status : (status ? "Other" : "New")} 
               onValueChange={(val) => val && handleStatusChange(val)} 
               disabled={isUpdatingStatus}
             >
@@ -253,12 +260,8 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="New">New</SelectItem>
-                <SelectItem value="Under review">Under review</SelectItem>
-                <SelectItem value="Contacted">Contacted</SelectItem>
-                <SelectItem value="Relevant">Relevant</SelectItem>
-                <SelectItem value="Hired">Hired</SelectItem>
-                <SelectItem value="Rejected">Rejected</SelectItem>
-                {!["New", "Under review", "Contacted", "Hired", "Rejected", "Relevant", "Other"].includes(status) && status && (
+                <SelectItem value="Opened">Opened</SelectItem>
+                {!["New", "Opened", "Other"].includes(status) && status && (
                   <SelectItem value={status}>{status}</SelectItem>
                 )}
                 <SelectItem value="Other">Other</SelectItem>

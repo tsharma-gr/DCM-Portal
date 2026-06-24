@@ -320,6 +320,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
   const getStatusBadge = (status?: string) => {
     switch (status) {
       case "New": return <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20">New</Badge>;
+      case "Opened": return <Badge variant="outline" className="bg-purple-500/10 text-purple-500 border-purple-500/20">Opened</Badge>;
       case "Under review": return <Badge variant="outline" className="bg-purple-500/10 text-purple-500 border-purple-500/20">Under review</Badge>;
       case "Contacted": return <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20">Contacted</Badge>;
       case "Relevant": return <Badge variant="outline" className="bg-indigo-500/10 text-indigo-500 border-indigo-500/20">Relevant</Badge>;
@@ -499,11 +500,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="New">New</SelectItem>
-                  <SelectItem value="Under review">Under review</SelectItem>
-                  <SelectItem value="Contacted">Contacted</SelectItem>
-                  <SelectItem value="Relevant">Relevant</SelectItem>
-                  <SelectItem value="Hired">Hired</SelectItem>
-                  <SelectItem value="Rejected">Rejected</SelectItem>
+                  <SelectItem value="Opened">Opened</SelectItem>
                   <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
