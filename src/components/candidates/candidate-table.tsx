@@ -73,6 +73,20 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
   const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates);
   const [localTotalCount, setLocalTotalCount] = useState(totalCount);
 
+  // Restore scroll position when returning from candidate details
+  useEffect(() => {
+    if (candidates.length > 0) {
+      const savedScrollY = sessionStorage.getItem("candidatesScrollY");
+      if (savedScrollY) {
+        // Use a slight timeout to ensure DOM is fully painted
+        setTimeout(() => {
+          window.scrollTo({ top: parseInt(savedScrollY, 10), behavior: "instant" });
+          sessionStorage.removeItem("candidatesScrollY");
+        }, 50);
+      }
+    }
+  }, [candidates]);
+
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
   const [showBulkCustomStatus, setShowBulkCustomStatus] = useState(false);
