@@ -50,7 +50,7 @@ export const candidateService = {
     if (error) throw error;
     
     // Map 'Pending' to 'Error' for the frontend
-    const mappedData = (data || []).map((c: Partial<Candidate>) => ({
+    const mappedData = (data || []).map((c: Omit<Candidate, "classification"> & { classification: string }) => ({
       ...c,
       classification: c.classification === "Pending" ? "Error" : c.classification
     }));
@@ -89,9 +89,9 @@ export const candidateService = {
 
   async getChartData() {
     const { data } = await supabase.from("candidates").select("classification, platform_name, dcm_type, processed_timestamp");
-    return (data || []).map((c: Partial<Candidate>) => ({
+    return (data || []).map((c: Omit<Candidate, "classification"> & { classification: string }) => ({
       ...c,
-      classification: c.classification === "Pending" ? "Error" : c.classification
+      classification: (c.classification === "Pending" ? "Error" : c.classification) as "FIT" | "UNFIT" | "Error"
     }));
   },
 
@@ -101,7 +101,7 @@ export const candidateService = {
     
     return {
       ...data,
-      classification: data.classification === "Pending" ? "Error" : data.classification
+      classification: (data.classification as string) === "Pending" ? "Error" : data.classification
     } as Candidate;
   },
 
@@ -202,7 +202,7 @@ export const candidateService = {
     
     return {
       ...data,
-      classification: data.classification === "Pending" ? "Error" : data.classification
+      classification: (data.classification as string) === "Pending" ? "Error" : data.classification
     } as Candidate;
   },
 
