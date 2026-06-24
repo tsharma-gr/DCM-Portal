@@ -19,7 +19,8 @@ export const candidateService = {
       .order("processed_timestamp", { ascending: false });
 
     if (filters?.classification && filters.classification !== "All") {
-      query = query.eq("classification", filters.classification);
+      const dbClassification = filters.classification === "Error" ? "Pending" : filters.classification;
+      query = query.eq("classification", dbClassification);
     }
     if (filters?.platform && filters.platform !== "All") {
       query = query.ilike("platform_name", `%${filters.platform}%`);
@@ -47,7 +48,14 @@ export const candidateService = {
     const { data, error, count } = await query;
 
     if (error) throw error;
-    return { data: data as Candidate[], count: count || 0 };
+    
+    // Map 'Pending' to 'Error' for the frontend
+    const mappedData = (data || []).map((c: any) => ({
+      ...c,
+      classification: c.classification === "Pending" ? "Error" : c.classification
+    }));
+
+    return { data: mappedData as Candidate[], count: count || 0 };
   },
 
   async getDashboardStats(): Promise<CandidateStats> {
@@ -81,13 +89,20 @@ export const candidateService = {
 
   async getChartData() {
     const { data } = await supabase.from("candidates").select("classification, platform_name, dcm_type, processed_timestamp");
-    return data || [];
+    return (data || []).map((c: any) => ({
+      ...c,
+      classification: c.classification === "Pending" ? "Error" : c.classification
+    }));
   },
 
   async getCandidateById(id: string): Promise<Candidate | null> {
     const { data, error } = await supabase.from("candidates").select("*").eq("id", id).single();
-    if (error) return null;
-    return data as Candidate;
+    if (error || !data) return null;
+    
+    return {
+      ...data,
+      classification: data.classification === "Pending" ? "Error" : data.classification
+    } as Candidate;
   },
 
   async updateCandidateStatus(id: string, status: string): Promise<void> {
@@ -168,9 +183,14 @@ export const candidateService = {
   },
 
   async updateCandidate(id: string, updates: Partial<Candidate>): Promise<Candidate> {
+    const dbUpdates = { ...updates };
+    if (dbUpdates.classification === "Error") {
+      dbUpdates.classification = "Pending";
+    }
+
     const { data, error } = await supabase
       .from("candidates")
-      .update(updates)
+      .update(dbUpdates)
       .eq("id", id)
       .select()
       .single();
@@ -179,13 +199,22 @@ export const candidateService = {
       console.error("Supabase Error (updateCandidate):", error.message);
       throw new Error(`Failed to update candidate: ${error.message}`);
     }
-    return data;
+    
+    return {
+      ...data,
+      classification: data.classification === "Pending" ? "Error" : data.classification
+    } as Candidate;
   },
 
   async bulkUpdateCandidates(ids: string[], updates: Partial<Candidate>): Promise<void> {
+    const dbUpdates = { ...updates };
+    if (dbUpdates.classification === "Error") {
+      dbUpdates.classification = "Pending";
+    }
+
     const { error } = await supabase
       .from("candidates")
-      .update(updates)
+      .update(dbUpdates)
       .in("id", ids);
 
     if (error) {
