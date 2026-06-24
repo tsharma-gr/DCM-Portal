@@ -314,7 +314,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
       case "UNFIT":
         return <Badge className="bg-red-500/15 text-red-500 border-red-500/20">UNFIT</Badge>;
       default:
-        return <Badge className="bg-amber-500/15 text-amber-500 border-amber-500/20">{c || "Pending"}</Badge>;
+        return <Badge className="bg-amber-500/15 text-amber-500 border-amber-500/20">{c || "Error"}</Badge>;
     }
   };
 
@@ -394,7 +394,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
               <SelectItem value="All">All</SelectItem>
               <SelectItem value="FIT">FIT</SelectItem>
               <SelectItem value="UNFIT">UNFIT</SelectItem>
-              <SelectItem value="Pending">Pending</SelectItem>
+              <SelectItem value="Error">Error</SelectItem>
             </SelectContent>
           </Select>
 

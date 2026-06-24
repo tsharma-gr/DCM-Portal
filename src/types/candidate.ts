@@ -1,7 +1,7 @@
 export interface Candidate {
   id: string; // usually UUID
   candidate_name: string;
-  classification: "FIT" | "UNFIT" | "Pending";
+  classification: "FIT" | "UNFIT" | "Error";
   ai_reasoning: string;
   current_position: string;
   location: string;

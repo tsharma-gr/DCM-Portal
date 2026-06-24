@@ -25,7 +25,7 @@ export function RecentCandidates({ candidates }: RecentCandidatesProps) {
       case "UNFIT":
         return <Badge className="bg-red-500/15 text-red-500 hover:bg-red-500/25 border-red-500/20">UNFIT</Badge>;
       default:
-        return <Badge className="bg-amber-500/15 text-amber-500 hover:bg-amber-500/25 border-amber-500/20">{classification || "Pending"}</Badge>;
+        return <Badge className="bg-amber-500/15 text-amber-500 hover:bg-amber-500/25 border-amber-500/20">{classification || "Error"}</Badge>;
     }
   };
 

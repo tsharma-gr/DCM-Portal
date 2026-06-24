@@ -23,7 +23,7 @@ export function RealtimeListener() {
               description: newCandidate.candidate_name || "New resume processed.",
             });
           } else {
-            toast.info(`New candidate processed: ${newCandidate.classification || 'Pending'}`, {
+            toast.info(`New candidate processed: ${newCandidate.classification || 'Error'}`, {
               description: newCandidate.candidate_name || "New resume processed.",
             });
           }

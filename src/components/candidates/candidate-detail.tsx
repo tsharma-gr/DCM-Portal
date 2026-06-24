@@ -77,7 +77,7 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
   const [editForm, setEditForm] = useState({
     candidate_name: candidate.candidate_name || "",
     current_position: candidate.current_position || "",
-    classification: candidate.classification || "Pending",
+    classification: candidate.classification || "Error",
     location: candidate.location || "",
     dcm_type: candidate.dcm_type || "",
     platform_name: candidate.platform_name || "",
@@ -105,7 +105,7 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
     setEditForm({
       candidate_name: candidate.candidate_name || "",
       current_position: candidate.current_position || "",
-      classification: candidate.classification || "Pending",
+      classification: candidate.classification || "Error",
       location: candidate.location || "",
       dcm_type: candidate.dcm_type || "",
       platform_name: candidate.platform_name || "",
@@ -206,7 +206,7 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
       case "UNFIT":
         return <Badge className="bg-red-500/15 text-red-500 text-lg py-1 px-4 border-red-500/20">UNFIT</Badge>;
       default:
-        return <Badge className="bg-amber-500/15 text-amber-500 text-lg py-1 px-4 border-amber-500/20">{c || "Pending"}</Badge>;
+        return <Badge className="bg-amber-500/15 text-amber-500 text-lg py-1 px-4 border-amber-500/20">{c || "Error"}</Badge>;
     }
   };
 
@@ -303,12 +303,12 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs uppercase text-muted-foreground font-semibold">Classification</Label>
-                  <Select value={editForm.classification || "Pending"} onValueChange={(v) => setEditForm({...editForm, classification: v as "FIT" | "UNFIT" | "Pending"})}>
+                  <Select value={editForm.classification || "Error"} onValueChange={(v) => setEditForm({...editForm, classification: v as "FIT" | "UNFIT" | "Error"})}>
                     <SelectTrigger className="bg-background/50"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="FIT">FIT</SelectItem>
                       <SelectItem value="UNFIT">UNFIT</SelectItem>
-                      <SelectItem value="Pending">Pending</SelectItem>
+                      <SelectItem value="Error">Error</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

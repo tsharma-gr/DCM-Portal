@@ -27,7 +27,7 @@ interface ChartsProps {
 const COLORS = {
   FIT: "#10b981", // Emerald
   UNFIT: "#ef4444", // Red
-  Pending: "#f59e0b", // Amber
+  Error: "#f59e0b", // Amber
   Primary: "#4f46e5", // Indigo
   Secondary: "#9333ea", // Purple
 };
@@ -37,7 +37,7 @@ export function DashboardCharts({ data }: ChartsProps) {
   const classificationData = useMemo(() => {
     const counts = data.reduce(
       (acc, curr) => {
-        const cls = curr.classification || "Pending";
+        const cls = curr.classification || "Error";
         acc[cls] = (acc[cls] || 0) + 1;
         return acc;
       },
@@ -148,7 +148,7 @@ export function DashboardCharts({ data }: ChartsProps) {
                     {classificationData.map((entry, index) => (
                       <Cell 
                         key={`cell-${index}`} 
-                        fill={entry.name === "FIT" ? COLORS.FIT : entry.name === "UNFIT" ? COLORS.UNFIT : COLORS.Pending} 
+                        fill={entry.name === "FIT" ? COLORS.FIT : entry.name === "UNFIT" ? COLORS.UNFIT : COLORS.Error} 
                       />
                     ))}
                   </Pie>
