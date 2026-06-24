@@ -164,7 +164,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
 
   const handleExportCSV = () => {
     if (!candidates.length) return;
-    const headers = ["ID", "Name", "Position", "Job Title", "Desired Role", "Classification", "Status", "Location", "DCM Type", "Platform", "Date Processed"];
+    const headers = ["ID", "Name", "Position", "Job Title", "Desired Role", "Classification", "Status", "Location", "DCM Type", "Platform", "Date Processed", "CV Link"];
     const csvRows = candidates.map(c => [
       c.id,
       `"${(c.candidate_name || '').replace(/"/g, '""')}"`,
@@ -176,7 +176,8 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
       `"${(c.location || '').replace(/"/g, '""')}"`,
       c.dcm_type || '',
       c.platform_name || '',
-      new Date(c.processed_timestamp).toISOString()
+      new Date(c.processed_timestamp).toISOString(),
+      `"${(c.cv_url || '').replace(/"/g, '""')}"`
     ].join(","));
     const csvContent = [headers.join(","), ...csvRows].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
