@@ -50,7 +50,7 @@ export const candidateService = {
     if (error) throw error;
     
     // Map 'Pending' to 'Error' for the frontend
-    const mappedData = (data || []).map((c: any) => ({
+    const mappedData = (data || []).map((c: Partial<Candidate>) => ({
       ...c,
       classification: c.classification === "Pending" ? "Error" : c.classification
     }));
@@ -89,7 +89,7 @@ export const candidateService = {
 
   async getChartData() {
     const { data } = await supabase.from("candidates").select("classification, platform_name, dcm_type, processed_timestamp");
-    return (data || []).map((c: any) => ({
+    return (data || []).map((c: Partial<Candidate>) => ({
       ...c,
       classification: c.classification === "Pending" ? "Error" : c.classification
     }));
