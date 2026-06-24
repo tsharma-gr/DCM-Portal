@@ -75,15 +75,22 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
 
   // Restore scroll position when returning from candidate details
   useEffect(() => {
-    if (candidates.length > 0) {
-      const savedScrollY = sessionStorage.getItem("candidatesScrollY");
-      if (savedScrollY) {
-        // Use a slight timeout to ensure DOM is fully painted
-        setTimeout(() => {
-          window.scrollTo({ top: parseInt(savedScrollY, 10), behavior: "instant" });
+    const savedScrollY = sessionStorage.getItem("candidatesScrollY");
+    if (savedScrollY && candidates.length > 0) {
+      const targetY = parseInt(savedScrollY, 10);
+      
+      // Force scroll position for a brief period to override Next.js and Framer Motion layout shifts
+      let attempts = 0;
+      const interval = setInterval(() => {
+        window.scrollTo({ top: targetY, behavior: "instant" });
+        attempts++;
+        if (attempts >= 8) { // 800ms total
+          clearInterval(interval);
           sessionStorage.removeItem("candidatesScrollY");
-        }, 50);
-      }
+        }
+      }, 100);
+
+      return () => clearInterval(interval);
     }
   }, [candidates]);
 
