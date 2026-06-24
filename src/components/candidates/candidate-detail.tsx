@@ -68,6 +68,7 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
     if (status === "New" || !status) {
       handleStatusChange("Opened");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Candidate Details Edit State

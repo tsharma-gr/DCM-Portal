@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -177,7 +177,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
       c.dcm_type || '',
       c.platform_name || '',
       new Date(c.processed_timestamp).toISOString(),
-      `"${(c.cv_url || '').replace(/"/g, '""')}"`
+      `"${(c.cv_link || '').replace(/"/g, '""')}"`
     ].join(","));
     const csvContent = [headers.join(","), ...csvRows].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
