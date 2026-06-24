@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CandidatesLoading() {
   return (
-    <div className="flex flex-col space-y-6">
+    <div className="flex flex-col space-y-6 min-h-[200vh]">
       <div>
         <Skeleton className="h-10 w-48 mb-2" />
         <Skeleton className="h-5 w-96" />

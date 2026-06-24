@@ -76,11 +76,11 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
   // Use useLayoutEffect to restore scroll instantly before the browser paints, avoiding the glitch
   const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
   useIsomorphicLayoutEffect(() => {
-    // We use a simple layout effect fallback pattern here because Next.js warns about useLayoutEffect in SSR
     const savedScrollY = sessionStorage.getItem("candidatesScrollY");
     if (savedScrollY && candidates.length > 0) {
       window.scrollTo({ top: parseInt(savedScrollY, 10), behavior: "instant" });
-      sessionStorage.removeItem("candidatesScrollY");
+      // Keep it around for just a moment in case Next.js tries to reset the scroll asynchronously
+      setTimeout(() => sessionStorage.removeItem("candidatesScrollY"), 500);
     }
   }, [candidates]);
 
