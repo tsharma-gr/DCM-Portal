@@ -551,11 +551,8 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
                 </TableCell>
               </TableRow>
             ) : (
-              candidates.map((candidate, idx) => (
-                <motion.tr
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2, delay: idx * 0.05 }}
+              candidates.map((candidate) => (
+                <TableRow
                   key={candidate.id}
                   className="border-border/50 hover:bg-muted/30 transition-colors group cursor-pointer"
                   onClick={() => {
@@ -623,7 +620,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
-                </motion.tr>
+                </TableRow>
               ))
             )}
           </TableBody>

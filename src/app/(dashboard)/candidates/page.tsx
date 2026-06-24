@@ -26,7 +26,7 @@ function CandidatesContent() {
   }
 
   return (
-    <div className="flex flex-col space-y-6 animate-in fade-in duration-500">
+    <div className="flex flex-col space-y-6">
       <CandidateTable candidates={candidates} totalCount={count} />
     </div>
   );
