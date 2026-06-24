@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -73,24 +73,14 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
   const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates);
   const [localTotalCount, setLocalTotalCount] = useState(totalCount);
 
-  // Restore scroll position when returning from candidate details
-  useEffect(() => {
+  // Use useLayoutEffect to restore scroll instantly before the browser paints, avoiding the glitch
+  const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+  useIsomorphicLayoutEffect(() => {
+    // We use a simple layout effect fallback pattern here because Next.js warns about useLayoutEffect in SSR
     const savedScrollY = sessionStorage.getItem("candidatesScrollY");
     if (savedScrollY && candidates.length > 0) {
-      const targetY = parseInt(savedScrollY, 10);
-      
-      // Force scroll position for a brief period to override Next.js and Framer Motion layout shifts
-      let attempts = 0;
-      const interval = setInterval(() => {
-        window.scrollTo({ top: targetY, behavior: "instant" });
-        attempts++;
-        if (attempts >= 8) { // 800ms total
-          clearInterval(interval);
-          sessionStorage.removeItem("candidatesScrollY");
-        }
-      }, 100);
-
-      return () => clearInterval(interval);
+      window.scrollTo({ top: parseInt(savedScrollY, 10), behavior: "instant" });
+      sessionStorage.removeItem("candidatesScrollY");
     }
   }, [candidates]);
 
