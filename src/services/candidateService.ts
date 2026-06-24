@@ -89,7 +89,7 @@ export const candidateService = {
 
   async getChartData() {
     const { data } = await supabase.from("candidates").select("classification, platform_name, dcm_type, processed_timestamp");
-    return (data || []).map((c: Omit<Candidate, "classification"> & { classification: string }) => ({
+    return (data || []).map((c: { classification: string; platform_name: string; dcm_type: string; processed_timestamp: string }) => ({
       ...c,
       classification: (c.classification === "Pending" ? "Error" : c.classification) as "FIT" | "UNFIT" | "Error"
     }));
@@ -183,7 +183,7 @@ export const candidateService = {
   },
 
   async updateCandidate(id: string, updates: Partial<Candidate>): Promise<Candidate> {
-    const dbUpdates = { ...updates };
+    const dbUpdates: Omit<Partial<Candidate>, "classification"> & { classification?: string } = { ...updates };
     if (dbUpdates.classification === "Error") {
       dbUpdates.classification = "Pending";
     }
@@ -207,7 +207,7 @@ export const candidateService = {
   },
 
   async bulkUpdateCandidates(ids: string[], updates: Partial<Candidate>): Promise<void> {
-    const dbUpdates = { ...updates };
+    const dbUpdates: Omit<Partial<Candidate>, "classification"> & { classification?: string } = { ...updates };
     if (dbUpdates.classification === "Error") {
       dbUpdates.classification = "Pending";
     }
