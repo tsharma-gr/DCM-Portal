@@ -26,6 +26,8 @@ const dcmNavItems = [
   { title: "BID DCM", href: "/candidates?dcmType=BID", icon: FileText },
   { title: "Estimator DCM", href: "/candidates?dcmType=Estimator", icon: FileText },
   { title: "QS DCM", href: "/candidates?dcmType=QS", icon: Briefcase },
+  { title: "Scaffolding DCM", href: "/candidates?dcmType=Scaffolding", icon: Building },
+  { title: "Temporary Works DCM", href: "/candidates?dcmType=Temporary+Works+Design", icon: Building },
 ];
 
 const bottomNavItems = [
