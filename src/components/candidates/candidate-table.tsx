@@ -164,7 +164,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
 
   const handleExportCSV = () => {
     if (!candidates.length) return;
-    const headers = ["ID", "Name", "Position", "Job Title", "Desired Role", "Classification", "Status", "Location", "DCM Type", "Platform", "Date Processed", "CV Link", "AI Reasoning"];
+    const headers = ["ID", "Name", "Position", "Job Title", "Desired Role", "Classification", "Status", "Location", "AI Reasoning", "DCM Type", "CV Link", "Date Processed", "Platform"];
     const csvRows = candidates.map(c => [
       c.id,
       `"${(c.candidate_name || '').replace(/"/g, '""')}"`,
@@ -174,11 +174,11 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
       c.classification || '',
       c.status || '',
       `"${(c.location || '').replace(/"/g, '""')}"`,
+      `"${(c.ai_reasoning || '').replace(/"/g, '""')}"`,
       c.dcm_type || '',
-      c.platform_name || '',
-      new Date(c.processed_timestamp).toISOString(),
       `"${(c.cv_link || '').replace(/"/g, '""')}"`,
-      `"${(c.ai_reasoning || '').replace(/"/g, '""')}"`
+      new Date(c.processed_timestamp).toISOString(),
+      c.platform_name || ''
     ].join(","));
     const csvContent = [headers.join(","), ...csvRows].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
