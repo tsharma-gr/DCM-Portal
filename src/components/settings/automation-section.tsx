@@ -13,7 +13,8 @@ const DCM_TYPES = [
   "Estimator DCM",
   "QS DCM",
   "Scaffolding DCM",
-  "Temporary Works Design DCM"
+  "Temporary Works Design DCM",
+  "Demolition DCM"
 ];
 
 export function AutomationSection() {

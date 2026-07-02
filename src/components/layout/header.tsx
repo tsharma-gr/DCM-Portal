@@ -40,16 +40,18 @@ export function Header() {
     router.push("/login");
   };
 
+  const initials = userName === "Loading..." ? "" : userName.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+
   return (
-    <header className="flex h-16 shrink-0 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6 print:hidden">
+    <header className="flex h-[72px] shrink-0 items-center justify-between border-b bg-card px-8 print:hidden">
       <div className="flex flex-1 items-center gap-4">
         {/* Search bar removed to avoid redundancy with page-level search */}
       </div>
       
       <div className="flex items-center gap-4">
         <DropdownMenu>
-          <DropdownMenuTrigger className="flex h-9 w-9 items-center justify-center rounded-full bg-muted/50 hover:bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
-            <User className="h-5 w-5 text-foreground/80" />
+          <DropdownMenuTrigger className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--violet)] to-[#EC4899] text-white font-semibold text-[13px] shadow-[0_4px_10px_var(--violet-glow)] hover:opacity-90 transition-opacity focus:outline-none">
+            {initials || <User className="h-4 w-4 text-white/80" />}
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end">
             <DropdownMenuGroup>

@@ -45,6 +45,8 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
   const dateInputRef = useRef<HTMLInputElement>(null);
   
   const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [searchInput, setSearchInput] = useState(searchParams.get("search") || "");
+  const lastPushedSearch = useRef(searchParams.get("search") || "");
   const [classification, setClassification] = useState(searchParams.get("classification") || "All");
   const [dcmType, setDcmType] = useState(searchParams.get("dcmType") || "All");
   const [platform, setPlatform] = useState(searchParams.get("platform") || "All");
@@ -54,7 +56,13 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
 
   // Sync external URL changes (like Sidebar clicks) to local state
   useEffect(() => {
-    setSearch(searchParams.get("search") || "");
+    const urlSearch = searchParams.get("search") || "";
+    // Only overwrite search input if URL changed externally
+    if (urlSearch !== lastPushedSearch.current) {
+      setSearch(urlSearch);
+      setSearchInput(urlSearch);
+      lastPushedSearch.current = urlSearch;
+    }
     setClassification(searchParams.get("classification") || "All");
     setDcmType(searchParams.get("dcmType") || "All");
     setPlatform(searchParams.get("platform") || "All");
@@ -62,6 +70,17 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
     setLimit(searchParams.get("limit") || "10");
     setPage(Number(searchParams.get("page")) || 1);
   }, [searchParams]);
+
+  // Debounce search input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (search !== searchInput) {
+        setSearch(searchInput);
+        setPage(1);
+      }
+    }, 1000);
+    return () => clearTimeout(handler);
+  }, [searchInput, search]);
 
   // Keep a ref to the latest filters so the WebSocket callback can access them
   const filtersRef = useRef({ search, classification, dcmType, platform, date });
@@ -293,45 +312,53 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
   }, [candidates.length]);
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      const params = new URLSearchParams();
-      if (search) params.set("search", search);
-      if (classification && classification !== "All") params.set("classification", classification);
-      if (dcmType && dcmType !== "All") params.set("dcmType", dcmType);
-      if (platform && platform !== "All") params.set("platform", platform);
-      if (date) params.set("date", date);
-      if (limit && limit !== "10") params.set("limit", limit);
-      if (page > 1) params.set("page", page.toString());
-      
-      router.push(`/candidates?${params.toString()}`);
-    }, 500);
-    return () => clearTimeout(handler);
+    const params = new URLSearchParams();
+    if (search) params.set("search", search);
+    if (classification && classification !== "All") params.set("classification", classification);
+    if (dcmType && dcmType !== "All") params.set("dcmType", dcmType);
+    if (platform && platform !== "All") params.set("platform", platform);
+    if (date) params.set("date", date);
+    if (limit && limit !== "10") params.set("limit", limit);
+    if (page > 1) params.set("page", page.toString());
+    
+    lastPushedSearch.current = search;
+    router.replace(`/candidates?${params.toString()}`, { scroll: false });
   }, [search, classification, dcmType, platform, date, limit, page, router]);
 
   const getClassificationBadge = (c: string) => {
-    switch (c) {
-      case "FIT":
-        return <Badge className="bg-emerald-500/15 text-emerald-500 border-emerald-500/20">FIT</Badge>;
-      case "UNFIT":
-        return <Badge className="bg-red-500/15 text-red-500 border-red-500/20">UNFIT</Badge>;
-      default:
-        return <Badge className="bg-amber-500/15 text-amber-500 border-amber-500/20">{c || "Error"}</Badge>;
-    }
+    const cls = c?.toLowerCase() || 'error';
+    return (
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11.5px] font-semibold tracking-[0.02em] ${
+        cls === 'fit' ? 'bg-[var(--fit-bg)] text-[var(--fit-fg)]' : 
+        cls === 'unfit' ? 'bg-[var(--unfit-bg)] text-[var(--unfit-fg)]' : 
+        'bg-[var(--error-bg)] text-[var(--error-fg)]'
+      }`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${
+          cls === 'fit' ? 'bg-[var(--fit-dot)]' : 
+          cls === 'unfit' ? 'bg-[var(--unfit-dot)]' : 
+          'bg-[var(--error-dot)]'
+        }`}></span>
+        {c || "ERROR"}
+      </span>
+    );
   };
 
   const getStatusBadge = (status?: string) => {
-    switch (status) {
-      case "New": return <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20">New</Badge>;
-      case "Opened": return <Badge variant="outline" className="bg-purple-500/10 text-purple-500 border-purple-500/20">Opened</Badge>;
-      case "Under review": return <Badge variant="outline" className="bg-purple-500/10 text-purple-500 border-purple-500/20">Under review</Badge>;
-      case "Contacted": return <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20">Contacted</Badge>;
-      case "Relevant": return <Badge variant="outline" className="bg-indigo-500/10 text-indigo-500 border-indigo-500/20">Relevant</Badge>;
-      case "Rejected": return <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20">Rejected</Badge>;
-      case "Hired": return <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">Hired</Badge>;
-      default: 
-        if (status) return <Badge variant="outline" className="bg-slate-500/10 text-slate-500 border-slate-500/20">{status}</Badge>;
-        return <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20">New</Badge>;
+    const isNew = status === "New" || !status;
+    if (isNew) {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11.5px] font-semibold tracking-[0.02em] bg-[var(--new-bg)] text-[var(--new-fg)]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--new-dot)]"></span>
+          NEW
+        </span>
+      );
     }
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11.5px] font-semibold tracking-[0.02em] bg-[var(--review-bg)] text-[var(--review-fg)] uppercase">
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--review-dot)]"></span>
+        {status}
+      </span>
+    );
   };
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
@@ -358,37 +385,29 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
       {/* Header and Export Button */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
         <div>
-          <h1 className="text-3xl font-bold font-heading tracking-tight">Candidates</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-[26px] font-bold font-heading tracking-[-0.02em]">Candidates</h1>
+          <p className="text-[13.5px] text-muted-foreground mt-1">
             Review and manage parsed candidates from the AI pipeline.
           </p>
         </div>
-        <Button variant="outline" onClick={handleExportCSV} className="bg-background/50 border-border/50 shrink-0">
-          <Download className="h-4 w-4 mr-2" />
-          Export CSV
-        </Button>
       </div>
 
       {/* Filters Bar */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-card/50 backdrop-blur p-4 rounded-xl border border-border/50 shadow-sm">
-        <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
+      <div className="flex items-center gap-[12px] mb-[20px] flex-wrap">
+        <div className="flex-1 min-w-[220px] flex items-center gap-[8px] bg-card border border-border rounded-[10px] p-[10px_14px] transition-all focus-within:border-[var(--violet)] focus-within:shadow-[0_0_0_3px_var(--violet-glow)]">
+          <Search className="h-4 w-4 text-muted-foreground" />
+          <input
             placeholder="Search candidates..."
-            className="pl-9 bg-background/50 border-border/50"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
+            className="border-none outline-none text-[13.5px] w-full bg-transparent font-inherit text-foreground"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
           />
         </div>
         
-        <div className="flex flex-wrap w-full sm:w-auto gap-3 items-center">
-          <SlidersHorizontal className="h-4 w-4 text-muted-foreground hidden sm:block" />
+        <div className="flex flex-wrap w-full sm:w-auto gap-[12px] items-center">
           <Select value={classification} onValueChange={(v) => { if (v) { setClassification(v); setPage(1); } }}>
-            <SelectTrigger className="w-[160px] bg-background/50 border-border/50">
-              <span className="text-muted-foreground font-medium mr-1">Status:</span>
+            <SelectTrigger className="border border-border bg-card rounded-[10px] px-3 py-2.5 h-auto text-[13.5px] text-[var(--ink-soft)] hover:border-[#CFC9EA] transition-colors cursor-pointer focus:ring-0">
+              <span className="font-medium mr-1">Status:</span>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -400,8 +419,8 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
           </Select>
 
           <Select value={dcmType} onValueChange={(v) => { if (v) { setDcmType(v); setPage(1); } }}>
-            <SelectTrigger className="w-[180px] bg-background/50 border-border/50">
-              <span className="text-muted-foreground font-medium mr-1">DCM:</span>
+            <SelectTrigger className="border border-border bg-card rounded-[10px] px-3 py-2.5 h-auto text-[13.5px] text-[var(--ink-soft)] hover:border-[#CFC9EA] transition-colors cursor-pointer focus:ring-0">
+              <span className="font-medium mr-1">DCM:</span>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -414,12 +433,13 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
               <SelectItem value="QS">QS</SelectItem>
               <SelectItem value="Scaffolding">Scaffolding</SelectItem>
               <SelectItem value="Temporary Works Design">Temporary Works Design</SelectItem>
+              <SelectItem value="Demolition">Demolition</SelectItem>
             </SelectContent>
           </Select>
 
           <Select value={platform} onValueChange={(v) => { if (v) { setPlatform(v); setPage(1); } }}>
-            <SelectTrigger className="w-[180px] bg-background/50 border-border/50">
-              <span className="text-muted-foreground font-medium mr-1">Platform:</span>
+            <SelectTrigger className="border border-border bg-card rounded-[10px] px-3 py-2.5 h-auto text-[13.5px] text-[var(--ink-soft)] hover:border-[#CFC9EA] transition-colors cursor-pointer focus:ring-0">
+              <span className="font-medium mr-1">Platform:</span>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -430,7 +450,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
           </Select>
 
           <Select value={limit} onValueChange={(v) => { if (v) { setLimit(v); setPage(1); } }}>
-            <SelectTrigger className="w-[130px] bg-background/50 border-border/50">
+            <SelectTrigger className="border border-border bg-card rounded-[10px] px-3 py-2.5 h-auto text-[13.5px] text-[var(--ink-soft)] hover:border-[#CFC9EA] transition-colors cursor-pointer focus:ring-0">
               <SelectValue placeholder="Per Page" />
             </SelectTrigger>
             <SelectContent>
@@ -467,39 +487,46 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
               <CalendarIcon className="h-4 w-4" />
             </Button>
           </div>
+
+          <button onClick={handleExportCSV} className="flex items-center gap-[8px] bg-[var(--ink)] text-white border-none rounded-[10px] p-[10px_16px] text-[13.5px] font-semibold font-inherit cursor-pointer transition-all hover:bg-[var(--violet-deep)] hover:-translate-y-[1px]">
+            <Download className="h-4 w-4" />
+            Export CSV
+          </button>
         </div>
       </div>
 
       {selectedIds.size > 0 && (
         <motion.div 
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between bg-primary/10 border border-primary/20 rounded-xl p-3 px-4 shadow-sm"
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-[var(--new-bg)] border border-[#D5C2FE] rounded-[12px] p-[12px_20px] shadow-[0_4px_20px_var(--violet-glow)] mb-[20px] gap-4"
         >
-          <div className="flex items-center gap-2">
-            <CheckSquare className="h-5 w-5 text-primary" />
-            <span className="font-medium text-sm text-primary">{selectedIds.size} candidates selected</span>
+          <div className="flex items-center gap-[12px]">
+            <div className="flex items-center justify-center w-[26px] h-[26px] rounded-[6px] bg-[var(--violet)] text-white shadow-sm">
+              <CheckSquare className="h-[14px] w-[14px]" />
+            </div>
+            <span className="font-semibold text-[14px] text-[var(--violet-deep)]">{selectedIds.size} candidates selected</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-[12px]">
             {showBulkCustomStatus ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-[8px]">
                 <Input 
                   value={bulkCustomStatus} 
                   onChange={e => setBulkCustomStatus(e.target.value)} 
                   placeholder="Others" 
-                  className="h-8 w-[140px] text-xs bg-background"
+                  className="h-[36px] w-[150px] text-[13px] bg-white border border-[#D5C2FE] rounded-[8px] focus-visible:ring-[var(--violet)]"
                   onKeyDown={e => e.key === 'Enter' && handleApplyBulkCustomStatus()}
                   autoFocus
                 />
-                <Button size="icon" variant="outline" className="h-8 w-8 bg-background" onClick={handleApplyBulkCustomStatus} disabled={isBulkUpdating}>
+                <button className="h-[36px] w-[36px] flex items-center justify-center bg-white border border-[#D5C2FE] rounded-[8px] text-[var(--violet)] hover:bg-[var(--violet-glow)] transition-colors" onClick={handleApplyBulkCustomStatus} disabled={isBulkUpdating}>
                   {isBulkUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                </Button>
-                <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground" onClick={() => setShowBulkCustomStatus(false)}>
+                </button>
+                <button className="h-[36px] w-[36px] flex items-center justify-center text-muted-foreground hover:text-[var(--ink)] transition-colors" onClick={() => setShowBulkCustomStatus(false)}>
                   <X className="h-4 w-4" />
-                </Button>
+                </button>
               </div>
             ) : (
               <Select onValueChange={(v: string | null) => { if (v) handleBulkStatusUpdate(v); }} disabled={isBulkUpdating}>
-                <SelectTrigger className="h-8 w-[140px] bg-background text-xs">
+                <SelectTrigger className="h-[36px] w-[160px] bg-white border border-[#D5C2FE] text-[13px] font-medium text-[var(--ink-soft)] rounded-[8px] focus:ring-[var(--violet)] focus:ring-offset-0">
                   <SelectValue placeholder="Change Status..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -509,10 +536,10 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
                 </SelectContent>
               </Select>
             )}
-            <Button variant="destructive" size="sm" onClick={handleBulkDelete} disabled={isBulkUpdating} className="h-8 text-xs">
-              {isBulkUpdating ? <Loader2 className="h-3 w-3 mr-2 animate-spin" /> : <Trash className="h-3 w-3 mr-2" />}
+            <button onClick={handleBulkDelete} disabled={isBulkUpdating} className="h-[36px] flex items-center gap-[6px] px-[14px] bg-[var(--error-bg)] text-[var(--error-fg)] border border-[var(--error-dot)]/20 rounded-[8px] text-[13px] font-semibold transition-all hover:bg-[var(--error-dot)] hover:text-white disabled:opacity-50">
+              {isBulkUpdating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash className="h-3.5 w-3.5" />}
               Delete Selected
-            </Button>
+            </button>
           </div>
         </motion.div>
       )}
@@ -522,110 +549,116 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="rounded-xl border border-border/50 bg-card/50 backdrop-blur overflow-hidden"
+        className="bg-card border border-border rounded-[16px] overflow-hidden shadow-[0_1px_2px_rgba(20,15,50,0.03)] flex flex-col"
       >
-        <Table>
-          <TableHeader>
-            <TableRow className="hover:bg-transparent border-border/50">
-              <TableHead className="w-[50px] px-4">
-                <input 
-                  type="checkbox" 
-                  className="h-4 w-4 rounded border-border text-primary focus:ring-primary accent-primary translate-y-[2px]" 
-                  checked={candidates.length > 0 && selectedIds.size === candidates.length}
-                  onChange={toggleSelectAll}
-                />
-              </TableHead>
-              <TableHead className="w-[250px]">Candidate</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Classification</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Platform</TableHead>
-              <TableHead className="hidden md:table-cell">Processed</TableHead>
-              <TableHead className="text-right pr-4">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {candidates.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
-                  No candidates found matching your criteria.
-                </TableCell>
-              </TableRow>
-            ) : (
-              candidates.map((candidate) => (
-                <TableRow
-                  key={candidate.id}
-                  className="border-border/50 hover:bg-muted/30 transition-colors group cursor-pointer"
-                  onClick={() => {
-                    sessionStorage.setItem("candidatesScrollY", window.scrollY.toString());
-                    router.push(`/candidates/${candidate.id}`);
-                  }}
-                >
-                  <TableCell className="w-[50px] px-4" onClick={(e) => e.stopPropagation()}>
-                    <input 
-                      type="checkbox" 
-                      className="h-4 w-4 rounded border-border text-primary focus:ring-primary accent-primary translate-y-[2px]" 
-                      checked={selectedIds.has(candidate.id)}
-                      onChange={() => toggleSelect(candidate.id)}
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">{candidate.candidate_name}</TableCell>
-                  <TableCell className="text-muted-foreground max-w-[150px] truncate" title={candidate.location}>
-                    {candidate.location || "N/A"}
-                  </TableCell>
-                  <TableCell>{getClassificationBadge(candidate.classification)}</TableCell>
-                  <TableCell>{getStatusBadge(candidate.status)}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="text-xs font-normal">
-                      {candidate.platform_name}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground whitespace-nowrap hidden md:table-cell">
-                    {candidate.processed_timestamp ? new Date(candidate.processed_timestamp).toLocaleString(undefined, {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    }) : "N/A"}
-                  </TableCell>
-                  <TableCell className="text-right pr-4" onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary ml-auto">
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-[160px]">
-                        <DropdownMenuGroup>
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => {
-                            sessionStorage.setItem("candidatesScrollY", window.scrollY.toString());
-                            router.push(`/candidates/${candidate.id}`);
-                          }}>
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => {
-                            sessionStorage.setItem("candidatesScrollY", window.scrollY.toString());
-                            router.push(`/candidates/${candidate.id}#comments`);
-                          }}>
-                            <MessageSquare className="mr-2 h-4 w-4" />
-                            Comments
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive" onClick={(e) => handleDelete(e, candidate.id)}>
-                            <Trash className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+        <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-300px)]">
+          <table className="w-full border-collapse min-w-[920px]">
+            <thead>
+              <tr>
+                <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border pl-[20px] w-[36px]">
+                  <input 
+                    type="checkbox" 
+                    className="w-[16px] h-[16px] accent-[var(--violet)] cursor-pointer" 
+                    checked={candidates.length > 0 && selectedIds.size === candidates.length}
+                    onChange={toggleSelectAll}
+                  />
+                </th>
+                <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border">Candidate</th>
+                <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border">Location</th>
+                <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border">Classification</th>
+                <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border">Status</th>
+                <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border">Platform</th>
+                <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border">Processed</th>
+                <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-right text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border pr-[20px]">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {candidates.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="h-32 text-center text-[13.5px] text-muted-foreground align-middle">
+                    No candidates found matching your criteria.
+                  </td>
+                </tr>
+              ) : (
+                candidates.map((candidate, i) => {
+                  const avatarColors = ["var(--avatar-a)","var(--avatar-b)","var(--avatar-c)","var(--avatar-d)","var(--avatar-e)"];
+                  const color = avatarColors[i % avatarColors.length];
+                  const initials = candidate.candidate_name ? candidate.candidate_name.split(' ').map((w: string) => w[0]).slice(0,2).join('').toUpperCase() : "??";
+                  
+                  return (
+                    <tr
+                      key={candidate.id}
+                      className="border-b border-border relative transition-colors duration-150 hover:bg-[#FBFAFF] cursor-pointer group"
+                      onClick={() => {
+                        sessionStorage.setItem("candidatesScrollY", window.scrollY.toString());
+                        router.push(`/candidates/${candidate.id}`);
+                      }}
+                    >
+                      <td className="px-[18px] py-[13px] text-[13.5px] align-middle pl-[20px] w-[36px] relative" onClick={(e) => e.stopPropagation()}>
+                        {/* Left accent on hover based on classification */}
+                        <div className="absolute left-0 top-0 bottom-0 w-[3px] opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: candidate.classification?.toLowerCase() === 'fit' ? 'var(--fit-dot)' : 'var(--unfit-dot)' }}></div>
+                        <input 
+                          type="checkbox" 
+                          className="w-[16px] h-[16px] accent-[var(--violet)] cursor-pointer" 
+                          checked={selectedIds.has(candidate.id)}
+                          onChange={() => toggleSelect(candidate.id)}
+                        />
+                      </td>
+                      <td className="px-[18px] py-[13px] text-[13.5px] align-middle">
+                        <div className="flex items-center gap-[11px] font-semibold text-[var(--ink)]">
+                          <div className="w-[32px] h-[32px] rounded-full flex items-center justify-center text-[12px] font-bold text-white shrink-0" style={{ background: color }}>
+                            {initials}
+                          </div>
+                          {candidate.candidate_name}
+                        </div>
+                      </td>
+                      <td className={`px-[18px] py-[13px] text-[13.5px] align-middle ${!candidate.location || candidate.location === 'Unknown' ? 'text-muted-foreground italic' : 'text-[var(--ink-soft)]'}`} title={candidate.location}>
+                        {candidate.location || "Unknown"}
+                      </td>
+                      <td className="px-[18px] py-[13px] text-[13.5px] align-middle">{getClassificationBadge(candidate.classification)}</td>
+                      <td className="px-[18px] py-[13px] text-[13.5px] align-middle">{getStatusBadge(candidate.status)}</td>
+                      <td className="px-[18px] py-[13px] text-[13.5px] align-middle">
+                        <span className="border border-border rounded-[8px] px-[10px] py-[4px] text-[12px] text-[var(--ink-soft)] font-medium inline-block">
+                          {candidate.platform_name}
+                        </span>
+                      </td>
+                      <td className="px-[18px] py-[13px] text-[13.5px] align-middle font-mono text-[12px] text-muted-foreground whitespace-nowrap hidden md:table-cell">
+                        {candidate.processed_timestamp ? new Date(candidate.processed_timestamp).toLocaleString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit'
+                        }) : "Unknown"}
+                      </td>
+                      <td className="px-[18px] py-[13px] text-[13.5px] align-middle text-right pr-[20px]" onClick={(e) => e.stopPropagation()}>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger className="inline-flex items-center justify-center focus:outline-none">
+                            <div className="w-[28px] h-[28px] rounded-[8px] flex items-center justify-center text-muted-foreground transition-all hover:bg-[var(--violet-glow)] hover:text-[var(--violet)] font-bold ml-auto border border-transparent">
+                              ⋯
+                            </div>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => router.push(`/candidates/${candidate.id}`)}>
+                              <Eye className="h-4 w-4 mr-2" /> View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push(`/candidates/${candidate.id}#comments`)}>
+                              <MessageSquare className="h-4 w-4 mr-2" /> Comments
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={(e) => handleDelete(e, candidate.id)} className="text-destructive focus:bg-destructive/10 focus:text-destructive">
+                              <Trash className="h-4 w-4 mr-2" /> Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </motion.div>
 
       {/* Pagination */}

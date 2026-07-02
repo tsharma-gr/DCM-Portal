@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Poppins } from "next/font/google";
+import { Inter, Poppins, Space_Grotesk, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -14,7 +14,17 @@ const poppins = Poppins({
   subsets: ["latin"],
 });
 
-import { RealtimeListener } from "@/components/realtime-listener";
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin"],
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: "--font-ibm-plex-mono",
+  weight: ["400", "500"],
+  subsets: ["latin"],
+});
+
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
@@ -29,7 +39,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${poppins.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${poppins.variable} ${spaceGrotesk.variable} ${ibmPlexMono.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
@@ -37,7 +47,6 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Toaster theme="light" position="bottom-right" />
-          <RealtimeListener />
           {children}
         </ThemeProvider>
       </body>

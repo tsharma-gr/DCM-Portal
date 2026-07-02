@@ -1,5 +1,6 @@
 import { AppLayout } from "@/components/layout/app-layout";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { RealtimeListener } from "@/components/realtime-listener";
 
 export default function DashboardLayout({
   children,
@@ -8,6 +9,7 @@ export default function DashboardLayout({
 }) {
   return (
     <TooltipProvider>
+      <RealtimeListener />
       <AppLayout>
         {children}
       </AppLayout>
