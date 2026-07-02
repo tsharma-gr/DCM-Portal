@@ -75,14 +75,7 @@ export default function ReportsPage() {
 
   return (
     <div className="flex flex-col space-y-6 animate-in fade-in duration-500 print:bg-white print:text-black">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold font-heading tracking-tight">Reports & Analytics</h1>
-          <p className="text-muted-foreground mt-2 print:hidden">
-            Generate and download comprehensive recruitment performance reports.
-          </p>
-        </div>
-      </div>
+
 
       <div className="grid gap-4 md:grid-cols-3 print:hidden">
         <Card className="bg-card/50 backdrop-blur border-border/50 hover:border-primary/50 transition-colors">

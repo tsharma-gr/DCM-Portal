@@ -59,12 +59,7 @@ export default function ProfilePage() {
 
   return (
     <div className="flex flex-col space-y-6 animate-in fade-in duration-500 max-w-4xl">
-      <div>
-        <h1 className="text-3xl font-bold font-heading tracking-tight">Your Profile</h1>
-        <p className="text-muted-foreground mt-2">
-          Manage your personal information and contact details.
-        </p>
-      </div>
+
 
       <div className="grid gap-6 md:grid-cols-2">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="col-span-2">

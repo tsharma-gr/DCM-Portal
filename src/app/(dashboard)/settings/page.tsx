@@ -11,7 +11,6 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { User, Shield, Moon, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
-import { AutomationSection } from "@/components/settings/automation-section";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -32,12 +31,7 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col space-y-6 animate-in fade-in duration-500 max-w-4xl">
-      <div>
-        <h1 className="text-3xl font-bold font-heading tracking-tight">Settings</h1>
-        <p className="text-muted-foreground mt-2">
-          Manage your account preferences and application settings.
-        </p>
-      </div>
+
 
       <div className="grid gap-6">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
@@ -92,9 +86,6 @@ export default function SettingsPage() {
           </Card>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.15 }}>
-          <AutomationSection />
-        </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 }}>
           <Card className="bg-card/50 backdrop-blur border-border/50 border-destructive/20">

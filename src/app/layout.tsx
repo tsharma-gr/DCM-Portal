@@ -26,6 +26,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 import { Toaster } from "sonner";
+import NextTopLoader from 'nextjs-toploader';
 
 export const metadata: Metadata = {
   title: "TalentVerse DCM Dashboard",
@@ -40,6 +41,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${poppins.variable} ${spaceGrotesk.variable} ${ibmPlexMono.variable} font-sans antialiased`}>
+        <NextTopLoader 
+          color="var(--violet)" 
+          initialPosition={0.08} 
+          crawlSpeed={200} 
+          height={3} 
+          crawl={true} 
+          showSpinner={false} 
+          easing="ease" 
+          speed={200} 
+          shadow="0 0 10px var(--violet),0 0 5px var(--violet)" 
+        />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

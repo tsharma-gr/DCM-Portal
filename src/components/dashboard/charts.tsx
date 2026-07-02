@@ -25,11 +25,11 @@ interface ChartsProps {
 }
 
 const COLORS = {
-  FIT: "#10b981", // Emerald
-  UNFIT: "#ef4444", // Red
-  Error: "#f59e0b", // Amber
-  Primary: "#4f46e5", // Indigo
-  Secondary: "#9333ea", // Purple
+  FIT: "#2FB865",
+  UNFIT: "#E5484D",
+  Error: "#E9A23B",
+  Primary: "#7C3AED",
+  Secondary: "#EC4899",
 };
 
 export function DashboardCharts({ data }: ChartsProps) {
@@ -97,9 +97,10 @@ export function DashboardCharts({ data }: ChartsProps) {
         transition={{ duration: 0.4 }}
         className="col-span-4 print:w-full print:break-inside-avoid"
       >
-        <Card className="h-full bg-card/50 backdrop-blur border-border/50 print:border-none print:shadow-none">
-          <CardHeader>
-            <CardTitle className="font-heading">Daily Processing Trend</CardTitle>
+        <Card className="h-full bg-card/60 backdrop-blur-md border-border/50 shadow-sm print:border-none print:shadow-none relative overflow-hidden group hover:shadow-md transition-shadow">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500/50 to-indigo-500/50"></div>
+          <CardHeader className="pb-4 pt-6">
+            <CardTitle className="font-heading text-lg tracking-wide">Daily Processing Trend</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full">
@@ -128,9 +129,10 @@ export function DashboardCharts({ data }: ChartsProps) {
         transition={{ duration: 0.4, delay: 0.2 }}
         className="col-span-3 print:w-full print:break-inside-avoid"
       >
-        <Card className="h-full bg-card/50 backdrop-blur border-border/50 print:border-none print:shadow-none">
-          <CardHeader>
-            <CardTitle className="font-heading">Classification Overview</CardTitle>
+        <Card className="h-full bg-card/60 backdrop-blur-md border-border/50 shadow-sm print:border-none print:shadow-none relative overflow-hidden group hover:shadow-md transition-shadow">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[var(--violet)]/50 to-pink-500/50"></div>
+          <CardHeader className="pb-4 pt-6">
+            <CardTitle className="font-heading text-lg tracking-wide">Classification Overview</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full">

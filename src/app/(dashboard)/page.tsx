@@ -16,11 +16,10 @@ function DashboardContent() {
 
   return (
     <div className="flex flex-col space-y-6 animate-in fade-in duration-500">
-      <div>
-        <h1 className="text-3xl font-bold font-heading tracking-tight">Overview</h1>
-        <p className="text-muted-foreground mt-2">
-          Monitor your AI recruitment pipeline and candidate metrics.
-        </p>
+      <div className="relative mb-2">
+        {/* Decorative Background Glows */}
+        <div className="absolute top-[-80px] left-[-2%] w-[300px] h-[300px] rounded-full bg-[var(--violet)]/10 blur-[100px] pointer-events-none z-0" />
+        <div className="absolute top-[-60px] right-[10%] w-[250px] h-[250px] rounded-full bg-blue-500/10 blur-[100px] pointer-events-none z-0" />
       </div>
 
       <StatCards stats={stats} />

@@ -22,7 +22,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Candidate } from "@/types/candidate";
-import { Search, ChevronLeft, ChevronRight, SlidersHorizontal, MoreHorizontal, Eye, Trash, MessageSquare, Download, CheckSquare, Loader2, Check, X, CalendarIcon } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, SlidersHorizontal, MoreHorizontal, Eye, Trash, MessageSquare, Download, CheckSquare, Loader2, Check, X, CalendarIcon, Filter, Layers, Globe, ListOrdered, MapPin } from "lucide-react";
+import { candidateService } from "@/services/candidateService";
+import { CandidateSlideOver } from "./candidate-slideover";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,6 +55,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
   const [date, setDate] = useState(searchParams.get("date") || "");
   const [limit, setLimit] = useState(searchParams.get("limit") || "10");
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
+  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
 
   // Sync external URL changes (like Sidebar clicks) to local state
   useEffect(() => {
@@ -83,10 +86,10 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
   }, [searchInput, search]);
 
   // Keep a ref to the latest filters so the WebSocket callback can access them
-  const filtersRef = useRef({ search, classification, dcmType, platform, date });
+  const filtersRef = useRef({ search, classification, dcmType, platform, date, limit, page });
   useEffect(() => {
-    filtersRef.current = { search, classification, dcmType, platform, date };
-  }, [search, classification, dcmType, platform, date]);
+    filtersRef.current = { search, classification, dcmType, platform, date, limit, page };
+  }, [search, classification, dcmType, platform, date, limit, page]);
   
   // Local state for optimistic updates
   const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates);
@@ -246,8 +249,14 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
                if (newDate !== filters.date) return;
             }
 
-            // Instantly add to top of table
-            setCandidates(prev => [newCandidate, ...prev]);
+            // Instantly add to top of table if on page 1, respecting the limit
+            if (filters.page === 1) {
+              setCandidates(prev => {
+                const updated = [newCandidate, ...prev];
+                const limitNum = Number(filters.limit) || 10;
+                return updated.slice(0, limitNum);
+              });
+            }
             setLocalTotalCount(prev => prev + 1);
           }
         )
@@ -381,34 +390,22 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
   };
 
   return (
-    <div className="space-y-4">
-      {/* Header and Export Button */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
-        <div>
-          <h1 className="text-[26px] font-bold font-heading tracking-[-0.02em]">Candidates</h1>
-          <p className="text-[13.5px] text-muted-foreground mt-1">
-            Review and manage parsed candidates from the AI pipeline.
-          </p>
-        </div>
-      </div>
-
+    <div className="space-y-4 pt-1">
       {/* Filters Bar */}
-      <div className="flex items-center gap-[12px] mb-[20px] flex-wrap">
-        <div className="flex-1 min-w-[220px] flex items-center gap-[8px] bg-card border border-border rounded-[10px] p-[10px_14px] transition-all focus-within:border-[var(--violet)] focus-within:shadow-[0_0_0_3px_var(--violet-glow)]">
-          <Search className="h-4 w-4 text-muted-foreground" />
-          <input
-            placeholder="Search candidates..."
-            className="border-none outline-none text-[13.5px] w-full bg-transparent font-inherit text-foreground"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-          />
-        </div>
-        
-        <div className="flex flex-wrap w-full sm:w-auto gap-[12px] items-center">
+      <div className="flex items-center justify-between gap-[12px] mb-[20px] flex-wrap bg-white/50 border border-border/50 p-2 rounded-[12px] shadow-sm">
+        <div className="flex flex-wrap gap-[12px] items-center">
+          <div className="flex items-center gap-2 ml-1 mr-1 text-muted-foreground">
+            <Filter className="h-4 w-4" />
+            <span className="text-[12px] font-semibold uppercase tracking-wider">Filters</span>
+          </div>
+          <div className="h-[20px] w-[1px] bg-border mx-1 hidden sm:block"></div>
+
           <Select value={classification} onValueChange={(v) => { if (v) { setClassification(v); setPage(1); } }}>
-            <SelectTrigger className="border border-border bg-card rounded-[10px] px-3 py-2.5 h-auto text-[13.5px] text-[var(--ink-soft)] hover:border-[#CFC9EA] transition-colors cursor-pointer focus:ring-0">
-              <span className="font-medium mr-1">Status:</span>
-              <SelectValue />
+            <SelectTrigger className="h-[36px] bg-white border border-border/80 hover:border-border rounded-[8px] px-3 text-[13px] shadow-sm transition-all focus:ring-0 focus:border-[var(--violet)]">
+              <div className="flex items-center gap-1.5">
+                <span className="text-muted-foreground">Status:</span>
+                <span className="font-medium text-foreground">{classification}</span>
+              </div>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="All">All</SelectItem>
@@ -419,9 +416,11 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
           </Select>
 
           <Select value={dcmType} onValueChange={(v) => { if (v) { setDcmType(v); setPage(1); } }}>
-            <SelectTrigger className="border border-border bg-card rounded-[10px] px-3 py-2.5 h-auto text-[13.5px] text-[var(--ink-soft)] hover:border-[#CFC9EA] transition-colors cursor-pointer focus:ring-0">
-              <span className="font-medium mr-1">DCM:</span>
-              <SelectValue />
+            <SelectTrigger className="h-[36px] bg-white border border-border/80 hover:border-border rounded-[8px] px-3 text-[13px] shadow-sm transition-all focus:ring-0 focus:border-[var(--violet)]">
+              <div className="flex items-center gap-1.5">
+                <span className="text-muted-foreground">DCM:</span>
+                <span className="font-medium text-foreground">{dcmType.length > 15 ? dcmType.substring(0,15) + '...' : dcmType}</span>
+              </div>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="All">All</SelectItem>
@@ -438,9 +437,11 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
           </Select>
 
           <Select value={platform} onValueChange={(v) => { if (v) { setPlatform(v); setPage(1); } }}>
-            <SelectTrigger className="border border-border bg-card rounded-[10px] px-3 py-2.5 h-auto text-[13.5px] text-[var(--ink-soft)] hover:border-[#CFC9EA] transition-colors cursor-pointer focus:ring-0">
-              <span className="font-medium mr-1">Platform:</span>
-              <SelectValue />
+            <SelectTrigger className="h-[36px] bg-white border border-border/80 hover:border-border rounded-[8px] px-3 text-[13px] shadow-sm transition-all focus:ring-0 focus:border-[var(--violet)]">
+              <div className="flex items-center gap-1.5">
+                <span className="text-muted-foreground">Platform:</span>
+                <span className="font-medium text-foreground">{platform}</span>
+              </div>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="All">All</SelectItem>
@@ -450,49 +451,51 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
           </Select>
 
           <Select value={limit} onValueChange={(v) => { if (v) { setLimit(v); setPage(1); } }}>
-            <SelectTrigger className="border border-border bg-card rounded-[10px] px-3 py-2.5 h-auto text-[13.5px] text-[var(--ink-soft)] hover:border-[#CFC9EA] transition-colors cursor-pointer focus:ring-0">
-              <SelectValue placeholder="Per Page" />
+            <SelectTrigger className="h-[36px] bg-white border border-border/80 hover:border-border rounded-[8px] px-3 text-[13px] shadow-sm transition-all focus:ring-0 focus:border-[var(--violet)] w-[auto]">
+              <div className="flex items-center gap-1.5">
+                <span className="text-muted-foreground">Per page:</span>
+                <span className="font-medium text-foreground">{limit}</span>
+              </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="10">10 / page</SelectItem>
-              <SelectItem value="20">20 / page</SelectItem>
-              <SelectItem value="50">50 / page</SelectItem>
-              <SelectItem value="100">100 / page</SelectItem>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+              <SelectItem value="100">100</SelectItem>
             </SelectContent>
           </Select>
 
-          <div className="relative flex items-center">
+          <div className="relative flex items-center group h-[36px] bg-white border border-border/80 rounded-[8px] shadow-sm hover:border-border transition-all focus-within:border-[var(--violet)] px-3">
+            <span className="text-muted-foreground text-[13px] mr-2">Date:</span>
             <Input 
               ref={dateInputRef}
               type="date"
               value={date}
               onChange={(e) => { setDate(e.target.value); setPage(1); }}
-              className="w-[140px] bg-background/50 border-border/50 text-muted-foreground pr-8 [&::-webkit-calendar-picker-indicator]:hidden"
+              className="w-[110px] p-0 h-auto border-none shadow-none text-foreground text-[13px] font-medium focus-visible:ring-0 bg-transparent cursor-pointer"
             />
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={(e) => {
-                if (date) {
+            {date && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={(e) => {
                   e.preventDefault();
                   setDate("");
                   setPage(1);
-                } else {
-                  dateInputRef.current?.showPicker();
-                }
-              }}
-              className={`absolute right-0 h-9 w-9 shrink-0 ${date ? 'text-destructive hover:bg-destructive/10' : 'text-muted-foreground hover:text-foreground'}`}
-              title={date ? "Clear date filter" : "Select date"}
-            >
-              <CalendarIcon className="h-4 w-4" />
-            </Button>
+                }}
+                className="absolute -right-2 h-7 w-7 shrink-0 text-destructive hover:bg-destructive/10"
+                title="Clear date filter"
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            )}
           </div>
-
-          <button onClick={handleExportCSV} className="flex items-center gap-[8px] bg-[var(--ink)] text-white border-none rounded-[10px] p-[10px_16px] text-[13.5px] font-semibold font-inherit cursor-pointer transition-all hover:bg-[var(--violet-deep)] hover:-translate-y-[1px]">
-            <Download className="h-4 w-4" />
-            Export CSV
-          </button>
         </div>
+
+        <button onClick={handleExportCSV} className="flex items-center gap-[8px] bg-[var(--ink)] text-white border-none rounded-[10px] p-[10px_16px] text-[13.5px] font-semibold font-inherit cursor-pointer transition-all hover:bg-[var(--violet-deep)] hover:-translate-y-[1px]">
+          <Download className="h-4 w-4" />
+          Export CSV
+        </button>
       </div>
 
       {selectedIds.size > 0 && (
@@ -552,7 +555,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
         className="bg-card border border-border rounded-[16px] overflow-hidden shadow-[0_1px_2px_rgba(20,15,50,0.03)] flex flex-col"
       >
         <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-300px)]">
-          <table className="w-full border-collapse min-w-[920px]">
+          <table className="w-full border-collapse">
             <thead>
               <tr>
                 <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border pl-[20px] w-[36px]">
@@ -563,20 +566,25 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
                     onChange={toggleSelectAll}
                   />
                 </th>
-                <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border">Candidate</th>
-                <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border">Location</th>
-                <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border">Classification</th>
-                <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border">Status</th>
-                <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border">Platform</th>
-                <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border">Processed</th>
-                <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-right text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border pr-[20px]">Actions</th>
+                <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border whitespace-nowrap">Candidate</th>
+                <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border whitespace-nowrap">Location</th>
+                <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border whitespace-nowrap">Classification</th>
+                <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border whitespace-nowrap">Status</th>
+                <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border whitespace-nowrap">Platform</th>
+                <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border pr-[20px] whitespace-nowrap">Processed</th>
               </tr>
             </thead>
             <tbody>
               {candidates.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="h-32 text-center text-[13.5px] text-muted-foreground align-middle">
-                    No candidates found matching your criteria.
+                  <td colSpan={7} className="h-[300px] align-middle">
+                    <div className="flex flex-col items-center justify-center text-center">
+                      <div className="w-[48px] h-[48px] rounded-full bg-[var(--violet-glow)] flex items-center justify-center mb-[16px]">
+                        <Search className="h-[20px] w-[20px] text-[var(--violet)]" />
+                      </div>
+                      <h3 className="text-[15px] font-semibold text-[var(--ink)] mb-[4px]">No candidates found</h3>
+                      <p className="text-[13.5px] text-muted-foreground max-w-[250px]">Try adjusting your filters or search terms to find what you&apos;re looking for.</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
@@ -589,10 +597,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
                     <tr
                       key={candidate.id}
                       className="border-b border-border relative transition-colors duration-150 hover:bg-[#FBFAFF] cursor-pointer group"
-                      onClick={() => {
-                        sessionStorage.setItem("candidatesScrollY", window.scrollY.toString());
-                        router.push(`/candidates/${candidate.id}`);
-                      }}
+                      onClick={() => setSelectedCandidate(candidate)}
                     >
                       <td className="px-[18px] py-[13px] text-[13.5px] align-middle pl-[20px] w-[36px] relative" onClick={(e) => e.stopPropagation()}>
                         {/* Left accent on hover based on classification */}
@@ -604,53 +609,57 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
                           onChange={() => toggleSelect(candidate.id)}
                         />
                       </td>
-                      <td className="px-[18px] py-[13px] text-[13.5px] align-middle">
-                        <div className="flex items-center gap-[11px] font-semibold text-[var(--ink)]">
-                          <div className="w-[32px] h-[32px] rounded-full flex items-center justify-center text-[12px] font-bold text-white shrink-0" style={{ background: color }}>
-                            {initials}
+                      <td className="px-[18px] py-[13px] text-[13.5px] align-middle truncate max-w-[220px]" title={candidate.candidate_name}>
+                        <div className="flex items-center gap-[12px] font-semibold text-[var(--ink)] truncate">
+                          <div 
+                            className="relative w-[34px] h-[34px] rounded-[10px] flex items-center justify-center text-[12.5px] font-extrabold text-white shrink-0 transition-all duration-300 group-hover:rounded-full border border-black/5" 
+                            style={{ background: color }}
+                          >
+                            {/* Glass glossy overlay */}
+                            <div className="absolute inset-0 rounded-[10px] bg-gradient-to-b from-white/30 to-transparent pointer-events-none transition-all duration-300 group-hover:rounded-full"></div>
+                            <span className="relative z-10 tracking-wide">{initials}</span>
                           </div>
-                          {candidate.candidate_name}
+                          <div className="flex flex-col">
+                            <span className="truncate transition-colors duration-200 group-hover:text-[var(--violet)] font-semibold text-[14px] text-[var(--ink)] leading-tight">{candidate.candidate_name}</span>
+                            {candidate.current_position && (
+                              <span className="truncate text-[12.5px] text-slate-400 font-medium leading-tight mt-0.5">{candidate.current_position}</span>
+                            )}
+                          </div>
                         </div>
                       </td>
-                      <td className={`px-[18px] py-[13px] text-[13.5px] align-middle ${!candidate.location || candidate.location === 'Unknown' ? 'text-muted-foreground italic' : 'text-[var(--ink-soft)]'}`} title={candidate.location}>
-                        {candidate.location || "Unknown"}
+                      <td className={`px-[18px] py-[13px] text-[13.5px] align-middle truncate max-w-[200px] ${!candidate.location || candidate.location === 'Unknown' ? 'text-muted-foreground italic' : 'text-[var(--ink-soft)]'}`} title={candidate.location}>
+                        <div className="flex items-center gap-1.5">
+                          {candidate.location && candidate.location !== 'Unknown' && <MapPin className="h-3.5 w-3.5 text-[#EC4899] shrink-0" />}
+                          <span className="truncate">{candidate.location || "Unknown"}</span>
+                        </div>
                       </td>
-                      <td className="px-[18px] py-[13px] text-[13.5px] align-middle">{getClassificationBadge(candidate.classification)}</td>
-                      <td className="px-[18px] py-[13px] text-[13.5px] align-middle">{getStatusBadge(candidate.status)}</td>
-                      <td className="px-[18px] py-[13px] text-[13.5px] align-middle">
+                      <td className="px-[18px] py-[13px] text-[13.5px] align-middle whitespace-nowrap">{getClassificationBadge(candidate.classification)}</td>
+                      <td className="px-[18px] py-[13px] text-[13.5px] align-middle whitespace-nowrap">{getStatusBadge(candidate.status)}</td>
+                      <td className="px-[18px] py-[13px] text-[13.5px] align-middle whitespace-nowrap">
                         <span className="border border-border rounded-[8px] px-[10px] py-[4px] text-[12px] text-[var(--ink-soft)] font-medium inline-block">
                           {candidate.platform_name}
                         </span>
                       </td>
-                      <td className="px-[18px] py-[13px] text-[13.5px] align-middle font-mono text-[12px] text-muted-foreground whitespace-nowrap hidden md:table-cell">
-                        {candidate.processed_timestamp ? new Date(candidate.processed_timestamp).toLocaleString(undefined, {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                          hour: 'numeric',
-                          minute: '2-digit'
-                        }) : "Unknown"}
-                      </td>
-                      <td className="px-[18px] py-[13px] text-[13.5px] align-middle text-right pr-[20px]" onClick={(e) => e.stopPropagation()}>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger className="inline-flex items-center justify-center focus:outline-none">
-                            <div className="w-[28px] h-[28px] rounded-[8px] flex items-center justify-center text-muted-foreground transition-all hover:bg-[var(--violet-glow)] hover:text-[var(--violet)] font-bold ml-auto border border-transparent">
-                              ⋯
-                            </div>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => router.push(`/candidates/${candidate.id}`)}>
-                              <Eye className="h-4 w-4 mr-2" /> View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => router.push(`/candidates/${candidate.id}#comments`)}>
-                              <MessageSquare className="h-4 w-4 mr-2" /> Comments
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={(e) => handleDelete(e, candidate.id)} className="text-destructive focus:bg-destructive/10 focus:text-destructive">
-                              <Trash className="h-4 w-4 mr-2" /> Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                      <td className="px-[18px] py-[13px] align-middle whitespace-nowrap text-left pr-[20px]">
+                        {candidate.processed_timestamp ? (
+                          <div className="flex flex-col space-y-0.5">
+                            <span className="text-[13px] font-medium text-[var(--ink)]">
+                              {new Date(candidate.processed_timestamp).toLocaleDateString(undefined, {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric'
+                              })}
+                            </span>
+                            <span className="text-[11.5px] font-mono text-muted-foreground uppercase tracking-wider">
+                              {new Date(candidate.processed_timestamp).toLocaleTimeString(undefined, {
+                                hour: 'numeric',
+                                minute: '2-digit'
+                              })}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-[13px] text-muted-foreground">Unknown</span>
+                        )}
                       </td>
                     </tr>
                   );
@@ -659,37 +668,46 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
             </tbody>
           </table>
         </div>
-      </motion.div>
-
-      {/* Pagination */}
-      <div className="flex items-center justify-between px-2">
-        <p className="text-sm text-muted-foreground">
-          Showing <span className="font-medium text-foreground">{candidates.length}</span> of <span className="font-medium text-foreground">{localTotalCount}</span> candidates
-        </p>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="h-8 w-8 p-0 bg-card/50"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="text-sm text-muted-foreground mx-2">
-            Page {page}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage(p => p + 1)}
-            disabled={candidates.length < Number(limit)} // Use dynamic limit
-            className="h-8 w-8 p-0 bg-card/50"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+        
+        {/* Pagination */}
+        <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-border">
+          <p className="text-[13.5px] text-slate-500 tracking-wide">
+            Showing <span className="font-bold text-[var(--ink)]">{candidates.length}</span> of <span className="font-bold text-[var(--ink)]">{localTotalCount}</span> candidates
+          </p>
+          <div className="flex items-center space-x-1.5">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="h-8 w-8 p-0 bg-white border-slate-200 shadow-sm rounded-[10px] text-slate-500 hover:text-[var(--violet)] hover:bg-[var(--violet)]/5 hover:border-[var(--violet)]/30 transition-all"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            
+            <div className="px-3 py-1 bg-[var(--violet)]/10 text-[var(--violet)] text-[13px] font-bold rounded-[10px] border border-[var(--violet)]/20 mx-1">
+              Page {page}
+            </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(p => p + 1)}
+              disabled={candidates.length < Number(limit)}
+              className="h-8 w-8 p-0 bg-white border-slate-200 shadow-sm rounded-[10px] text-slate-500 hover:text-[var(--violet)] hover:bg-[var(--violet)]/5 hover:border-[var(--violet)]/30 transition-all"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-      </div>
+      </motion.div>
+      
+      {/* Slide-over for candidate details */}
+      <CandidateSlideOver 
+        candidate={selectedCandidate} 
+        isOpen={!!selectedCandidate} 
+        onClose={() => setSelectedCandidate(null)} 
+      />
     </div>
   );
 }

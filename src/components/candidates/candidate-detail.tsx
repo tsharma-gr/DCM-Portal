@@ -32,7 +32,8 @@ import {
   X,
   Trash,
   Target,
-  Tag
+  Tag,
+  Hash
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -42,9 +43,10 @@ interface CandidateDetailProps {
   candidate: Candidate;
   comments: CandidateComment[];
   currentUserEmail: string;
+  isSlideOver?: boolean;
 }
 
-export function CandidateDetail({ candidate, comments: initialComments, currentUserEmail }: CandidateDetailProps) {
+export function CandidateDetail({ candidate, comments: initialComments, currentUserEmail, isSlideOver = false }: CandidateDetailProps) {
   const router = useRouter();
   const [comments, setComments] = useState<CandidateComment[]>(initialComments);
   const [newComment, setNewComment] = useState("");
@@ -211,16 +213,20 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <Button 
-          variant="ghost" 
-          onClick={() => router.back()} 
-          className="text-muted-foreground hover:text-foreground pl-0 flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Candidates
-        </Button>
+    <div className={`space-y-6 ${isSlideOver ? 'p-6 pt-10' : ''}`}>
+      <div className={`flex justify-between items-center ${isSlideOver ? 'sticky top-0 z-10 bg-[#F8F9FC]/90 backdrop-blur pb-4 -mx-6 px-6 -mt-10 pt-10 border-b border-border/50' : ''}`}>
+        {!isSlideOver ? (
+          <Button 
+            variant="ghost" 
+            onClick={() => router.back()} 
+            className="text-muted-foreground hover:text-foreground pl-0 flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Candidates
+          </Button>
+        ) : (
+          <h2 className="text-xl font-bold text-[var(--ink)] tracking-tight">Candidate Details</h2>
+        )}
         
         <div className="flex items-center gap-2 bg-card/50 backdrop-blur p-1 rounded-md border border-border/50">
           <span className="text-sm text-muted-foreground font-medium pl-2">Status:</span>
@@ -272,7 +278,7 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-3">
         {/* Profile Card */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -280,7 +286,10 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
           transition={{ duration: 0.4 }}
           className="md:col-span-1"
         >
-          <Card className="bg-card/50 backdrop-blur border-border/50 relative">
+          <Card className="bg-card/50 backdrop-blur border-border/50 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 overflow-hidden relative group">
+            {/* Subtle gradient accent at top of card */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[var(--violet)] to-[var(--violet-glow)] opacity-70 group-hover:opacity-100 transition-opacity"></div>
+            
             {!isEditingDetails && (
               <Button 
                 variant="ghost" 
@@ -387,6 +396,12 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
                       <span>Desired: {candidate.desired_role}</span>
                     </div>
                   )}
+                  {candidate.cv_reference && (
+                    <div className="flex items-center gap-3 text-sm">
+                      <Hash className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-mono text-[13px]">CV Ref: {candidate.cv_reference}</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-3 text-sm">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span>
@@ -403,9 +418,10 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
                   <div className="pt-4 flex gap-3">
                     {candidate.cv_link && (
                       <a href={candidate.cv_link} target="_blank" rel="noopener noreferrer" className="w-full">
-                        <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                          <ExternalLink className="h-4 w-4 mr-2" />
-                          View CV
+                        <Button className="w-full bg-gradient-to-r from-[var(--violet)] to-[#8352ff] hover:opacity-90 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 border-none group relative overflow-hidden">
+                          <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+                          <ExternalLink className="h-4 w-4 mr-2 relative z-10" />
+                          <span className="relative z-10 font-medium tracking-wide">View Full CV</span>
                         </Button>
                       </a>
                     )}
@@ -424,64 +440,57 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
           className="md:col-span-2 space-y-6"
         >
           {/* AI Reasoning Panel */}
-          <Card className="bg-card/50 backdrop-blur border-border/50">
-            <CardHeader>
+          <Card className="bg-card/50 backdrop-blur border-border/50 shadow-sm hover:shadow-md transition-all duration-300 group">
+            <CardHeader className="pb-4">
               <div className="flex items-center gap-2 mb-2">
-                <BrainCircuit className="h-5 w-5 text-primary" />
-                <CardTitle className="font-heading">AI Analysis & Reasoning</CardTitle>
+                <div className="p-2 rounded-lg bg-[var(--violet-glow)] text-[var(--violet)] group-hover:scale-110 transition-transform duration-300">
+                  <BrainCircuit className="h-5 w-5" />
+                </div>
+                <CardTitle className="font-heading text-lg">AI Analysis & Reasoning</CardTitle>
               </div>
               <CardDescription>
                 Detailed breakdown of why this candidate was marked as {candidate.classification} for {candidate.dcm_type}.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="bg-muted/30 p-6 rounded-lg border border-border/50 text-sm leading-relaxed whitespace-pre-wrap font-sans text-foreground/90 shadow-inner">
-                {candidate.ai_reasoning || "No AI reasoning provided for this candidate."}
-              </div>
-              
-              <div className="mt-8">
-                <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider mb-4">System Metadata</h4>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="bg-background/50 p-3 rounded-md border border-border/50">
-                    <p className="text-muted-foreground mb-1">CV Reference ID</p>
-                    <p className="font-mono">{candidate.cv_reference || "N/A"}</p>
-                  </div>
-                  <div className="bg-background/50 p-3 rounded-md border border-border/50">
-                    <p className="text-muted-foreground mb-1">Database ID</p>
-                    <p className="font-mono truncate">{candidate.id}</p>
-                  </div>
+              <div className="relative p-[1px] rounded-xl bg-gradient-to-b from-border/80 to-transparent">
+                <div className="bg-muted/40 p-6 rounded-[11px] text-[14.5px] leading-relaxed whitespace-pre-wrap font-sans text-foreground/90 shadow-inner">
+                  {candidate.ai_reasoning || "No AI reasoning provided for this candidate."}
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Comments & Activity Timeline */}
-          <Card id="comments" className="bg-card/50 backdrop-blur border-border/50">
-            <CardHeader>
-              <div className="flex items-center gap-2 mb-2">
-                <MessageSquare className="h-5 w-5 text-primary" />
-                <CardTitle className="font-heading">Comments & Activity</CardTitle>
+          <Card id="comments" className="bg-card/50 backdrop-blur border-border/50 shadow-sm hover:shadow-md transition-all duration-300">
+            <CardHeader className="pb-2 pt-4 px-5">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-600">
+                  <MessageSquare className="h-4 w-4" />
+                </div>
+                <CardTitle className="font-heading text-base">Comments & Activity</CardTitle>
               </div>
-              <CardDescription>
+              <CardDescription className="text-xs">
                 Collaborate with other recruiters and leave notes on this candidate.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
+            <CardContent className="space-y-4 px-5 pb-5">
+              <div className="space-y-2">
                 <Textarea 
                   placeholder="Add a comment about this candidate..." 
-                  className="min-h-[100px] resize-none focus-visible:ring-primary bg-background/50"
+                  className="min-h-[40px] text-sm resize-none focus-visible:ring-primary bg-background/50"
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   disabled={isSubmitting}
                 />
                 <div className="flex justify-end">
                   <Button 
+                    size="sm"
                     onClick={handleAddComment} 
                     disabled={!newComment.trim() || isSubmitting}
-                    className="bg-primary text-primary-foreground hover:bg-primary/90"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 text-xs"
                   >
-                    {isSubmitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                    {isSubmitting ? <Loader2 className="h-3 w-3 mr-2 animate-spin" /> : null}
                     Post Comment
                   </Button>
                 </div>
@@ -491,7 +500,7 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
 
               <div className="space-y-4">
                 {comments.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground bg-muted/20 rounded-lg border border-dashed border-border/50">
+                  <div className="text-center py-4 text-xs text-muted-foreground bg-muted/20 rounded-lg border border-dashed border-border/50">
                     No comments yet. Be the first to add one!
                   </div>
                 ) : (
