@@ -364,7 +364,15 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
                   </div>
                   <CardTitle className="text-2xl font-heading">{candidate.candidate_name}</CardTitle>
                   <CardDescription className="text-base mt-1">
-                    {candidate.current_position || "Position Not Specified"}
+                    {(() => {
+                      if (candidate.current_position && candidate.current_position !== "N/A" && candidate.current_position !== "Unknown") {
+                        return candidate.current_position;
+                      }
+                      if (candidate.job_title && candidate.job_title !== "N/A" && candidate.job_title !== "Unknown") {
+                        return candidate.job_title.split(',')[0].trim();
+                      }
+                      return "Position Not Specified";
+                    })()}
                   </CardDescription>
                   <div className="mt-4">
                     {getClassificationBadge(candidate.classification)}

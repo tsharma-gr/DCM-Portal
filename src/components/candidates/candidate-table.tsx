@@ -626,9 +626,16 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
                           </div>
                           <div className="flex flex-col">
                             <span className="truncate transition-colors duration-200 group-hover:text-[var(--violet)] font-semibold text-[14px] text-[var(--ink)] leading-tight">{candidate.candidate_name}</span>
-                            {candidate.current_position && (
-                              <span className="truncate text-[12.5px] text-slate-400 font-medium leading-tight mt-0.5">{candidate.current_position}</span>
-                            )}
+                            {(() => {
+                              const pos = (candidate.current_position && candidate.current_position !== "N/A" && candidate.current_position !== "Unknown") 
+                                ? candidate.current_position 
+                                : (candidate.job_title && candidate.job_title !== "N/A" && candidate.job_title !== "Unknown") 
+                                  ? candidate.job_title.split(',')[0].trim() 
+                                  : null;
+                              return pos ? (
+                                <span className="truncate text-[12.5px] text-slate-400 font-medium leading-tight mt-0.5">{pos}</span>
+                              ) : null;
+                            })()}
                           </div>
                         </div>
                       </td>
