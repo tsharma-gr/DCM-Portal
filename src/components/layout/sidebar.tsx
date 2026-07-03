@@ -35,6 +35,7 @@ const dcmNavItems = [
   { title: "Temporary Works DCM", href: "/candidates?dcmType=Temporary+Works+Design", icon: Building },
   { title: "Demolition DCM", href: "/candidates?dcmType=Demolition", icon: Building },
   { title: "Passive Fire DCM", href: "/candidates?dcmType=Passive+Fire+Protection", icon: Flame },
+  { title: "Civil & Structural DCM", href: "/candidates?dcmType=Consultancy+Civil+%26+Structural", icon: Building },
 ];
 
 const bottomNavItems = [

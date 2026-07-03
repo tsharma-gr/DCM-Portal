@@ -15,7 +15,8 @@ const DCM_TYPES = [
   "Scaffolding DCM",
   "Temporary Works Design DCM",
   "Demolition DCM",
-  "Passive Fire Protection DCM"
+  "Passive Fire Protection DCM",
+  "Consultancy Civil & Structural DCM"
 ];
 
 export function AutomationSection() {
