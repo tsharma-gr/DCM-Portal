@@ -465,28 +465,26 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
             </SelectContent>
           </Select>
 
-          <div className="relative flex items-center group h-[36px] bg-white border border-border/80 rounded-[8px] shadow-sm hover:border-border transition-all focus-within:border-[var(--violet)] px-3">
+          <div className="relative flex items-center group h-[36px] bg-white border border-border/80 rounded-[8px] shadow-sm hover:border-border transition-all focus-within:border-[var(--violet)] px-3 cursor-pointer">
+            <CalendarIcon className="h-3.5 w-3.5 text-slate-400 mr-2 group-focus-within:text-[var(--violet)] transition-colors" />
             <span className="text-muted-foreground text-[13px] mr-2">Date:</span>
-            <Input 
-              ref={dateInputRef}
-              type="date"
-              value={date}
-              onChange={(e) => { setDate(e.target.value); setPage(1); }}
-              className="w-[110px] p-0 h-auto border-none shadow-none text-foreground text-[13px] font-medium focus-visible:ring-0 bg-transparent cursor-pointer"
-            />
+            <div className="relative flex items-center h-full">
+              <Input 
+                ref={dateInputRef}
+                type="date"
+                value={date}
+                onChange={(e) => { setDate(e.target.value); setPage(1); }}
+                className="w-[110px] p-0 h-auto border-none shadow-none text-[var(--ink)] text-[13px] font-medium focus-visible:ring-0 bg-transparent cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-clear-button]:hidden relative z-10"
+              />
+            </div>
             {date && (
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={(e) => {
-                  e.preventDefault();
-                  setDate("");
-                  setPage(1);
-                }}
-                className="absolute -right-2 h-7 w-7 shrink-0 text-destructive hover:bg-destructive/10"
-                title="Clear date filter"
+                onClick={(e) => { e.preventDefault(); setDate(""); setPage(1); }}
+                className="h-[22px] w-[22px] ml-1 p-0 text-slate-400 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors relative z-20 shrink-0"
               >
-                <X className="h-3.5 w-3.5" />
+                <X className="h-[14px] w-[14px]" />
               </Button>
             )}
           </div>

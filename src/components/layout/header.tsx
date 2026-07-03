@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
 export function Header() {
   const router = useRouter();
@@ -37,6 +38,7 @@ export function Header() {
   }, [supabase]);
 
   const handleLogout = async () => {
+    toast.dismiss();
     await supabase.auth.signOut();
     router.push("/login");
   };
