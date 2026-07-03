@@ -706,7 +706,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
               variant="outline"
               size="sm"
               onClick={() => setPage(p => p + 1)}
-              disabled={candidates.length < Number(limit)}
+              disabled={page >= Math.ceil(localTotalCount / Number(limit))}
               className="h-8 w-8 p-0 bg-white border-slate-200 shadow-sm rounded-[10px] text-slate-500 hover:text-[var(--violet)] hover:bg-[var(--violet)]/5 hover:border-[var(--violet)]/30 transition-all"
             >
               <ChevronRight className="h-4 w-4" />
