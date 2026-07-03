@@ -465,25 +465,30 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
             </SelectContent>
           </Select>
 
-          <div className="relative flex items-center group h-[36px] bg-white border border-border/80 rounded-[8px] shadow-sm hover:border-border transition-all focus-within:border-[var(--violet)] focus-within:shadow-[0_0_0_2px_rgba(147,83,245,0.1)] px-2 cursor-pointer">
-            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-[var(--violet)]/10 mr-2 shrink-0 transition-colors group-hover:bg-[var(--violet)]/20">
-              <CalendarIcon className="h-3.5 w-3.5 text-[var(--violet)]" />
-            </div>
-            <span className="text-muted-foreground text-[13px] font-medium mr-2">Date:</span>
-            <div className="relative flex items-center h-full">
+          <div 
+            className="relative flex items-center group h-[36px] bg-white border border-border/80 rounded-[8px] shadow-sm hover:border-border transition-all focus-within:border-[var(--violet)] focus-within:shadow-[0_0_0_2px_rgba(147,83,245,0.1)] px-3 cursor-pointer"
+            onClick={() => dateInputRef.current?.showPicker()}
+          >
+            <span className="text-muted-foreground text-[13px] font-medium mr-2 pointer-events-none">Date:</span>
+            <div className="relative flex items-center h-full pointer-events-none">
               <Input 
                 ref={dateInputRef}
                 type="date"
                 value={date}
                 onChange={(e) => { setDate(e.target.value); setPage(1); }}
-                className="w-[110px] p-0 h-auto border-none shadow-none text-[var(--ink)] text-[13px] font-medium focus-visible:ring-0 bg-transparent cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-clear-button]:hidden relative z-10"
+                className="w-[105px] p-0 h-auto border-none shadow-none text-[var(--ink)] text-[13px] font-medium focus-visible:ring-0 bg-transparent pointer-events-auto cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-clear-button]:hidden relative z-10"
               />
             </div>
+            
+            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-[var(--violet)]/10 ml-1 shrink-0 transition-colors group-hover:bg-[var(--violet)]/20 pointer-events-none">
+              <CalendarIcon className="h-3.5 w-3.5 text-[var(--violet)]" />
+            </div>
+
             {date && (
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={(e) => { e.preventDefault(); setDate(""); setPage(1); }}
+                onClick={(e) => { e.stopPropagation(); setDate(""); setPage(1); }}
                 className="h-[22px] w-[22px] ml-1 p-0 text-slate-400 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors relative z-20 shrink-0"
               >
                 <X className="h-[14px] w-[14px]" />
