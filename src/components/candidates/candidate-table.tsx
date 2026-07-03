@@ -465,9 +465,11 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
             </SelectContent>
           </Select>
 
-          <div className="relative flex items-center group h-[36px] bg-white border border-border/80 rounded-[8px] shadow-sm hover:border-border transition-all focus-within:border-[var(--violet)] px-3 cursor-pointer">
-            <CalendarIcon className="h-3.5 w-3.5 text-slate-400 mr-2 group-focus-within:text-[var(--violet)] transition-colors" />
-            <span className="text-muted-foreground text-[13px] mr-2">Date:</span>
+          <div className="relative flex items-center group h-[36px] bg-white border border-border/80 rounded-[8px] shadow-sm hover:border-border transition-all focus-within:border-[var(--violet)] focus-within:shadow-[0_0_0_2px_rgba(147,83,245,0.1)] px-2 cursor-pointer">
+            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-[var(--violet)]/10 mr-2 shrink-0 transition-colors group-hover:bg-[var(--violet)]/20">
+              <CalendarIcon className="h-3.5 w-3.5 text-[var(--violet)]" />
+            </div>
+            <span className="text-muted-foreground text-[13px] font-medium mr-2">Date:</span>
             <div className="relative flex items-center h-full">
               <Input 
                 ref={dateInputRef}
