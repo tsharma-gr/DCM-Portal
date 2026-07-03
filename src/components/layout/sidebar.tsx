@@ -16,6 +16,7 @@ import {
   ChevronDown,
   ChevronRight,
   List,
+  Flame,
 } from "lucide-react";
 
 const mainNavItems = [
@@ -33,6 +34,7 @@ const dcmNavItems = [
   { title: "Scaffolding DCM", href: "/candidates?dcmType=Scaffolding", icon: Building },
   { title: "Temporary Works DCM", href: "/candidates?dcmType=Temporary+Works+Design", icon: Building },
   { title: "Demolition DCM", href: "/candidates?dcmType=Demolition", icon: Building },
+  { title: "Passive Fire DCM", href: "/candidates?dcmType=Passive+Fire+Protection", icon: Flame },
 ];
 
 const bottomNavItems = [
