@@ -21,6 +21,7 @@ export interface Candidate {
   t2_tenure?: number;
   business_specialization?: string;
   recruitly_id?: string;
+  current_company?: string;
 }
 
 export interface CandidateComment {
