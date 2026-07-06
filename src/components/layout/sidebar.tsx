@@ -61,35 +61,35 @@ function SidebarContent() {
         </div>
       </div>
       
+      <div className="mb-4">
+        <p className="text-[11px] font-semibold tracking-[0.08em] text-slate-500 px-2.5 pt-3.5 pb-2 uppercase">
+          OVERVIEW
+        </p>
+        <div className="flex flex-col">
+          {mainNavItems.map((item) => {
+            const isActive = pathname === item.href && (item.href !== "/candidates" || !currentDcmType);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                prefetch={true}
+                className={cn(
+                  "flex items-center gap-2.5 px-3 py-2.5 rounded-[10px] text-[14px] font-medium transition-all mb-0.5",
+                  isActive 
+                    ? "bg-gradient-to-br from-[var(--violet)] to-[#9353F5] text-white shadow-[0_6px_16px_var(--violet-glow)]" 
+                    : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+                )}
+              >
+                <item.icon className={cn("w-[18px] text-center", isActive ? "opacity-100" : "opacity-75")} />
+                {item.title}
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="flex-1 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <nav className="flex flex-col">
-          <div className="mb-4">
-            <p className="text-[11px] font-semibold tracking-[0.08em] text-slate-500 px-2.5 pt-3.5 pb-2 uppercase">
-              OVERVIEW
-            </p>
-            <div className="flex flex-col">
-              {mainNavItems.map((item) => {
-                const isActive = pathname === item.href && (item.href !== "/candidates" || !currentDcmType);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    prefetch={true}
-                    className={cn(
-                      "flex items-center gap-2.5 px-3 py-2.5 rounded-[10px] text-[14px] font-medium transition-all mb-0.5",
-                      isActive 
-                        ? "bg-gradient-to-br from-[var(--violet)] to-[#9353F5] text-white shadow-[0_6px_16px_var(--violet-glow)]" 
-                        : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
-                    )}
-                  >
-                    <item.icon className={cn("w-[18px] text-center", isActive ? "opacity-100" : "opacity-75")} />
-                    {item.title}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-
           <div>
             <p className="text-[11px] font-semibold tracking-[0.08em] text-slate-500 px-2.5 pt-3.5 pb-2 uppercase">
               DCM SYSTEMS
