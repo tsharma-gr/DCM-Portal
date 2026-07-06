@@ -468,14 +468,15 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
 
       {selectedIds.size > 0 && (
         <motion.div 
-          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-[var(--new-bg)] border border-[#D5C2FE] rounded-[12px] p-[12px_20px] shadow-[0_4px_20px_var(--violet-glow)] mb-[20px] gap-4"
+          initial={{ opacity: 0, y: -10, height: 0, marginBottom: 0 }} 
+          animate={{ opacity: 1, y: 0, height: 'auto', marginBottom: 16 }}
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-slate-900 border border-slate-800 rounded-[12px] p-[12px_20px] shadow-lg overflow-hidden gap-4"
         >
           <div className="flex items-center gap-[12px]">
-            <div className="flex items-center justify-center w-[26px] h-[26px] rounded-[6px] bg-[var(--violet)] text-white shadow-sm">
-              <CheckSquare className="h-[14px] w-[14px]" />
+            <div className="flex items-center justify-center w-[28px] h-[28px] rounded-[8px] bg-[var(--violet)] text-white shadow-sm">
+              <CheckSquare className="h-[15px] w-[15px]" />
             </div>
-            <span className="font-semibold text-[14px] text-[var(--violet-deep)]">{selectedIds.size} candidates selected</span>
+            <span className="font-semibold text-[14px] text-white">{selectedIds.size} candidate{selectedIds.size > 1 ? 's' : ''} selected</span>
           </div>
           <div className="flex flex-wrap items-center gap-[12px]">
             {showBulkCustomStatus ? (
@@ -484,30 +485,30 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
                   value={bulkCustomStatus} 
                   onChange={e => setBulkCustomStatus(e.target.value)} 
                   placeholder="Others" 
-                  className="h-[36px] w-[150px] text-[13px] bg-white border border-[#D5C2FE] rounded-[8px] focus-visible:ring-[var(--violet)]"
+                  className="h-[36px] w-[150px] text-[13px] bg-slate-800 text-white border border-slate-700 rounded-[8px] focus-visible:ring-[var(--violet)] placeholder:text-slate-500"
                   onKeyDown={e => e.key === 'Enter' && handleApplyBulkCustomStatus()}
                   autoFocus
                 />
-                <button className="h-[36px] w-[36px] flex items-center justify-center bg-white border border-[#D5C2FE] rounded-[8px] text-[var(--violet)] hover:bg-[var(--violet-glow)] transition-colors" onClick={handleApplyBulkCustomStatus} disabled={isBulkUpdating}>
+                <button className="h-[36px] w-[36px] flex items-center justify-center bg-slate-800 border border-slate-700 rounded-[8px] text-[var(--violet)] hover:bg-slate-700 transition-colors" onClick={handleApplyBulkCustomStatus} disabled={isBulkUpdating}>
                   {isBulkUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                 </button>
-                <button className="h-[36px] w-[36px] flex items-center justify-center text-muted-foreground hover:text-[var(--ink)] transition-colors" onClick={() => setShowBulkCustomStatus(false)}>
+                <button className="h-[36px] w-[36px] flex items-center justify-center text-slate-400 hover:text-white transition-colors" onClick={() => setShowBulkCustomStatus(false)}>
                   <X className="h-4 w-4" />
                 </button>
               </div>
             ) : (
               <Select onValueChange={(v: string | null) => { if (v) handleBulkStatusUpdate(v); }} disabled={isBulkUpdating}>
-                <SelectTrigger className="h-[36px] w-[160px] bg-white border border-[#D5C2FE] text-[13px] font-medium text-[var(--ink-soft)] rounded-[8px] focus:ring-[var(--violet)] focus:ring-offset-0">
+                <SelectTrigger className="h-[36px] w-[160px] bg-slate-800 border border-slate-700 text-[13px] font-medium text-slate-200 rounded-[8px] focus:ring-[var(--violet)] focus:ring-offset-0">
                   <SelectValue placeholder="Change Status..." />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="New">New</SelectItem>
-                  <SelectItem value="Opened">Opened</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
+                <SelectContent className="bg-slate-800 border-slate-700 text-slate-200">
+                  <SelectItem value="New" className="focus:bg-slate-700 focus:text-white">New</SelectItem>
+                  <SelectItem value="Opened" className="focus:bg-slate-700 focus:text-white">Opened</SelectItem>
+                  <SelectItem value="Other" className="focus:bg-slate-700 focus:text-white">Other</SelectItem>
                 </SelectContent>
               </Select>
             )}
-            <button onClick={handleBulkDelete} disabled={isBulkUpdating} className="h-[36px] flex items-center gap-[6px] px-[14px] bg-[var(--error-bg)] text-[var(--error-fg)] border border-[var(--error-dot)]/20 rounded-[8px] text-[13px] font-semibold transition-all hover:bg-[var(--error-dot)] hover:text-white disabled:opacity-50">
+            <button onClick={handleBulkDelete} disabled={isBulkUpdating} className="h-[36px] flex items-center gap-[6px] px-[14px] bg-red-500/10 text-red-400 border border-red-500/20 rounded-[8px] text-[13px] font-semibold transition-all hover:bg-red-500 hover:text-white disabled:opacity-50">
               {isBulkUpdating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash className="h-3.5 w-3.5" />}
               Delete Selected
             </button>
