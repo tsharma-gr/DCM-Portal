@@ -21,13 +21,21 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Candidate } from "@/types/candidate";
 import { Search, ChevronLeft, ChevronRight, SlidersHorizontal, MoreHorizontal, Eye, Trash, MessageSquare, Download, CheckSquare, Loader2, Check, X, CalendarIcon, Filter, Layers, Globe, ListOrdered, MapPin } from "lucide-react";
 
 import { exportCandidatesToExcel } from "@/utils/excel-export";
 import { CandidateSlideOver } from "./candidate-slideover";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface CandidateTableProps {
   candidates: Candidate[];
@@ -48,6 +56,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
   const [date, setDate] = useState(searchParams.get("date") || "");
   const [limit, setLimit] = useState(searchParams.get("limit") || "10");
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
 
   // Sync external URL changes (like Sidebar clicks) to local state
@@ -160,7 +169,6 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
 
   const handleBulkDelete = async () => {
     if (selectedIds.size === 0) return;
-    if (!confirm(`Are you sure you want to delete ${selectedIds.size} candidates?`)) return;
     setIsBulkUpdating(true);
     try {
       const { candidateService } = await import("@/services/candidateService");
@@ -466,55 +474,69 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
         </div>
       </div>
 
-      {selectedIds.size > 0 && (
-        <motion.div 
-          initial={{ opacity: 0, y: -10, height: 0, marginBottom: 0 }} 
-          animate={{ opacity: 1, y: 0, height: 'auto', marginBottom: 16 }}
-          className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-slate-900 border border-slate-800 rounded-[12px] p-[12px_20px] shadow-lg overflow-hidden gap-4"
-        >
-          <div className="flex items-center gap-[12px]">
-            <div className="flex items-center justify-center w-[28px] h-[28px] rounded-[8px] bg-[var(--violet)] text-white shadow-sm">
-              <CheckSquare className="h-[15px] w-[15px]" />
-            </div>
-            <span className="font-semibold text-[14px] text-white">{selectedIds.size} candidate{selectedIds.size > 1 ? 's' : ''} selected</span>
-          </div>
-          <div className="flex flex-wrap items-center gap-[12px]">
-            {showBulkCustomStatus ? (
-              <div className="flex items-center gap-[8px]">
-                <Input 
-                  value={bulkCustomStatus} 
-                  onChange={e => setBulkCustomStatus(e.target.value)} 
-                  placeholder="Others" 
-                  className="h-[36px] w-[150px] text-[13px] bg-slate-800 text-white border border-slate-700 rounded-[8px] focus-visible:ring-[var(--violet)] placeholder:text-slate-500"
-                  onKeyDown={e => e.key === 'Enter' && handleApplyBulkCustomStatus()}
-                  autoFocus
-                />
-                <button className="h-[36px] w-[36px] flex items-center justify-center bg-slate-800 border border-slate-700 rounded-[8px] text-[var(--violet)] hover:bg-slate-700 transition-colors" onClick={handleApplyBulkCustomStatus} disabled={isBulkUpdating}>
-                  {isBulkUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                </button>
-                <button className="h-[36px] w-[36px] flex items-center justify-center text-slate-400 hover:text-white transition-colors" onClick={() => setShowBulkCustomStatus(false)}>
-                  <X className="h-4 w-4" />
-                </button>
+      {/* Floating Bulk Actions Pill */}
+      <AnimatePresence>
+        {selectedIds.size > 0 && (
+          <motion.div 
+            initial={{ opacity: 0, y: 50, x: '-50%' }} 
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, y: 50, x: '-50%' }}
+            className="fixed bottom-10 left-[calc(50%_+_125px)] flex items-center gap-3 bg-[#16152b]/70 border border-white/10 rounded-full p-2 pr-3 shadow-[0_8px_32px_rgba(0,0,0,0.2)] z-50 backdrop-blur-xl"
+          >
+            <div className="flex items-center gap-3 pl-3 pr-2 border-r border-white/10">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-[var(--violet)] text-white shadow-sm">
+                <CheckSquare className="h-3.5 w-3.5" />
               </div>
-            ) : (
-              <Select onValueChange={(v: string | null) => { if (v) handleBulkStatusUpdate(v); }} disabled={isBulkUpdating}>
-                <SelectTrigger className="h-[36px] w-[160px] bg-slate-800 border border-slate-700 text-[13px] font-medium text-slate-200 rounded-[8px] focus:ring-[var(--violet)] focus:ring-offset-0">
-                  <SelectValue placeholder="Change Status..." />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700 text-slate-200">
-                  <SelectItem value="New" className="focus:bg-slate-700 focus:text-white">New</SelectItem>
-                  <SelectItem value="Opened" className="focus:bg-slate-700 focus:text-white">Opened</SelectItem>
-                  <SelectItem value="Other" className="focus:bg-slate-700 focus:text-white">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-            <button onClick={handleBulkDelete} disabled={isBulkUpdating} className="h-[36px] flex items-center gap-[6px] px-[14px] bg-red-500/10 text-red-400 border border-red-500/20 rounded-[8px] text-[13px] font-semibold transition-all hover:bg-red-500 hover:text-white disabled:opacity-50">
-              {isBulkUpdating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash className="h-3.5 w-3.5" />}
-              Delete Selected
-            </button>
-          </div>
-        </motion.div>
-      )}
+              <span className="font-semibold text-[13.5px] text-white whitespace-nowrap">{selectedIds.size} selected</span>
+            </div>
+            
+            <div className="flex items-center gap-1.5">
+              <button 
+                onClick={() => setShowDeleteConfirm(true)} 
+                disabled={isBulkUpdating} 
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 text-red-400 rounded-full text-[13px] font-semibold transition-all hover:bg-red-500 hover:text-white disabled:opacity-50 whitespace-nowrap"
+              >
+                {isBulkUpdating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash className="h-3.5 w-3.5" />}
+                Delete
+              </button>
+              <button 
+                onClick={() => setSelectedIds(new Set())} 
+                className="flex items-center justify-center w-8 h-8 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                title="Deselect all"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="sm:max-w-[425px] bg-[#16152b] border border-white/10 text-white shadow-[0_16px_64px_rgba(0,0,0,0.5)] !rounded-[16px]">
+          <DialogHeader>
+            <DialogTitle className="text-[18px] font-semibold flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
+                <Trash className="w-5 h-5" />
+              </div>
+              Confirm Deletion
+            </DialogTitle>
+            <DialogDescription className="text-slate-400 mt-4 text-[14.5px] pl-[52px]">
+              Are you sure you want to permanently delete <strong>{selectedIds.size} candidate{selectedIds.size > 1 ? 's' : ''}</strong>? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-6 pt-4 border-t border-white/5 flex sm:justify-end gap-3 pl-[52px]">
+            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)} className="bg-transparent border-white/10 text-slate-300 hover:bg-white/5 hover:text-white rounded-[10px]">
+              No, Cancel
+            </Button>
+            <Button onClick={() => {
+              setShowDeleteConfirm(false);
+              handleBulkDelete();
+            }} className="bg-red-500 hover:bg-red-600 text-white font-semibold rounded-[10px] border-none shadow-[0_4px_12px_rgba(239,68,68,0.3)]">
+              Yes, Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Table Section */}
       <motion.div 
