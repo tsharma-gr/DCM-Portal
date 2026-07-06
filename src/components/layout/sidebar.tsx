@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
   Users,
@@ -88,26 +89,34 @@ function SidebarContent() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        <nav className="flex flex-col">
-          <div>
-            <p className="text-[11px] font-semibold tracking-[0.08em] text-slate-500 px-2.5 pt-3.5 pb-2 uppercase">
-              DCM SYSTEMS
-            </p>
-            <div className="flex flex-col">
-              <button 
-                onClick={() => setIsDcmOpen(!isDcmOpen)}
-                className="flex items-center justify-between px-3 py-2.5 rounded-[10px] text-[14px] font-medium transition-all mb-0.5 text-slate-400 hover:bg-white/5 hover:text-slate-200"
+      <div className="mb-1">
+        <p className="text-[11px] font-semibold tracking-[0.08em] text-slate-500 px-2.5 pt-3.5 pb-2 uppercase">
+          DCM SYSTEMS
+        </p>
+        <button 
+          onClick={() => setIsDcmOpen(!isDcmOpen)}
+          className="flex items-center justify-between w-full px-3 py-2.5 rounded-[10px] text-[14px] font-medium transition-all mb-0.5 text-slate-400 hover:bg-white/5 hover:text-slate-200"
+        >
+          <div className="flex items-center gap-2.5">
+            <List className="w-[18px] text-center opacity-75" />
+            DCM Systems
+          </div>
+          {isDcmOpen ? <ChevronDown className="w-4 h-4 opacity-50" /> : <ChevronRight className="w-4 h-4 opacity-50" />}
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth">
+        <nav className="flex flex-col h-full">
+          <AnimatePresence initial={false}>
+            {isDcmOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25, ease: "easeInOut" }}
+                className="overflow-hidden"
               >
-                <div className="flex items-center gap-2.5">
-                  <List className="w-[18px] text-center opacity-75" />
-                  DCM Systems
-                </div>
-                {isDcmOpen ? <ChevronDown className="w-4 h-4 opacity-50" /> : <ChevronRight className="w-4 h-4 opacity-50" />}
-              </button>
-              
-              {isDcmOpen && (
-                <div className="flex flex-col ml-[21px] pl-4 border-l border-slate-700/50 mt-1">
+                <div className="flex flex-col ml-[21px] pl-4 border-l border-slate-700/50 mt-1 pb-4">
                   {dcmNavItems.map((item) => {
                     const itemDcmType = new URL(item.href, "http://localhost").searchParams.get("dcmType");
                     const isActive = pathname === "/candidates" && currentDcmType === itemDcmType;
@@ -130,9 +139,9 @@ function SidebarContent() {
                     );
                   })}
                 </div>
-              )}
-            </div>
-          </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </nav>
       </div>
 
