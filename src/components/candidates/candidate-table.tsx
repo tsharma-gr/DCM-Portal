@@ -24,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { Candidate } from "@/types/candidate";
 import { Search, ChevronLeft, ChevronRight, SlidersHorizontal, MoreHorizontal, Eye, Trash, MessageSquare, Download, CheckSquare, Loader2, Check, X, CalendarIcon, Filter, Layers, Globe, ListOrdered, MapPin } from "lucide-react";
 import { candidateService } from "@/services/candidateService";
+import { exportCandidatesToExcel } from "@/utils/excel-export";
 import { CandidateSlideOver } from "./candidate-slideover";
 import {
   DropdownMenu,
@@ -184,34 +185,18 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
     }
   };
 
-  const handleExportCSV = () => {
-    if (!candidates.length) return;
-    const headers = ["ID", "Name", "Position", "Job Title", "Desired Role", "Classification", "Status", "Location", "AI Reasoning", "DCM Type", "CV Link", "Date Processed", "Platform"];
-    const csvRows = candidates.map(c => [
-      c.id,
-      `"${(c.candidate_name || '').replace(/"/g, '""')}"`,
-      `"${(c.current_position || '').replace(/"/g, '""')}"`,
-      `"${(c.job_title || '').replace(/"/g, '""')}"`,
-      `"${(c.desired_role || '').replace(/"/g, '""')}"`,
-      c.classification || '',
-      c.status || '',
-      `"${(c.location || '').replace(/"/g, '""')}"`,
-      `"${(c.ai_reasoning || '').replace(/"/g, '""')}"`,
-      c.dcm_type || '',
-      `"${(c.cv_link || '').replace(/"/g, '""')}"`,
-      new Date(c.processed_timestamp).toISOString(),
-      c.platform_name || ''
-    ].join(","));
-    const csvContent = [headers.join(","), ...csvRows].join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `candidates_export_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleExportExcel = () => {
+    const candidatesToExport = selectedIds.size > 0
+      ? candidates.filter(c => selectedIds.has(c.id))
+      : candidates;
+
+    if (!candidatesToExport.length) {
+      toast.error("No candidates to export");
+      return;
+    }
+
+    exportCandidatesToExcel(candidatesToExport, dcmType === "All" ? "Combined" : dcmType);
+    toast.success(`Exported ${candidatesToExport.length} candidates to Excel`);
   };
 
   // Sync when server data changes
@@ -499,10 +484,12 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
           </div>
         </div>
 
-        <button onClick={handleExportCSV} className="flex items-center gap-[8px] bg-[var(--ink)] text-white border-none rounded-[10px] p-[10px_16px] text-[13.5px] font-semibold font-inherit cursor-pointer transition-all hover:bg-[var(--violet-deep)] hover:-translate-y-[1px]">
-          <Download className="h-4 w-4" />
-          Export CSV
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={handleExportExcel} className="flex items-center gap-[8px] bg-[var(--violet)] text-white border-none rounded-[10px] p-[10px_16px] text-[13.5px] font-semibold font-inherit cursor-pointer transition-all hover:bg-[var(--violet-deep)] hover:-translate-y-[1px]">
+            <Download className="h-4 w-4" />
+            {selectedIds.size > 0 ? "Export Selected" : "Export Excel"}
+          </button>
+        </div>
       </div>
 
       {selectedIds.size > 0 && (

@@ -13,6 +13,14 @@ export interface Candidate {
   status?: string;
   job_title?: string;
   desired_role?: string;
+  email?: string;
+  phone_number?: string;
+  linkedin_url?: string;
+  salary_range?: string;
+  t1_tenure?: number;
+  t2_tenure?: number;
+  business_specialization?: string;
+  recruitly_id?: string;
 }
 
 export interface CandidateComment {
