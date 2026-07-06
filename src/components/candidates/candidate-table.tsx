@@ -378,7 +378,6 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
               <SelectItem value="All">All</SelectItem>
               <SelectItem value="FIT">FIT</SelectItem>
               <SelectItem value="UNFIT">UNFIT</SelectItem>
-              <SelectItem value="Error">Error</SelectItem>
             </SelectContent>
           </Select>
 
@@ -389,19 +388,23 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
                 <span className="font-medium text-foreground">{dcmType.length > 15 ? dcmType.substring(0,15) + '...' : dcmType}</span>
               </div>
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="All">All</SelectItem>
-              <SelectItem value="Exterior">Exterior</SelectItem>
-              <SelectItem value="Structural">Structural</SelectItem>
-              <SelectItem value="Windows and Doors">Windows and Doors</SelectItem>
-              <SelectItem value="BID">BID</SelectItem>
-              <SelectItem value="Estimator">Estimator</SelectItem>
-              <SelectItem value="QS">QS</SelectItem>
-              <SelectItem value="Scaffolding">Scaffolding</SelectItem>
-              <SelectItem value="Temporary Works Design">Temporary Works Design</SelectItem>
-              <SelectItem value="Demolition">Demolition</SelectItem>
-              <SelectItem value="Passive Fire Protection">Passive Fire Protection</SelectItem>
-              <SelectItem value="Consultancy Civil & Structural">Consultancy Civil & Structural</SelectItem>
+            <SelectContent className="w-[480px]">
+              <div className="mb-1 pb-1 border-b border-border/50">
+                <SelectItem value="All" className="font-semibold text-[var(--violet)]">All Systems</SelectItem>
+              </div>
+              <div className="grid grid-cols-2 gap-x-2">
+                <SelectItem value="Exterior">Exterior</SelectItem>
+                <SelectItem value="Structural">Structural</SelectItem>
+                <SelectItem value="Windows and Doors">Windows and Doors</SelectItem>
+                <SelectItem value="BID">BID</SelectItem>
+                <SelectItem value="Estimator">Estimator</SelectItem>
+                <SelectItem value="QS">QS</SelectItem>
+                <SelectItem value="Scaffolding">Scaffolding</SelectItem>
+                <SelectItem value="Temporary Works Design">Temporary Works Design</SelectItem>
+                <SelectItem value="Demolition">Demolition</SelectItem>
+                <SelectItem value="Passive Fire Protection">Passive Fire Protection</SelectItem>
+                <SelectItem value="Consultancy Civil & Structural">Consultancy Civil & Structural</SelectItem>
+              </div>
             </SelectContent>
           </Select>
 
@@ -565,7 +568,12 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
                 <th className="sticky top-0 z-[2] bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border pr-[20px] whitespace-nowrap">Processed</th>
               </tr>
             </thead>
-            <tbody>
+            <motion.tbody
+              key={`${page}-${search}-${classification}-${dcmType}-${platform}-${limit}`}
+              initial={{ opacity: 0, y: 12, filter: 'blur(6px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            >
               {candidates.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="h-[300px] align-middle">
@@ -663,7 +671,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
                   );
                 })
               )}
-            </tbody>
+            </motion.tbody>
           </table>
         </div>
         
@@ -678,7 +686,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
               size="sm"
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="h-8 w-8 p-0 bg-white border-slate-200 shadow-sm rounded-[10px] text-slate-500 hover:text-[var(--violet)] hover:bg-[var(--violet)]/5 hover:border-[var(--violet)]/30 transition-all"
+              className="h-8 w-8 p-0 bg-white border-slate-200 shadow-sm rounded-[10px] text-slate-500 hover:text-[var(--violet)] hover:bg-[var(--violet)]/5 hover:border-[var(--violet)]/30 transition-all duration-300 hover:shadow-md hover:-translate-y-[2px] active:scale-90 active:shadow-none disabled:pointer-events-none"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -692,7 +700,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
               size="sm"
               onClick={() => setPage(p => p + 1)}
               disabled={page >= Math.ceil(localTotalCount / Number(limit))}
-              className="h-8 w-8 p-0 bg-white border-slate-200 shadow-sm rounded-[10px] text-slate-500 hover:text-[var(--violet)] hover:bg-[var(--violet)]/5 hover:border-[var(--violet)]/30 transition-all"
+              className="h-8 w-8 p-0 bg-white border-slate-200 shadow-sm rounded-[10px] text-slate-500 hover:text-[var(--violet)] hover:bg-[var(--violet)]/5 hover:border-[var(--violet)]/30 transition-all duration-300 hover:shadow-md hover:-translate-y-[2px] active:scale-90 active:shadow-none disabled:pointer-events-none"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
