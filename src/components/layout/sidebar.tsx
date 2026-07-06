@@ -9,7 +9,6 @@ import {
   Users,
   Briefcase,
   Building,
-  BarChart,
   Settings,
   DoorOpen,
   FileText,

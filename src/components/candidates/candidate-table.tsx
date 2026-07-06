@@ -23,18 +23,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Candidate } from "@/types/candidate";
 import { Search, ChevronLeft, ChevronRight, SlidersHorizontal, MoreHorizontal, Eye, Trash, MessageSquare, Download, CheckSquare, Loader2, Check, X, CalendarIcon, Filter, Layers, Globe, ListOrdered, MapPin } from "lucide-react";
-import { candidateService } from "@/services/candidateService";
+
 import { exportCandidatesToExcel } from "@/utils/excel-export";
 import { CandidateSlideOver } from "./candidate-slideover";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuGroup,
-} from "@/components/ui/dropdown-menu";
+
 import { motion } from "framer-motion";
 
 interface CandidateTableProps {
@@ -355,24 +347,6 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
     );
   };
 
-  const handleDelete = async (e: React.MouseEvent, id: string) => {
-    e.stopPropagation(); // prevent navigation
-    if (confirm("Are you sure you want to delete this candidate?")) {
-      // Optimistic UI Update: instantly remove it from the screen
-      setCandidates(prev => prev.filter(c => c.id !== id));
-      setLocalTotalCount(prev => Math.max(0, prev - 1));
-      try {
-        const { candidateService } = await import("@/services/candidateService");
-        await candidateService.deleteCandidate(id);
-        router.refresh();
-      } catch (err) {
-        // Revert on error
-        setCandidates(initialCandidates);
-        setLocalTotalCount(totalCount);
-        console.error("Failed to delete candidate", err);
-      }
-    }
-  };
 
   return (
     <div className="space-y-4 pt-1">

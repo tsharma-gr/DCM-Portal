@@ -5,7 +5,7 @@ export function exportCandidatesToExcel(candidates: Candidate[], dcmType: string
   // Map data to the required headers
   const data = candidates.map((c, index) => {
     // Format LinkedIn as plain text or NA
-    let linkedinVal = c.linkedin_url || 'NA';
+    const linkedinVal = c.linkedin_url || 'NA';
     
     return {
       'SL.No': index + 1,
