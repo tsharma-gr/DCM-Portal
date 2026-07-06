@@ -105,8 +105,8 @@ function SidebarContent() {
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth">
-        <nav className="flex flex-col h-full">
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth pb-4">
+        <nav className="flex flex-col">
           <AnimatePresence initial={false}>
             {isDcmOpen && (
               <motion.div
