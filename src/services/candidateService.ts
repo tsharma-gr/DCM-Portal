@@ -88,8 +88,32 @@ export const candidateService = {
   },
 
   async getChartData() {
-    const { data } = await supabase.from("candidates").select("classification, platform_name, dcm_type, processed_timestamp");
-    return (data || []).map((c: { classification: string; platform_name: string; dcm_type: string; processed_timestamp: string }) => ({
+    let allData: any[] = [];
+    const limit = 1000;
+    
+    // 1. Get total count
+    const { count } = await supabase.from("candidates").select("*", { count: "exact", head: true });
+    
+    if (count) {
+      // 2. Fetch all pages concurrently
+      const totalPages = Math.ceil(count / limit);
+      const promises = [];
+      for (let i = 0; i < totalPages; i++) {
+        promises.push(
+          supabase
+            .from("candidates")
+            .select("classification, platform_name, dcm_type, processed_timestamp")
+            .range(i * limit, (i + 1) * limit - 1)
+        );
+      }
+      
+      const results = await Promise.all(promises);
+      results.forEach(res => {
+        if (res.data) allData = allData.concat(res.data);
+      });
+    }
+
+    return allData.map((c: any) => ({
       ...c,
       classification: (c.classification === "Pending" ? "Error" : c.classification) as "FIT" | "UNFIT" | "Error"
     }));
