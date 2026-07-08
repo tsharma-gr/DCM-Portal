@@ -57,6 +57,7 @@ export function DashboardCharts({ data }: ChartsProps) {
       {} as Record<string, number>
     );
     return Object.entries(counts)
+      .filter(([name]) => name && name !== "N/A" && name !== "Unknown")
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 5); // top 5
