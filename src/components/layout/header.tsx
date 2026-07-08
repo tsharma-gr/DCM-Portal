@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { User, Search, Activity } from "lucide-react";
+import { User, Search } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,

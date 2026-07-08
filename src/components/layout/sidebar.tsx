@@ -53,6 +53,7 @@ function SidebarContent() {
   return (
     <div className="w-[250px] min-w-[250px] bg-[#16152b] border-none flex flex-col px-4 py-[22px] print:hidden h-full">
       <div className="flex flex-col items-center justify-center pt-2 pb-6 border-b border-white/5 mb-4 px-2 text-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.png" alt="TalentVerse AI Logo" className="h-[64px] w-auto object-contain mb-3 drop-shadow-[0_4px_12px_rgba(147,83,245,0.4)]" />
         <div className="font-heading font-extrabold text-[17px] text-white tracking-[0.08em] uppercase">
           TALENT VERSE AI
