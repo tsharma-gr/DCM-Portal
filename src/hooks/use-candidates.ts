@@ -25,6 +25,10 @@ export function useDashboardData() {
           candidateService.getCandidates(1, 10),
         ]);
         
+        // Accurately calculate active DCMs across all 13k+ candidates
+        const uniqueDCMs = new Set(chart.filter(c => c.dcm_type && c.dcm_type !== "N/A" && c.dcm_type !== "Unknown").map(c => c.dcm_type));
+        statsData.activeDCMs = uniqueDCMs.size;
+        
         dashboardCache = { stats: statsData, chartData: chart, recentCandidates: recent };
 
         if (mounted) {

@@ -68,23 +68,19 @@ export const candidateService = {
       { count: fitCount },
       { count: unfitCount },
       { count: processedTodayCount },
-      { data: dcmTypes },
     ] = await Promise.all([
       supabase.from("candidates").select("*", { count: "exact", head: true }),
       supabase.from("candidates").select("*", { count: "exact", head: true }).eq("classification", "FIT"),
       supabase.from("candidates").select("*", { count: "exact", head: true }).eq("classification", "UNFIT"),
       supabase.from("candidates").select("*", { count: "exact", head: true }).gte("processed_timestamp", today.toISOString()),
-      supabase.from("candidates").select("dcm_type").not("dcm_type", "is", null),
     ]);
-
-    const activeDCMs = new Set((dcmTypes || []).map((row) => row.dcm_type)).size;
 
     return {
       total: totalCount || 0,
       fit: fitCount || 0,
       unfit: unfitCount || 0,
       processedToday: processedTodayCount || 0,
-      activeDCMs: activeDCMs || 0,
+      activeDCMs: 0, // Will be calculated accurately on the frontend from full chart data
     };
   },
 
