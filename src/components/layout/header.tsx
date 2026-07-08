@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { User, Search } from "lucide-react";
+import { User, Search, Activity } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -104,6 +104,8 @@ export function Header() {
               Welcome back to TalentVerse AI. Monitor your recruitment pipeline, analyze AI candidate metrics, and track your active DCMs in real-time.
             </p>
           </div>
+        ) : pathname === "/bot-status" ? (
+          <div /> 
         ) : (
           <>
             <h1 className="text-3xl font-bold font-heading text-[var(--ink)] tracking-tight">{pageTitle}</h1>
@@ -127,6 +129,16 @@ export function Header() {
       
       <div className="flex items-center gap-6 mt-1">
       <div className="flex items-center gap-4">
+        <button 
+          onClick={() => router.push('/bot-status')}
+          className="flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all text-[13px] font-bold border border-indigo-100 shadow-sm"
+        >
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+          </span>
+          Live Bot Status
+        </button>
         <DropdownMenu>
           <DropdownMenuTrigger className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--violet)] to-[#EC4899] text-white font-semibold text-[13px] shadow-[0_4px_10px_var(--violet-glow)] hover:opacity-90 transition-opacity focus:outline-none">
             {initials || <User className="h-4 w-4 text-white/80" />}
