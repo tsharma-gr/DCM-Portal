@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { supabaseAdmin as supabase } from "@/lib/supabase";
 import { Candidate, CandidateStats } from "@/types/candidate";
 
