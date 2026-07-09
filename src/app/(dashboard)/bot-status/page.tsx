@@ -92,13 +92,13 @@ export default function BotStatusPage() {
         setTotalProcessed(total);
 
         const now = Date.now();
-        const RUNNING_THRESHOLD_MS = 5 * 60 * 1000; // Reduced to 5 minutes for faster updates
+        const RUNNING_THRESHOLD_MS = 4 * 60 * 1000; // 4 minutes
 
         const processQueue = (config: typeof QUEUE1_CONFIG) => {
-          return config.map(bot => {
+          const processed = config.map(bot => {
             const stats = statsMap[bot.dcmType];
             if (!stats) {
-              return { ...bot, candidates: 0, status: "pending", timeLabel: "Not started", lastTimestamp: 0 } as BotStatusData;
+              return { ...bot, candidates: 0, status: "pending", timeLabel: "Not started", lastTimestamp: 0, earliestTs: 0 };
             }
 
             const timeSinceLast = now - stats.latestTs;
@@ -108,22 +108,37 @@ export default function BotStatusPage() {
               status = "running";
             }
 
-            const formatTime = (ts: number) => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            const latestStr = formatTime(stats.latestTs);
-            const startStr = formatTime(stats.earliestTs);
-            const endStr = status === "running" ? "Running" : formatTime(stats.latestTs);
-            
-            const timeLabel = `Latest: ${latestStr} | Start: ${startStr} | End: ${endStr}`;
-
             return {
               name: bot.name,
               dcmType: bot.dcmType,
               candidates: stats.count,
               status,
-              timeLabel,
-              lastTimestamp: stats.latestTs
-            } as BotStatusData;
+              timeLabel: "",
+              lastTimestamp: stats.latestTs,
+              earliestTs: stats.earliestTs
+            };
+          });
+
+          return processed.map((bot, index, array) => {
+            if (bot.status === "pending") {
+              bot.timeLabel = "Not started";
+              return bot as BotStatusData;
+            }
+
+            const formatTime = (ts: number) => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const latestStr = formatTime(bot.lastTimestamp);
+            const startStr = formatTime(bot.earliestTs);
+            let endStr = bot.status === "running" ? "Running" : latestStr;
+
+            // If this bot completed, check if it's waiting for the next bot in the queue
+            const timeSinceLast = now - bot.lastTimestamp;
+            const nextBot = array[index + 1];
+            if (bot.status === "completed" && nextBot && nextBot.candidates === 0 && timeSinceLast < 15 * 60 * 1000) {
+              endStr += " (Waiting next bot)";
+            }
+
+            bot.timeLabel = `Latest: ${latestStr} | Start: ${startStr} | End: ${endStr}`;
+            return bot as BotStatusData;
           });
         };
 
