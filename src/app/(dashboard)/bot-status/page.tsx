@@ -81,7 +81,7 @@ export default function BotStatusPage() {
         }
 
         const statsMap: Record<string, { count: number, earliestTs: number, latestTs: number }> = {};
-        let total = allData.length;
+        const total = allData.length;
 
         if (allData.length > 0) {
           allData.forEach(row => {
