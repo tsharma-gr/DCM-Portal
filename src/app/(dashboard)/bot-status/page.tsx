@@ -92,7 +92,7 @@ export default function BotStatusPage() {
         setTotalProcessed(total);
 
         const now = Date.now();
-        const RUNNING_THRESHOLD_MS = 4 * 60 * 1000; // 4 minutes
+        const RUNNING_THRESHOLD_MS = 7 * 60 * 1000; // 7 minutes
 
         const processQueue = (config: typeof QUEUE1_CONFIG) => {
           const processed = config.map(bot => {
