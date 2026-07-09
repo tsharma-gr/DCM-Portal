@@ -13,7 +13,7 @@ interface BotHealthMonitorProps {
 export function BotHealthMonitor({ stats }: BotHealthMonitorProps) {
   // Using dummy values for demonstration, in a real app these would come from an API endpoint for bots
   const todaysTarget = 5000;
-  const todayExtracted = stats.newCandidates || 1240; 
+  const todayExtracted = stats.processedToday || 1240; 
   const progressPercent = Math.min(100, Math.round((todayExtracted / todaysTarget) * 100));
 
   return (
