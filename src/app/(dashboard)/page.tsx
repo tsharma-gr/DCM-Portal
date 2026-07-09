@@ -3,7 +3,6 @@
 import { useDashboardData } from "@/hooks/use-candidates";
 import { StatCards } from "@/components/dashboard/stat-cards";
 import { DashboardCharts } from "@/components/dashboard/charts";
-import { RecentCandidates } from "@/components/dashboard/recent-candidates";
 import DashboardLoading from "./loading";
 import { Suspense } from "react";
 
@@ -24,7 +23,6 @@ function DashboardContent() {
 
       <StatCards stats={stats} />
       <DashboardCharts data={chartData} />
-      <RecentCandidates candidates={recentCandidates} />
     </div>
   );
 }

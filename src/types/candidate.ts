@@ -38,4 +38,11 @@ export type CandidateStats = {
   unfit: number;
   processedToday: number;
   activeDCMs: number;
+  trends?: {
+    total: string;
+    fit: string;
+    unfit: string;
+    processedToday: string;
+    activeDCMs: string;
+  };
 };

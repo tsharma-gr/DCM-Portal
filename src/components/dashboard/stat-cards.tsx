@@ -17,7 +17,7 @@ export function StatCards({ stats }: StatCardsProps) {
       icon: Users,
       color: "text-blue-500",
       bgColor: "bg-blue-500/10",
-      trend: "+12% from last month",
+      trend: stats.trends?.total || "Calculating...",
     },
     {
       title: "FIT Candidates",
@@ -25,7 +25,7 @@ export function StatCards({ stats }: StatCardsProps) {
       icon: UserCheck,
       color: "text-emerald-500",
       bgColor: "bg-emerald-500/10",
-      trend: "+4% from last week",
+      trend: stats.trends?.fit || "Calculating...",
     },
     {
       title: "UNFIT Candidates",
@@ -33,7 +33,7 @@ export function StatCards({ stats }: StatCardsProps) {
       icon: UserX,
       color: "text-red-500",
       bgColor: "bg-red-500/10",
-      trend: "-2% from last week",
+      trend: stats.trends?.unfit || "Calculating...",
     },
     {
       title: "Processed Today",
@@ -41,7 +41,7 @@ export function StatCards({ stats }: StatCardsProps) {
       icon: Activity,
       color: "text-amber-500",
       bgColor: "bg-amber-500/10",
-      trend: "Real-time updates",
+      trend: stats.trends?.processedToday || "Real-time updates",
     },
     {
       title: "Active DCMs",
@@ -49,7 +49,7 @@ export function StatCards({ stats }: StatCardsProps) {
       icon: Building2,
       color: "text-purple-500",
       bgColor: "bg-purple-500/10",
-      trend: "across 2 platforms",
+      trend: stats.trends?.activeDCMs || "across platforms",
     },
   ];
 

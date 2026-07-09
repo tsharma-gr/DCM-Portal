@@ -61,75 +61,87 @@ export default function ProfilePage() {
     <div className="flex flex-col space-y-6 animate-in fade-in duration-500 max-w-4xl">
 
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="col-span-2">
-          <Card className="bg-card/50 backdrop-blur border-border/50">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <User className="h-5 w-5 text-primary" />
-                <CardTitle>Personal Details</CardTitle>
+          <Card className="bg-white/60 backdrop-blur-xl border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300">
+            <CardHeader className="border-b border-black/5 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[var(--violet-glow)] flex items-center justify-center text-[var(--violet)]">
+                  <User className="h-4 w-4" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold text-[var(--ink)]">Personal Details</CardTitle>
+                  <CardDescription className="text-xs mt-0.5">Update your name and basic information.</CardDescription>
+                </div>
               </div>
-              <CardDescription>Update your name and basic information.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-4">
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="bg-background" />
+                <div className="space-y-1.5">
+                  <Label htmlFor="firstName" className="text-[12px] font-semibold text-slate-600">First Name</Label>
+                  <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="bg-white/50 border-black/5 focus:bg-white focus:border-[var(--violet)] focus:ring-[var(--violet-glow)] h-9 rounded-lg transition-all text-[13px]" />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} className="bg-background" />
+                <div className="space-y-1.5">
+                  <Label htmlFor="lastName" className="text-[12px] font-semibold text-slate-600">Last Name</Label>
+                  <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} className="bg-white/50 border-black/5 focus:bg-white focus:border-[var(--violet)] focus:ring-[var(--violet-glow)] h-9 rounded-lg transition-all text-[13px]" />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="title">Job Title</Label>
-                <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="bg-background" />
+              <div className="space-y-1.5">
+                <Label htmlFor="title" className="text-[12px] font-semibold text-slate-600">Job Title</Label>
+                <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="bg-white/50 border-black/5 focus:bg-white focus:border-[var(--violet)] focus:ring-[var(--violet-glow)] h-9 rounded-lg transition-all text-[13px]" />
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
-          <Card className="bg-card/50 backdrop-blur border-border/50 h-full">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Mail className="h-5 w-5 text-primary" />
-                <CardTitle>Contact Info</CardTitle>
+          <Card className="bg-white/60 backdrop-blur-xl border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 h-full">
+            <CardHeader className="border-b border-black/5 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-600">
+                  <Mail className="h-4 w-4" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold text-[var(--ink)]">Contact Info</CardTitle>
+                  <CardDescription className="text-xs mt-0.5">Where you receive notifications.</CardDescription>
+                </div>
               </div>
-              <CardDescription>Where you receive notifications.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input id="email" value={email || ""} disabled className="bg-muted/50" />
-                <p className="text-xs text-muted-foreground">Email changes require re-verification.</p>
+            <CardContent className="space-y-4 pt-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-[12px] font-semibold text-slate-600">Email Address</Label>
+                <Input id="email" value={email || ""} disabled className="bg-black/5 border-black/5 text-slate-500 h-9 rounded-lg text-[13px]" />
+                <p className="text-[11px] text-slate-400 mt-1">Email changes require re-verification.</p>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 (555) 000-0000" className="bg-background" />
+              <div className="space-y-1.5">
+                <Label htmlFor="phone" className="text-[12px] font-semibold text-slate-600">Phone Number</Label>
+                <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 (555) 000-0000" className="bg-white/50 border-black/5 focus:bg-white focus:border-[var(--violet)] focus:ring-[var(--violet-glow)] h-9 rounded-lg transition-all text-[13px]" />
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 }}>
-          <Card className="bg-card/50 backdrop-blur border-border/50 h-full">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Building className="h-5 w-5 text-primary" />
-                <CardTitle>Company Details</CardTitle>
+          <Card className="bg-white/60 backdrop-blur-xl border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 h-full">
+            <CardHeader className="border-b border-black/5 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-600">
+                  <Building className="h-4 w-4" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold text-[var(--ink)]">Company Details</CardTitle>
+                  <CardDescription className="text-xs mt-0.5">Your organization information.</CardDescription>
+                </div>
               </div>
-              <CardDescription>Your organization information.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="company">Company Name</Label>
-                <Input id="company" value={company} onChange={(e) => setCompany(e.target.value)} className="bg-background" />
+            <CardContent className="space-y-4 pt-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="company" className="text-[12px] font-semibold text-slate-600">Company Name</Label>
+                <Input id="company" value={company} onChange={(e) => setCompany(e.target.value)} className="bg-white/50 border-black/5 focus:bg-white focus:border-[var(--violet)] focus:ring-[var(--violet-glow)] h-9 rounded-lg transition-all text-[13px]" />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="department">Department</Label>
-                <Input id="department" value={department} onChange={(e) => setDepartment(e.target.value)} className="bg-background" />
+              <div className="space-y-1.5">
+                <Label htmlFor="department" className="text-[12px] font-semibold text-slate-600">Department</Label>
+                <Input id="department" value={department} onChange={(e) => setDepartment(e.target.value)} className="bg-white/50 border-black/5 focus:bg-white focus:border-[var(--violet)] focus:ring-[var(--violet-glow)] h-9 rounded-lg transition-all text-[13px]" />
               </div>
             </CardContent>
           </Card>
@@ -140,13 +152,17 @@ export default function ProfilePage() {
         initial={{ opacity: 0 }} 
         animate={{ opacity: 1 }} 
         transition={{ duration: 0.3, delay: 0.3 }}
-        className="flex justify-end pt-4"
+        className="flex justify-end pt-2 pb-6"
       >
-        <Button onClick={handleSave} disabled={isSaving} className="gap-2 w-32 bg-primary text-primary-foreground hover:bg-primary/90 transition-all">
+        <Button 
+          onClick={handleSave} 
+          disabled={isSaving} 
+          className="gap-2 px-6 h-10 rounded-lg bg-[var(--violet)] text-white hover:bg-indigo-600 shadow-[0_4px_14px_0_rgba(124,58,237,0.39)] hover:shadow-[0_6px_20px_rgba(124,58,237,0.23)] hover:-translate-y-0.5 transition-all duration-200 font-bold text-[13px]"
+        >
           {isSaving ? (
             "Saving..."
           ) : isSaved ? (
-            "Saved!"
+            "Saved Successfully!"
           ) : (
             <>
               <Save className="h-4 w-4" />

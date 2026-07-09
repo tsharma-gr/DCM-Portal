@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { User, Search } from "lucide-react";
+import { User, Search, Settings, LogOut } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -92,25 +92,23 @@ export function Header() {
     <header className="flex min-h-[72px] shrink-0 items-start justify-between bg-transparent px-8 pt-8 pb-2 print:hidden">
       <div className="flex flex-col flex-1 gap-1">
         {pathname === "/" ? (
-          <div>
-            <h1 className="text-3xl font-bold font-heading tracking-tight text-[var(--ink)] flex items-center gap-3 mb-1">
+          <div className="animate-in slide-in-from-left-2 duration-700 ease-out">
+            <h1 className="text-3xl font-extrabold font-heading tracking-tight mb-1 bg-gradient-to-r from-[var(--ink)] via-[var(--violet)] to-[var(--ink)] bg-clip-text text-transparent">
               Dashboard Overview
-              <div className="flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-emerald-600 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 shadow-sm">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                SYSTEM ONLINE
-              </div>
             </h1>
-            <p className="text-sm text-muted-foreground mb-2 max-w-xl">
-              Welcome back to TalentVerse AI. Monitor your recruitment pipeline, analyze AI candidate metrics, and track your active DCMs in real-time.
+            <p className="text-sm font-medium text-slate-500 mb-2 max-w-xl">
+              Welcome back to TalentVerse AI.
             </p>
           </div>
         ) : pathname === "/bot-status" ? (
           <div /> 
         ) : (
-          <>
-            <h1 className="text-3xl font-bold font-heading text-[var(--ink)] tracking-tight">{pageTitle}</h1>
-            <p className="text-sm text-muted-foreground mb-2">{pageSubtitle}</p>
-          </>
+          <div className="animate-in slide-in-from-left-2 duration-700 ease-out">
+            <h1 className="text-3xl font-extrabold font-heading tracking-tight mb-1 bg-gradient-to-r from-[var(--ink)] via-[var(--violet)] to-[var(--ink)] bg-clip-text text-transparent">
+              {pageTitle}
+            </h1>
+            <p className="text-sm font-medium text-slate-500 mb-2">{pageSubtitle}</p>
+          </div>
         )}
         
         {pathname.includes("/candidates") && (
@@ -128,14 +126,14 @@ export function Header() {
       </div>
       
       <div className="flex items-center gap-6 mt-1">
-      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-5">
         <button 
           onClick={() => router.push('/bot-status')}
-          className="flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all text-[13px] font-bold border border-indigo-100 shadow-sm"
+          className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 hover:bg-emerald-500/20 hover:border-emerald-500/30 transition-all duration-300 text-[12.5px] font-bold shadow-[0_0_12px_rgba(16,185,129,0.15)] hover:shadow-[0_0_20px_rgba(16,185,129,0.25)]"
         >
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 duration-1000"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
           </span>
           Live Bot Status
         </button>
@@ -143,29 +141,32 @@ export function Header() {
           <DropdownMenuTrigger className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--violet)] to-[#EC4899] text-white font-semibold text-[13px] shadow-[0_4px_10px_var(--violet-glow)] hover:opacity-90 transition-opacity focus:outline-none">
             {initials || <User className="h-4 w-4 text-white/80" />}
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-60 bg-card/80 backdrop-blur-xl border-border/50 shadow-[0_8px_30px_rgba(0,0,0,0.12)] p-2 rounded-[16px] overflow-hidden mt-2" align="end">
+          <DropdownMenuContent className="w-56 bg-white border border-slate-200 shadow-xl p-1.5 rounded-[12px] overflow-hidden mt-2" align="end">
             <DropdownMenuGroup>
-              <DropdownMenuLabel className="font-normal px-3 pt-2 pb-3">
-                <div className="flex flex-col space-y-1.5">
-                  <p className="text-[14.5px] font-bold tracking-wide text-foreground leading-none">{userName}</p>
-                  <p className="text-[12px] font-medium leading-none text-muted-foreground truncate">
+              <DropdownMenuLabel className="font-normal px-2.5 pt-2 pb-2.5">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-[13.5px] font-bold text-slate-900 tracking-tight">{userName}</p>
+                  <p className="text-[12px] font-medium text-slate-500 truncate">
                     {userEmail}
                   </p>
                 </div>
               </DropdownMenuLabel>
             </DropdownMenuGroup>
-            <DropdownMenuSeparator className="bg-border/50 mx-2" />
-            <DropdownMenuGroup className="px-1 py-1">
-              <DropdownMenuItem className="cursor-pointer font-semibold text-[13px] rounded-lg py-2.5 px-3 mb-1 transition-all focus:bg-[var(--violet)]/15 focus:text-[var(--violet)] hover:pl-4" onClick={() => router.push('/profile')}>
+            <DropdownMenuSeparator className="bg-slate-100 mx-1 mb-1" />
+            <DropdownMenuGroup className="px-1">
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-2.5 font-medium text-[13px] text-slate-700 rounded-md py-2 px-2.5 mb-0.5 transition-colors hover:bg-slate-100 hover:text-slate-900 focus:bg-slate-100 focus:text-slate-900" onClick={() => router.push('/profile')}>
+                <User className="h-4 w-4 text-slate-400" />
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer font-semibold text-[13px] rounded-lg py-2.5 px-3 transition-all focus:bg-[var(--violet)]/15 focus:text-[var(--violet)] hover:pl-4" onClick={() => router.push('/settings')}>
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-2.5 font-medium text-[13px] text-slate-700 rounded-md py-2 px-2.5 transition-colors hover:bg-slate-100 hover:text-slate-900 focus:bg-slate-100 focus:text-slate-900" onClick={() => router.push('/settings')}>
+                <Settings className="h-4 w-4 text-slate-400" />
                 Settings
               </DropdownMenuItem>
             </DropdownMenuGroup>
-            <DropdownMenuSeparator className="bg-border/50 mx-2" />
-            <div className="px-1 pt-1 pb-0.5">
-              <DropdownMenuItem className="cursor-pointer font-bold text-[13px] rounded-lg py-2.5 px-3 text-red-500 transition-all focus:bg-red-500/15 focus:text-red-500 hover:pl-4" onClick={handleLogout}>
+            <DropdownMenuSeparator className="bg-slate-100 mx-1 my-1" />
+            <div className="px-1 pb-1">
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-2.5 font-medium text-[13px] text-red-600 rounded-md py-2 px-2.5 transition-colors hover:bg-red-50 hover:text-red-700 focus:bg-red-50 focus:text-red-700" onClick={handleLogout}>
+                <LogOut className="h-4 w-4 text-red-500/70" />
                 Log out
               </DropdownMenuItem>
             </div>

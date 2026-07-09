@@ -549,7 +549,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
         transition={{ duration: 0.3 }}
         className="bg-card border border-border rounded-[16px] overflow-hidden shadow-[0_1px_2px_rgba(20,15,50,0.03)] flex flex-col"
       >
-        <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-300px)]">
+        <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-330px)] custom-scrollbar">
           <table className="w-full border-collapse">
             <thead>
               <tr>

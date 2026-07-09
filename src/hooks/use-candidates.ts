@@ -29,6 +29,42 @@ export function useDashboardData() {
         const uniqueDCMs = new Set(chart.filter(c => c.dcm_type && c.dcm_type !== "N/A" && c.dcm_type !== "Unknown").map(c => c.dcm_type));
         statsData.activeDCMs = uniqueDCMs.size;
         
+        // Calculate dynamic trends
+        const now = new Date();
+        const oneMonthAgo = new Date(now);
+        oneMonthAgo.setMonth(now.getMonth() - 1);
+        const twoMonthsAgo = new Date(now);
+        twoMonthsAgo.setMonth(now.getMonth() - 2);
+
+        const oneWeekAgo = new Date(now);
+        oneWeekAgo.setDate(now.getDate() - 7);
+        const twoWeeksAgo = new Date(now);
+        twoWeeksAgo.setDate(now.getDate() - 14);
+
+        const parseDate = (d: string | null | undefined) => d ? new Date(d).getTime() : 0;
+
+        const candidatesThisMonth = chart.filter(c => parseDate(c.processed_timestamp) >= oneMonthAgo.getTime()).length;
+        const candidatesLastMonth = chart.filter(c => parseDate(c.processed_timestamp) >= twoMonthsAgo.getTime() && parseDate(c.processed_timestamp) < oneMonthAgo.getTime()).length;
+        const totalTrendVal = candidatesLastMonth === 0 ? 0 : Math.round(((candidatesThisMonth - candidatesLastMonth) / candidatesLastMonth) * 100);
+
+        const fitThisWeek = chart.filter(c => c.classification === "FIT" && parseDate(c.processed_timestamp) >= oneWeekAgo.getTime()).length;
+        const fitLastWeek = chart.filter(c => c.classification === "FIT" && parseDate(c.processed_timestamp) >= twoWeeksAgo.getTime() && parseDate(c.processed_timestamp) < oneWeekAgo.getTime()).length;
+        const fitTrendVal = fitLastWeek === 0 ? 0 : Math.round(((fitThisWeek - fitLastWeek) / fitLastWeek) * 100);
+
+        const unfitThisWeek = chart.filter(c => c.classification === "UNFIT" && parseDate(c.processed_timestamp) >= oneWeekAgo.getTime()).length;
+        const unfitLastWeek = chart.filter(c => c.classification === "UNFIT" && parseDate(c.processed_timestamp) >= twoWeeksAgo.getTime() && parseDate(c.processed_timestamp) < oneWeekAgo.getTime()).length;
+        const unfitTrendVal = unfitLastWeek === 0 ? 0 : Math.round(((unfitThisWeek - unfitLastWeek) / unfitLastWeek) * 100);
+
+        const uniquePlatforms = new Set(chart.filter(c => c.platform_name && c.platform_name !== "N/A" && c.platform_name !== "Unknown").map(c => c.platform_name));
+
+        statsData.trends = {
+          total: `${totalTrendVal > 0 ? '+' : ''}${totalTrendVal}% from last month`,
+          fit: `${fitTrendVal > 0 ? '+' : ''}${fitTrendVal}% from last week`,
+          unfit: `${unfitTrendVal > 0 ? '+' : ''}${unfitTrendVal}% from last week`,
+          processedToday: "Real-time updates",
+          activeDCMs: `across ${uniquePlatforms.size} platform${uniquePlatforms.size !== 1 ? 's' : ''}`
+        };
+        
         dashboardCache = { stats: statsData, chartData: chart, recentCandidates: recent };
 
         if (mounted) {
