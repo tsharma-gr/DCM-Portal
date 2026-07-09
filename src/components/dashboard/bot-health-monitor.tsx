@@ -49,7 +49,7 @@ export function BotHealthMonitor({ stats }: BotHealthMonitorProps) {
           <div className="bg-slate-50 border border-slate-100 rounded-[12px] p-4 flex flex-col gap-3">
             <div className="flex justify-between items-end">
               <div className="flex flex-col">
-                <span className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Today's Extraction</span>
+                <span className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Today&apos;s Extraction</span>
                 <span className="text-2xl font-bold text-[var(--ink)] tracking-tight">
                   {todayExtracted.toLocaleString()} <span className="text-sm text-slate-400 font-normal">/ {todaysTarget.toLocaleString()} CVs</span>
                 </span>

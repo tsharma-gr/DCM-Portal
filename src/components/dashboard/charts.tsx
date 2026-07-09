@@ -17,7 +17,6 @@ import {
   Area,
   Legend,
   CartesianGrid,
-  Treemap,
 } from "recharts";
 import { motion } from "framer-motion";
 

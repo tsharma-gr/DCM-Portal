@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Candidate } from "@/types/candidate";
 import { motion } from "framer-motion";
-import { AlertCircle, MapPin, ChevronRight } from "lucide-react";
+import { AlertCircle, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 interface ActionRequiredQueueProps {

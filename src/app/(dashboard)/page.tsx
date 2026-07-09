@@ -7,7 +7,7 @@ import DashboardLoading from "./loading";
 import { Suspense } from "react";
 
 function DashboardContent() {
-  const { stats, chartData, recentCandidates, isLoading } = useDashboardData();
+  const { stats, chartData, isLoading } = useDashboardData();
 
   if (isLoading || !stats) {
     return <DashboardLoading />;
