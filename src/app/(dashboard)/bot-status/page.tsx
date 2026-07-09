@@ -68,20 +68,23 @@ export default function BotStatusPage() {
 
         if (error) throw error;
 
-        const statsMap: Record<string, { count: number, latestTs: number }> = {};
+        const statsMap: Record<string, { count: number, earliestTs: number, latestTs: number }> = {};
         let total = 0;
 
         if (data) {
           total = data.length;
           data.forEach(row => {
             if (!statsMap[row.dcm_type]) {
-              statsMap[row.dcm_type] = { count: 0, latestTs: 0 };
+              statsMap[row.dcm_type] = { count: 0, earliestTs: Infinity, latestTs: 0 };
             }
             statsMap[row.dcm_type].count += 1;
             
             const rowTs = new Date(row.processed_timestamp).getTime();
             if (rowTs > statsMap[row.dcm_type].latestTs) {
               statsMap[row.dcm_type].latestTs = rowTs;
+            }
+            if (rowTs < statsMap[row.dcm_type].earliestTs) {
+              statsMap[row.dcm_type].earliestTs = rowTs;
             }
           });
         }
@@ -105,7 +108,13 @@ export default function BotStatusPage() {
               status = "running";
             }
 
-            const timeLabel = `Latest: ${new Date(stats.latestTs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            const formatTime = (ts: number) => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            const latestStr = formatTime(stats.latestTs);
+            const startStr = formatTime(stats.earliestTs);
+            const endStr = status === "running" ? "Running" : formatTime(stats.latestTs);
+            
+            const timeLabel = `Latest: ${latestStr} | Start: ${startStr} | End: ${endStr}`;
 
             return {
               name: bot.name,
