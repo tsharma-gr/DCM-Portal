@@ -17,7 +17,6 @@ import {
   ChevronRight,
   List,
   Flame,
-  Activity,
 } from "lucide-react";
 
 const mainNavItems = [

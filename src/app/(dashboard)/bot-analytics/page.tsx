@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Activity, Clock, Calendar, Database, Server, Loader2, ArrowRight } from "lucide-react";
+import { motion, Variants } from "framer-motion";
+import { Activity, Clock, Calendar, Server, Loader2 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { cn } from "@/lib/utils";
 
-const containerVariants: any = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -14,7 +14,7 @@ const containerVariants: any = {
   }
 };
 
-const itemVariants: any = {
+const itemVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
   visible: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 300, damping: 24 } }
 };
@@ -57,7 +57,7 @@ export default function BotAnalyticsPage() {
         startDate.setHours(0, 0, 0, 0);
         const startIso = startDate.toISOString();
 
-        const allData: any[] = [];
+        const allData: { dcm_type: string; processed_timestamp: string }[] = [];
         let from = 0;
         const step = 1000;
         
@@ -250,7 +250,7 @@ export default function BotAnalyticsPage() {
           </div>
         ) : (
           <div className="space-y-10">
-            {dailyStats.map((day, index) => (
+            {dailyStats.map((day) => (
               <motion.div 
                 key={day.dateStr} 
                 variants={itemVariants}
