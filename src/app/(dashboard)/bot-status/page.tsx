@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Activity, CheckCircle2, Loader2, Clock, Server, Globe2, ShieldCheck, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/client";
+import Link from "next/link";
 
 const QUEUE1_CONFIG = [
   { name: "Exterior DCM", dcmType: "Exterior" },
@@ -232,16 +233,15 @@ export default function BotStatusPage() {
             </h1>
             <p className="text-[14px] text-slate-500 mt-2 font-medium tracking-wide">Monitor real-time candidate scraping operations running on your VPS.</p>
           </div>
-          <motion.div 
-            whileHover={{ scale: 1.05 }}
-            className="flex items-center gap-3 px-5 py-2.5 bg-emerald-50 border border-emerald-100 rounded-full shadow-sm relative z-10 cursor-default"
-          >
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-            </span>
-            <span className="text-emerald-700 font-bold text-[13px] tracking-wider uppercase">All Systems Operational</span>
-          </motion.div>
+          <Link href="/bot-analytics">
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              className="flex items-center gap-2.5 px-6 py-3 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-200 rounded-full shadow-sm relative z-10 cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-colors"
+            >
+              <Activity className="w-4 h-4 text-blue-600" />
+              <span className="text-blue-700 font-bold text-[13px] tracking-wider uppercase">View Historical Analytics</span>
+            </motion.div>
+          </Link>
         </motion.div>
 
         {/* Global Stats Cards */}
