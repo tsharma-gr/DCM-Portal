@@ -14,6 +14,7 @@ const QUEUE1_CONFIG = [
   { name: "Consultancy DCM", dcmType: "Consultancy Civil & Structural" },
   { name: "Demolition DCM", dcmType: "Demolition" },
   { name: "Bid DCM", dcmType: "BID" },
+  { name: "Health & Safety DCM", dcmType: "Health & Safety" },
 ];
 
 const QUEUE2_CONFIG = [
@@ -22,7 +23,6 @@ const QUEUE2_CONFIG = [
   { name: "Scaffolding DCM", dcmType: "Scaffolding" },
   { name: "Temporary Works DCM", dcmType: "Temporary Works Design" },
   { name: "Estimator DCM", dcmType: "Estimator" },
-  { name: "Health & Safety DCM", dcmType: "Health & Safety" },
   { name: "Waste Management DCM", dcmType: "Waste Management / Recycling" },
 ];
 
