@@ -100,7 +100,7 @@ export function Header() {
               Welcome back to TalentVerse AI.
             </p>
           </div>
-        ) : pathname === "/bot-status" ? (
+        ) : pathname === "/bot-status" || pathname === "/bot-analytics" ? (
           <div /> 
         ) : (
           <div className="animate-in slide-in-from-left-2 duration-700 ease-out">
