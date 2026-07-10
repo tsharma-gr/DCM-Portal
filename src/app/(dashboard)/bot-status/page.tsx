@@ -22,6 +22,8 @@ const QUEUE2_CONFIG = [
   { name: "Scaffolding DCM", dcmType: "Scaffolding" },
   { name: "Temporary Works DCM", dcmType: "Temporary Works Design" },
   { name: "Estimator DCM", dcmType: "Estimator" },
+  { name: "Health & Safety DCM", dcmType: "Health & Safety" },
+  { name: "Waste Management DCM", dcmType: "Waste Management / Recycling" },
 ];
 
 type BotStatusData = {

@@ -36,6 +36,8 @@ const dcmNavItems = [
   { title: "Demolition DCM", href: "/candidates?dcmType=Demolition", icon: Building },
   { title: "Passive Fire DCM", href: "/candidates?dcmType=Passive+Fire+Protection", icon: Flame },
   { title: "Civil & Structural DCM", href: "/candidates?dcmType=Consultancy+Civil+%26+Structural", icon: Building },
+  { title: "Health & Safety DCM", href: "/candidates?dcmType=Health+%26+Safety", icon: Building },
+  { title: "Waste Management DCM", href: "/candidates?dcmType=Waste+Management+%2F+Recycling", icon: Building },
 ];
 
 const bottomNavItems = [
