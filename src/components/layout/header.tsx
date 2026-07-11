@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { User, Search, Settings, LogOut } from "lucide-react";
+import { User, Search, Settings, LogOut, Globe } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,

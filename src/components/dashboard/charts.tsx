@@ -86,7 +86,7 @@ export function DashboardCharts({ data }: ChartsProps) {
 
     return Object.values(days).map(d => ({
       ...d,
-      date: new Date(d.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+      date: new Date(d.date).toLocaleDateString('en-GB', { month: 'short', day: 'numeric', timeZone: 'Europe/London' })
     }));
   }, [data]);
 

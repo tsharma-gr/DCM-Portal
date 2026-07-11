@@ -91,7 +91,7 @@ export default function BotAnalyticsPage() {
             const row = allData[i];
             if (!row.processed_timestamp) continue;
             const ts = new Date(row.processed_timestamp);
-            const dateStr = ts.toLocaleDateString("en-US", { weekday: 'short', month: 'short', day: 'numeric' });
+            const dateStr = ts.toLocaleDateString("en-GB", { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'Europe/London' });
             const rowTime = ts.getTime();
 
             if (!groupedByDate[dateStr]) groupedByDate[dateStr] = {};
@@ -172,7 +172,7 @@ export default function BotAnalyticsPage() {
 
   const formatTime = (ts: number) => {
     if (!ts || ts === Infinity) return "--:--";
-    return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return new Date(ts).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London' });
   };
 
   const formatDuration = (ms: number) => {

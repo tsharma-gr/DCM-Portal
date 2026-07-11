@@ -653,16 +653,18 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
                         {candidate.processed_timestamp ? (
                           <div className="flex flex-col space-y-0.5">
                             <span className="text-[13px] font-medium text-[var(--ink)]">
-                              {new Date(candidate.processed_timestamp).toLocaleDateString(undefined, {
+                              {new Date(candidate.processed_timestamp).toLocaleDateString('en-GB', {
                                 day: 'numeric',
                                 month: 'short',
-                                year: 'numeric'
+                                year: 'numeric',
+                                timeZone: 'Europe/London'
                               })}
                             </span>
                             <span className="text-[11.5px] font-mono text-muted-foreground uppercase tracking-wider">
-                              {new Date(candidate.processed_timestamp).toLocaleTimeString(undefined, {
+                              {new Date(candidate.processed_timestamp).toLocaleTimeString('en-GB', {
                                 hour: 'numeric',
-                                minute: '2-digit'
+                                minute: '2-digit',
+                                timeZone: 'Europe/London'
                               })}
                             </span>
                           </div>

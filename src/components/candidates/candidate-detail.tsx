@@ -413,12 +413,13 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
                   <div className="flex items-center gap-3 text-sm">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span>
-                      Processed on {new Date(candidate.processed_timestamp).toLocaleString(undefined, {
+                      Processed on {new Date(candidate.processed_timestamp).toLocaleString('en-GB', {
                         month: 'long',
                         day: 'numeric',
                         year: 'numeric',
                         hour: '2-digit',
-                        minute: '2-digit'
+                        minute: '2-digit',
+                        timeZone: 'Europe/London'
                       })}
                     </span>
                   </div>
@@ -524,7 +525,7 @@ export function CandidateDetail({ candidate, comments: initialComments, currentU
                             <div className="flex items-center gap-2">
                               <span className="text-xs flex items-center text-muted-foreground">
                                 <Clock className="h-3 w-3 mr-1" />
-                                {new Date(comment.created_at).toLocaleString()}
+                                {new Date(comment.created_at).toLocaleString('en-GB', { timeZone: 'Europe/London' })}
                               </span>
                               {comment.author_email === currentUserEmail && editingCommentId !== comment.id && (
                                 <div className="flex items-center">
