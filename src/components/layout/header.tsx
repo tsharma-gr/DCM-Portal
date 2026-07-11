@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { User, Search, Settings, LogOut, Globe, Menu } from "lucide-react";
+import { User, Search, Settings, LogOut, Menu } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +23,7 @@ export function Header() {
   const supabase = createClient();
   const [userEmail, setUserEmail] = useState<string>("Loading...");
   const [userName, setUserName] = useState<string>("Loading...");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     async function fetchUser() {
@@ -35,6 +36,7 @@ export function Header() {
         setUserEmail("Not logged in");
         setUserName("Guest");
       }
+      setIsLoading(false);
     }
     fetchUser();
   }, [supabase]);
@@ -96,10 +98,8 @@ export function Header() {
         <div className="flex items-center gap-3">
           <div className="block lg:hidden">
             <Sheet>
-              <SheetTrigger asChild>
-                <button className="p-2 -ml-2 rounded-md hover:bg-slate-100 transition-colors text-slate-700">
-                  <Menu className="w-5 h-5" />
-                </button>
+              <SheetTrigger className="p-2 -ml-2 rounded-md hover:bg-slate-100 transition-colors text-slate-700 focus:outline-none focus:ring-2 focus:ring-[var(--violet-glow)]">
+                <Menu className="w-5 h-5" />
               </SheetTrigger>
               <SheetContent side="left" className="p-0 w-[250px] border-none">
                 <Sidebar />
