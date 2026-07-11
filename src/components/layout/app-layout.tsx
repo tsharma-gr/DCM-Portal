@@ -11,7 +11,7 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="flex min-h-screen bg-background">
-      <div className="sticky top-0 h-screen shrink-0 z-50">
+      <div className="hidden lg:block sticky top-0 h-screen shrink-0 z-50">
         <Suspense fallback={<div className="w-[250px] h-full bg-card" />}>
           <Sidebar />
         </Suspense>
@@ -22,7 +22,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             <Header />
           </Suspense>
         </div>
-        <main className="flex-1 px-8 pt-2 pb-6 bg-muted/10 overflow-y-auto">
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 pt-2 pb-6 bg-muted/10 overflow-y-auto">
           <div className="mx-auto w-full max-w-7xl">
             {children}
           </div>

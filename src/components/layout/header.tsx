@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { User, Search, Settings, LogOut, Globe } from "lucide-react";
+import { User, Search, Settings, LogOut, Globe, Menu } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +11,9 @@ import {
   DropdownMenuTrigger,
   DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
+import { Sidebar } from "@/components/layout/sidebar";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -89,30 +91,49 @@ export function Header() {
   }
 
   return (
-    <header className="flex min-h-[72px] shrink-0 items-start justify-between bg-transparent px-8 pt-8 pb-2 print:hidden">
+    <header className="flex min-h-[72px] shrink-0 flex-col sm:flex-row sm:items-start sm:justify-between gap-4 bg-transparent px-4 sm:px-6 lg:px-8 pt-8 pb-2 print:hidden">
       <div className="flex flex-col flex-1 gap-1">
-        {pathname === "/" ? (
-          <div className="animate-in slide-in-from-left-2 duration-700 ease-out">
-            <h1 className="text-3xl font-extrabold font-heading tracking-tight mb-1 bg-gradient-to-r from-[var(--ink)] via-[var(--violet)] to-[var(--ink)] bg-clip-text text-transparent">
-              Dashboard Overview
-            </h1>
-            <p className="text-sm font-medium text-slate-500 mb-2 max-w-xl">
-              Welcome back to TalentVerse AI.
-            </p>
+        <div className="flex items-center gap-3">
+          <div className="block lg:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <button className="p-2 -ml-2 rounded-md hover:bg-slate-100 transition-colors text-slate-700">
+                  <Menu className="w-5 h-5" />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="left" className="p-0 w-[250px] border-none">
+                <Sidebar />
+              </SheetContent>
+            </Sheet>
           </div>
-        ) : pathname === "/bot-status" || pathname === "/bot-analytics" ? (
-          <div /> 
-        ) : (
-          <div className="animate-in slide-in-from-left-2 duration-700 ease-out">
-            <h1 className="text-3xl font-extrabold font-heading tracking-tight mb-1 bg-gradient-to-r from-[var(--ink)] via-[var(--violet)] to-[var(--ink)] bg-clip-text text-transparent">
-              {pageTitle}
-            </h1>
-            <p className="text-sm font-medium text-slate-500 mb-2">{pageSubtitle}</p>
-          </div>
-        )}
+          {isLoading ? (
+            <div className="animate-pulse">
+              <div className="h-6 w-48 bg-slate-200 rounded mb-2"></div>
+              <div className="h-4 w-32 bg-slate-100 rounded"></div>
+            </div>
+          ) : pathname === "/" ? (
+            <div className="animate-in slide-in-from-left-2 duration-700 ease-out">
+              <h1 className="text-[26px] sm:text-3xl font-extrabold font-heading tracking-tight mb-1 bg-gradient-to-r from-[var(--ink)] via-[var(--violet)] to-[var(--ink)] bg-clip-text text-transparent leading-tight">
+                Good afternoon, {userName}
+              </h1>
+              <p className="text-sm font-medium text-slate-500 mb-2">
+                Welcome back to TalentVerse AI.
+              </p>
+            </div>
+          ) : pathname === "/bot-status" || pathname === "/bot-analytics" ? (
+            <div /> 
+          ) : (
+            <div className="animate-in slide-in-from-left-2 duration-700 ease-out">
+              <h1 className="text-[26px] sm:text-3xl font-extrabold font-heading tracking-tight mb-1 bg-gradient-to-r from-[var(--ink)] via-[var(--violet)] to-[var(--ink)] bg-clip-text text-transparent leading-tight">
+                {pageTitle}
+              </h1>
+              <p className="text-sm font-medium text-slate-500 mb-2">{pageSubtitle}</p>
+            </div>
+          )}
+        </div>
         
         {pathname.includes("/candidates") && (
-          <div className="relative w-[350px] mt-1">
+          <div className="relative w-full sm:w-[350px] mt-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input 
               type="text"

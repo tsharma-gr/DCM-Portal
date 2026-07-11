@@ -76,7 +76,7 @@ export default function ProfilePage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4 pt-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="firstName" className="text-[12px] font-semibold text-slate-600">First Name</Label>
                   <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="bg-white/50 border-black/5 focus:bg-white focus:border-[var(--violet)] focus:ring-[var(--violet-glow)] h-9 rounded-lg transition-all text-[13px]" />

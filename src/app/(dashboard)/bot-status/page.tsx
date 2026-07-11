@@ -229,11 +229,11 @@ export default function BotStatusPage() {
                   <Activity className="w-6 h-6" />
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--ink)] to-slate-500">
                   Live Server Status
                 </span>
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400/90 bg-slate-50/80 px-2.5 py-1 rounded-[6px] border border-slate-200/50 shadow-sm uppercase tracking-wider cursor-help mt-1" title="All times displayed in UK Time (GMT/BST)">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400/90 bg-slate-50/80 px-2.5 py-1 rounded-[6px] border border-slate-200/50 shadow-sm uppercase tracking-wider cursor-help mt-1 sm:mt-0" title="All times displayed in UK Time (GMT/BST)">
                   <Globe2 className="w-3 h-3 opacity-70" />
                   UK Time
                 </div>

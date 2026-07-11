@@ -55,8 +55,9 @@ export function ActionRequiredQueue({ candidates }: ActionRequiredQueueProps) {
         </CardHeader>
         <CardContent>
           <div className="bg-card border border-border rounded-[16px] overflow-hidden shadow-[0_1px_2px_rgba(20,15,50,0.03)] flex flex-col">
-            <Table>
-              <TableHeader>
+            <div className="overflow-x-auto w-full">
+              <Table className="w-full min-w-[500px]">
+                <TableHeader>
                 <TableRow className="hover:bg-transparent border-b-border">
                   <TableHead className="bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border h-auto">Candidate</TableHead>
                   <TableHead className="bg-[#FBFAFE] text-left text-[11.5px] font-semibold tracking-[0.05em] uppercase text-muted-foreground px-[18px] py-[14px] border-b border-border h-auto">Flag</TableHead>
@@ -102,6 +103,7 @@ export function ActionRequiredQueue({ candidates }: ActionRequiredQueueProps) {
                 )}
               </TableBody>
             </Table>
+            </div>
           </div>
         </CardContent>
       </Card>
