@@ -139,7 +139,7 @@ export default function BotStatusPage() {
               return bot as BotStatusData;
             }
 
-            const formatTime = (ts: number) => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const formatTime = (ts: number) => new Date(ts).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London' });
             const latestStr = formatTime(bot.lastTimestamp);
             const startStr = formatTime(bot.earliestTs);
             let endStr = bot.status === "running" ? "Running" : latestStr;
