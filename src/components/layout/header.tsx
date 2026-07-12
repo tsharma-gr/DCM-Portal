@@ -75,8 +75,18 @@ export function Header() {
     return () => clearTimeout(timeout);
   }, [searchQuery, pathname, router, searchParams]);
 
-  let pageTitle = "Overview";
-  let pageSubtitle = "Monitor your AI recruitment pipeline and candidate metrics.";
+  // Determine greeting based on UK time
+  const getGreeting = () => {
+    const ukTimeStr = new Date().toLocaleString('en-US', { timeZone: 'Europe/London', hour: 'numeric', hour12: false });
+    const hour = parseInt(ukTimeStr, 10);
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
+  const greeting = getGreeting();
+
+  let pageTitle = "Dashboard Overview";
+  let pageSubtitle = "Welcome back to TalentVerse AI.";
   
   if (pathname.includes("/candidates")) {
     pageTitle = "Candidates";
@@ -114,7 +124,7 @@ export function Header() {
           ) : pathname === "/" ? (
             <div className="animate-in slide-in-from-left-2 duration-700 ease-out">
               <h1 className="text-[26px] sm:text-3xl font-extrabold font-heading tracking-tight mb-1 bg-gradient-to-r from-[var(--ink)] via-[var(--violet)] to-[var(--ink)] bg-clip-text text-transparent leading-tight">
-                Good afternoon, {userName}
+                {greeting}, {userName}
               </h1>
               <p className="text-sm font-medium text-slate-500 mb-2">
                 Welcome back to TalentVerse AI.
