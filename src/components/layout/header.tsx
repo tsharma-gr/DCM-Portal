@@ -124,7 +124,7 @@ export function Header() {
           ) : pathname === "/" ? (
             <div className="animate-in slide-in-from-left-2 duration-700 ease-out">
               <h1 className="text-[26px] sm:text-3xl font-extrabold font-heading tracking-tight mb-1 bg-gradient-to-r from-[var(--ink)] via-[var(--violet)] to-[var(--ink)] bg-clip-text text-transparent leading-tight">
-                {greeting}, {userName}
+                {greeting}, {userName.charAt(0).toUpperCase() + userName.slice(1)}
               </h1>
               <p className="text-sm font-medium text-slate-500 mb-2">
                 Welcome back to TalentVerse AI.
