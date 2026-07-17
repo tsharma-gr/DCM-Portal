@@ -45,8 +45,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, message: stdout.trim() });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('VPS Control Error:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    const errMessage = error instanceof Error ? error.message : 'Internal Server Error';
+    return NextResponse.json({ error: errMessage }, { status: 500 });
   }
 }
