@@ -22,9 +22,9 @@ const QUEUE2_CONFIG = [
   { name: "Windows & Doors DCM", dcmType: "Windows and Doors" },
   { name: "Scaffolding DCM", dcmType: "Scaffolding" },
   { name: "Temporary Works DCM", dcmType: "Temporary Works Design" },
+  { name: "Firesec DCM", dcmType: "Firesec" },
   { name: "Estimator DCM", dcmType: "Estimator" },
   { name: "Waste Management DCM", dcmType: "Waste Management / Recycling" },
-  { name: "Firesec DCM", dcmType: "Firesec" },
 ];
 
 type BotStatusData = {
