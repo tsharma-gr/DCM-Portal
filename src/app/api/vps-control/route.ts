@@ -18,7 +18,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
 
-    const vpsUrl = "http://139.59.191.27:8000";
+    const vpsUrl = "https://139-59-191-27.nip.io";
 
     const response = await fetch(vpsUrl, {
       method: "POST",
