@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
-import { exec } from 'child_process';
-import { promisify } from 'util';
 
-const execAsync = promisify(exec);
+const SECRET_TOKEN = "tv_queue_master_secret_2026_xyz987";
 
 export async function POST(request: Request) {
   try {
@@ -20,30 +18,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
 
-    const scriptName = `${queue}_scheduler.py`;
-    const signal = action === 'pause' ? 'STOP' : 'CONT';
+    const vpsUrl = "http://139.59.191.27:8000";
 
-    // We find the scheduler PID, then send the signal to it AND its child processes (main.py)
-    const bashCommand = `
-      PID=$(pgrep -f '${scriptName}')
-      if [ -n "$PID" ]; then
-        kill -${signal} $PID
-        pkill -${signal} -P $PID
-        echo "Success"
-      else
-        echo "Scheduler not found"
-      fi
-    `;
+    const response = await fetch(vpsUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${SECRET_TOKEN}`
+      },
+      body: JSON.stringify({ queue, action }),
+      cache: "no-store"
+    });
 
-    const sshCommand = `ssh -o StrictHostKeyChecking=no root@139.59.191.27 "${bashCommand.replace(/\n/g, ' ')}"`;
+    const data = await response.json();
 
-    const { stdout, stderr } = await execAsync(sshCommand);
-
-    if (stderr && !stderr.includes('Warning')) {
-      console.error('SSH Stderr:', stderr);
+    if (!response.ok) {
+      console.error('VPS Listener Error:', data);
+      return NextResponse.json({ error: data.error || 'Failed to communicate with VPS' }, { status: response.status });
     }
 
-    return NextResponse.json({ success: true, message: stdout.trim() });
+    return NextResponse.json({ success: true, message: data.message || "Success" });
 
   } catch (error: unknown) {
     console.error('VPS Control Error:', error);
