@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { User, Shield, Moon, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
+import { AutomationSection } from "@/components/settings/automation-section";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -53,6 +54,14 @@ export default function SettingsPage() {
                 <Label htmlFor="role">Account Role</Label>
                 <Input id="role" value="Super Administrator" readOnly className="bg-muted/50 max-w-md" />
               </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.05 }}>
+          <Card className="bg-card/50 backdrop-blur border-border/50">
+            <CardContent className="pt-6">
+              <AutomationSection />
             </CardContent>
           </Card>
         </motion.div>
