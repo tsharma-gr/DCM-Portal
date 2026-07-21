@@ -17,6 +17,7 @@ import {
   ChevronRight,
   List,
   Flame,
+  Target,
 } from "lucide-react";
 
 const mainNavItems = [
@@ -40,6 +41,10 @@ const dcmNavItems = [
   { title: "Waste Management DCM", href: "/candidates?dcmType=Waste+Management+%2F+Recycling", icon: Building },
   { title: "Firesec DCM", href: "/candidates?dcmType=Firesec", icon: Flame },
   { title: "Catering DCM", href: "/candidates?dcmType=Catering", icon: Building },
+];
+
+const companyTargetingNavItems = [
+  { title: "Firesec Company Targeter", href: "/candidates?dcmType=Firesec+Company+Targeter", icon: Target },
 ];
 
 const bottomNavItems = [
@@ -148,6 +153,35 @@ function SidebarContent() {
             )}
           </AnimatePresence>
         </nav>
+
+        <div className="mb-1 mt-4">
+          <p className="text-[11px] font-semibold tracking-[0.08em] text-slate-500 px-2.5 pt-3.5 pb-2 uppercase">
+            COMPANY TARGETING
+          </p>
+          <div className="flex flex-col ml-[21px] pl-4 border-l border-slate-700/50 mt-1 pb-4">
+            {companyTargetingNavItems.map((item) => {
+              const itemDcmType = new URL(item.href, "http://localhost").searchParams.get("dcmType");
+              const isActive = pathname === "/candidates" && currentDcmType === itemDcmType;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  prefetch={true}
+                  className={cn(
+                    "flex items-center gap-2.5 px-3 py-2 rounded-[8px] text-[13.5px] font-medium transition-all mb-1 relative",
+                    isActive 
+                      ? "text-white" 
+                      : "text-slate-400 hover:text-slate-200"
+                  )}
+                >
+                  {isActive && <div className="absolute left-[-17px] top-1/2 -translate-y-1/2 w-[2px] h-[16px] bg-[#9353F5] rounded-r-full" />}
+                  <item.icon className={cn("w-[16px] text-center", isActive ? "opacity-100 text-[#9353F5]" : "opacity-60")} />
+                  {item.title}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       <div className="mt-auto pt-2.5 border-t border-slate-800">
