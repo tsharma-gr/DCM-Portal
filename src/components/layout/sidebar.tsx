@@ -155,9 +155,6 @@ function SidebarContent() {
           </AnimatePresence>
 
           <div className="mt-4 mb-1">
-            <p className="text-[11px] font-semibold tracking-[0.08em] text-slate-500 px-2.5 pt-3.5 pb-2 uppercase">
-              COMPANY TARGETING
-            </p>
             <button 
               onClick={() => setIsCompanyTargetingOpen(!isCompanyTargetingOpen)}
               className="flex items-center justify-between w-full px-3 py-2.5 rounded-[10px] text-[14px] font-medium transition-all mb-0.5 text-slate-400 hover:bg-white/5 hover:text-slate-200"
