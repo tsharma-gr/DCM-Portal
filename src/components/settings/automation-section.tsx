@@ -19,7 +19,8 @@ const DCM_TYPES = [
   "Consultancy Civil & Structural DCM",
   "Health & Safety DCM",
   "Waste Management DCM",
-  "Firesec DCM"
+  "Firesec DCM",
+  "Catering DCM"
 ];
 
 export function AutomationSection() {

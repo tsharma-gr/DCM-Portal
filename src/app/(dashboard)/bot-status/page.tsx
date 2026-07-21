@@ -25,6 +25,7 @@ const QUEUE2_CONFIG = [
   { name: "Firesec DCM", dcmType: "Firesec" },
   { name: "Estimator DCM", dcmType: "Estimator" },
   { name: "Waste Management DCM", dcmType: "Waste Management / Recycling" },
+  { name: "Catering DCM", dcmType: "Catering" },
 ];
 
 type BotStatusData = {
