@@ -58,6 +58,7 @@ function SidebarContent() {
   const searchParams = useSearchParams();
   const currentDcmType = searchParams.get("dcmType");
   const [isDcmOpen, setIsDcmOpen] = useState(true);
+  const [isCompanyTargetingOpen, setIsCompanyTargetingOpen] = useState(true);
 
   return (
     <div className="w-[250px] min-w-[250px] bg-[#16152b] border-none flex flex-col px-4 py-[22px] print:hidden h-full">
@@ -152,36 +153,59 @@ function SidebarContent() {
               </motion.div>
             )}
           </AnimatePresence>
-        </nav>
 
-        <div className="mb-1 mt-4">
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-slate-500 px-2.5 pt-3.5 pb-2 uppercase">
-            COMPANY TARGETING
-          </p>
-          <div className="flex flex-col ml-[21px] pl-4 border-l border-slate-700/50 mt-1 pb-4">
-            {companyTargetingNavItems.map((item) => {
-              const itemDcmType = new URL(item.href, "http://localhost").searchParams.get("dcmType");
-              const isActive = pathname === "/candidates" && currentDcmType === itemDcmType;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  prefetch={true}
-                  className={cn(
-                    "flex items-center gap-2.5 px-3 py-2 rounded-[8px] text-[13.5px] font-medium transition-all mb-1 relative",
-                    isActive 
-                      ? "text-white" 
-                      : "text-slate-400 hover:text-slate-200"
-                  )}
-                >
-                  {isActive && <div className="absolute left-[-17px] top-1/2 -translate-y-1/2 w-[2px] h-[16px] bg-[#9353F5] rounded-r-full" />}
-                  <item.icon className={cn("w-[16px] text-center", isActive ? "opacity-100 text-[#9353F5]" : "opacity-60")} />
-                  {item.title}
-                </Link>
-              );
-            })}
+          <div className="mt-4 mb-1">
+            <p className="text-[11px] font-semibold tracking-[0.08em] text-slate-500 px-2.5 pt-3.5 pb-2 uppercase">
+              COMPANY TARGETING
+            </p>
+            <button 
+              onClick={() => setIsCompanyTargetingOpen(!isCompanyTargetingOpen)}
+              className="flex items-center justify-between w-full px-3 py-2.5 rounded-[10px] text-[14px] font-medium transition-all mb-0.5 text-slate-400 hover:bg-white/5 hover:text-slate-200"
+            >
+              <div className="flex items-center gap-2.5">
+                <List className="w-[18px] text-center opacity-75" />
+                Company Targeting
+              </div>
+              {isCompanyTargetingOpen ? <ChevronDown className="w-4 h-4 opacity-50" /> : <ChevronRight className="w-4 h-4 opacity-50" />}
+            </button>
           </div>
-        </div>
+
+          <AnimatePresence initial={false}>
+            {isCompanyTargetingOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25, ease: "easeInOut" }}
+                className="overflow-hidden"
+              >
+                <div className="flex flex-col ml-[21px] pl-4 border-l border-slate-700/50 mt-1 pb-4">
+                  {companyTargetingNavItems.map((item) => {
+                    const itemDcmType = new URL(item.href, "http://localhost").searchParams.get("dcmType");
+                    const isActive = pathname === "/candidates" && currentDcmType === itemDcmType;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        prefetch={true}
+                        className={cn(
+                          "flex items-center gap-2.5 px-3 py-2 rounded-[8px] text-[13.5px] font-medium transition-all mb-1 relative",
+                          isActive 
+                            ? "text-white" 
+                            : "text-slate-400 hover:text-slate-200"
+                        )}
+                      >
+                        {isActive && <div className="absolute left-[-17px] top-1/2 -translate-y-1/2 w-[2px] h-[16px] bg-[#9353F5] rounded-r-full" />}
+                        <item.icon className={cn("w-[16px] text-center", isActive ? "opacity-100 text-[#9353F5]" : "opacity-60")} />
+                        {item.title}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </nav>
       </div>
 
       <div className="mt-auto pt-2.5 border-t border-slate-800">
