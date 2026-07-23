@@ -15,8 +15,8 @@ const QUEUE1_CONFIG = [
   { name: "Demolition DCM", dcmType: "Demolition" },
   { name: "Bid DCM", dcmType: "BID" },
   { name: "Health & Safety DCM", dcmType: "Health & Safety" },
+  { name: "Catering DCM", dcmType: "Catering" },
   { name: "Firesec Company Targeter", dcmType: "Firesec Company Targeter" },
-  { name: "Waste Company Targeter", dcmType: "Waste Company Targeter" },
 ];
 
 const QUEUE2_CONFIG = [
@@ -27,7 +27,7 @@ const QUEUE2_CONFIG = [
   { name: "Firesec DCM", dcmType: "Firesec" },
   { name: "Estimator DCM", dcmType: "Estimator" },
   { name: "Waste Management DCM", dcmType: "Waste Management / Recycling" },
-  { name: "Catering DCM", dcmType: "Catering" },
+  { name: "Waste Company Targeter", dcmType: "Waste Company Targeter" },
 ];
 
 type BotStatusData = {
