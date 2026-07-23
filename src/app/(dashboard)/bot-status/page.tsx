@@ -16,6 +16,7 @@ const QUEUE1_CONFIG = [
   { name: "Bid DCM", dcmType: "BID" },
   { name: "Health & Safety DCM", dcmType: "Health & Safety" },
   { name: "Firesec Company Targeter", dcmType: "Firesec Company Targeter" },
+  { name: "Waste Company Targeter", dcmType: "Waste Company Targeter" },
 ];
 
 const QUEUE2_CONFIG = [

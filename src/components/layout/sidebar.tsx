@@ -45,6 +45,7 @@ const dcmNavItems = [
 
 const companyTargetingNavItems = [
   { title: "Firesec Company Targeter", href: "/candidates?dcmType=Firesec+Company+Targeter", icon: Target },
+  { title: "Waste Company Targeter", href: "/candidates?dcmType=Waste+Company+Targeter", icon: Target },
 ];
 
 const bottomNavItems = [
