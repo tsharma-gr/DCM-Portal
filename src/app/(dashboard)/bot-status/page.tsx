@@ -109,21 +109,43 @@ export default function BotStatusPage() {
 
         setTotalProcessed(total);
 
+        const { data: statusData, error: statusError } = await supabase
+          .from("bot_status")
+          .select("dcm_type, status, last_updated");
+
+        const realStatusMap: Record<string, { status: string, last_updated: string }> = {};
+        if (statusData) {
+          statusData.forEach(row => {
+            realStatusMap[row.dcm_type] = {
+              status: row.status,
+              last_updated: row.last_updated
+            };
+          });
+        }
+
         const now = Date.now();
         const RUNNING_THRESHOLD_MS = 7 * 60 * 1000; // 7 minutes
 
         const processQueue = (config: typeof QUEUE1_CONFIG) => {
           const processed = config.map(bot => {
-            const stats = statsMap[bot.dcmType];
-            if (!stats) {
-              return { ...bot, candidates: 0, status: "pending", timeLabel: "Not started", lastTimestamp: 0, earliestTs: 0 };
-            }
+            const stats = statsMap[bot.dcmType] || { count: 0, earliestTs: 0, latestTs: 0 };
+            const realStatus = realStatusMap[bot.dcmType]?.status;
 
-            const timeSinceLast = now - stats.latestTs;
-            let status: "pending" | "running" | "completed" = "completed";
+            let status: "pending" | "running" | "completed" = "pending";
             
-            if (timeSinceLast < RUNNING_THRESHOLD_MS) {
+            if (realStatus === "RUNNING") {
               status = "running";
+            } else if (realStatus === "COMPLETED") {
+              status = "completed";
+            } else if (stats.count > 0) {
+              // Fallback to old logic if no DB status yet
+              const timeSinceLast = now - stats.latestTs;
+              status = "completed";
+              if (timeSinceLast < RUNNING_THRESHOLD_MS) {
+                status = "running";
+              }
+            } else {
+              status = "pending";
             }
 
             return {
@@ -143,15 +165,19 @@ export default function BotStatusPage() {
               return bot as BotStatusData;
             }
 
-            const formatTime = (ts: number) => new Date(ts).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London' });
+            const formatTime = (ts: number) => ts > 0 ? new Date(ts).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London' }) : "--:--";
             const latestStr = formatTime(bot.lastTimestamp);
             const startStr = formatTime(bot.earliestTs);
+            
             let endStr = bot.status === "running" ? "Running" : latestStr;
+            if (bot.status === "completed" && bot.lastTimestamp === 0) {
+                endStr = "Finished (0 found)";
+            }
 
             // If this bot completed, check if it's waiting for the next bot in the queue
             const timeSinceLast = now - bot.lastTimestamp;
             const nextBot = array[index + 1];
-            if (bot.status === "completed" && nextBot && nextBot.candidates === 0 && timeSinceLast < 15 * 60 * 1000) {
+            if (bot.status === "completed" && nextBot && nextBot.candidates === 0 && timeSinceLast < 15 * 60 * 1000 && bot.lastTimestamp > 0) {
               endStr += " (Waiting next bot)";
             }
 
