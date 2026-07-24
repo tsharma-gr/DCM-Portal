@@ -21,7 +21,7 @@ const DCM_TYPES = [
   "Waste Management DCM",
   "Firesec DCM",
   "Catering DCM",
-  "Target Catering DCM"
+  "Catering Company Targeter"
 ];
 
 export function AutomationSection() {
