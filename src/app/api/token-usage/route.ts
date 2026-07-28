@@ -1,19 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-
-const execAsync = promisify(exec);
 
 export async function POST(request: Request) {
   try {
     const { targetDate } = await request.json();
-    let cmd = 'ssh -o BatchMode=yes root@139.59.191.27 "python3 /root/daily_token_tracker.py"';
-    if (targetDate) {
-      cmd = `ssh -o BatchMode=yes root@139.59.191.27 "python3 /root/daily_token_tracker.py ${targetDate}"`;
+    
+    const vpsUrl = "https://139-59-191-27.nip.io";
+    const SECRET_TOKEN = "tv_queue_master_secret_2026_xyz987";
+    
+    const response = await fetch(vpsUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${SECRET_TOKEN}`
+      },
+      body: JSON.stringify({ action: "get_tokens", targetDate }),
+      cache: "no-store"
+    });
+    
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to fetch tokens from VPS');
     }
     
-    const { stdout, stderr } = await execAsync(cmd);
+    const stdout = data.output || '';
     
     // Parse the output string into structured JSON
     const lines = stdout.split('\n');
@@ -71,7 +81,7 @@ export async function POST(request: Request) {
       }
     }
     
-    return NextResponse.json({ success: true, text: stdout, parsed: { bots, grandTotal }, error: stderr });
+    return NextResponse.json({ success: true, text: stdout, parsed: { bots, grandTotal } });
   } catch (error: unknown) {
     const err = error as Error;
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
