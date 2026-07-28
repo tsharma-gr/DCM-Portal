@@ -29,6 +29,7 @@ type DCMStat = {
 
 type DailyStats = {
   dateStr: string;
+  rawDateStr: string;
   totalCvs: number;
   dcms: DCMStat[];
 };
@@ -37,6 +38,28 @@ export default function BotAnalyticsPage() {
   const [dailyStats, setDailyStats] = useState<DailyStats[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<number>(7);
+  const [tokenData, setTokenData] = useState<{ [key: string]: any }>({});
+  const [loadingTokensFor, setLoadingTokensFor] = useState<string | null>(null);
+
+  const fetchTokenData = async (rawDate: string) => {
+    if (tokenData[rawDate]) return;
+    setLoadingTokensFor(rawDate);
+    try {
+      const res = await fetch('/api/token-usage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetDate: rawDate })
+      });
+      const data = await res.json();
+      if (data.success && data.parsed) {
+        setTokenData(prev => ({ ...prev, [rawDate]: data.parsed }));
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingTokensFor(null);
+    }
+  };
 
   useEffect(() => {
     let isActive = true;
@@ -92,21 +115,22 @@ export default function BotAnalyticsPage() {
             if (!row.processed_timestamp) continue;
             const ts = new Date(row.processed_timestamp);
             const dateStr = ts.toLocaleDateString("en-GB", { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'Europe/London' });
+            const rawDateStr = ts.toISOString().split('T')[0];
             const rowTime = ts.getTime();
 
-            if (!groupedByDate[dateStr]) groupedByDate[dateStr] = {};
+            if (!groupedByDate[dateStr]) groupedByDate[dateStr] = { rawDateStr, dcms: {} };
 
             const dcmType = row.dcm_type || "Unknown";
-            if (!groupedByDate[dateStr][dcmType]) {
-              groupedByDate[dateStr][dcmType] = { count: 0, earliestTs: Infinity, latestTs: 0 };
+            if (!groupedByDate[dateStr].dcms[dcmType]) {
+              groupedByDate[dateStr].dcms[dcmType] = { count: 0, earliestTs: Infinity, latestTs: 0 };
             }
 
-            groupedByDate[dateStr][dcmType].count += 1;
-            if (rowTime > groupedByDate[dateStr][dcmType].latestTs) {
-              groupedByDate[dateStr][dcmType].latestTs = rowTime;
+            groupedByDate[dateStr].dcms[dcmType].count += 1;
+            if (rowTime > groupedByDate[dateStr].dcms[dcmType].latestTs) {
+              groupedByDate[dateStr].dcms[dcmType].latestTs = rowTime;
             }
-            if (rowTime < groupedByDate[dateStr][dcmType].earliestTs) {
-              groupedByDate[dateStr][dcmType].earliestTs = rowTime;
+            if (rowTime < groupedByDate[dateStr].dcms[dcmType].earliestTs) {
+              groupedByDate[dateStr].dcms[dcmType].earliestTs = rowTime;
             }
           }
 
@@ -121,19 +145,19 @@ export default function BotAnalyticsPage() {
         const finalizeData = () => {
           if (!isActive) return;
           const parsedData: DailyStats[] = [];
-          for (const [dateStr, dcmObj] of Object.entries(groupedByDate)) {
+          for (const [dateStr, dateObj] of Object.entries(groupedByDate)) {
             let dailyTotal = 0;
             const dcms: DCMStat[] = [];
-            for (const [dcmType, stats] of Object.entries(dcmObj)) {
-              dailyTotal += stats.count;
-              let durationMs = stats.latestTs - stats.earliestTs;
-              if (durationMs === 0 && stats.count > 0) durationMs = 60000; 
+            for (const [dcmType, stats] of Object.entries((dateObj as any).dcms)) {
+              dailyTotal += (stats as any).count;
+              let durationMs = (stats as any).latestTs - (stats as any).earliestTs;
+              if (durationMs === 0 && (stats as any).count > 0) durationMs = 60000; 
 
               dcms.push({
                 dcmType,
-                count: stats.count,
-                earliestTs: stats.earliestTs,
-                latestTs: stats.latestTs,
+                count: (stats as any).count,
+                earliestTs: (stats as any).earliestTs,
+                latestTs: (stats as any).latestTs,
                 durationMs
               });
             }
@@ -141,6 +165,7 @@ export default function BotAnalyticsPage() {
 
             parsedData.push({
               dateStr,
+              rawDateStr: (dateObj as any).rawDateStr,
               totalCvs: dailyTotal,
               dcms
             });
@@ -265,6 +290,30 @@ export default function BotAnalyticsPage() {
                       <h2 className="text-[20px] font-extrabold text-[var(--ink)]">{day.dateStr}</h2>
                       <p className="text-[13px] text-slate-500 font-semibold">{day.totalCvs} total candidates processed</p>
                     </div>
+                  </div>
+                  <div>
+                    {!tokenData[day.rawDateStr] ? (
+                      <button 
+                        onClick={() => fetchTokenData(day.rawDateStr)}
+                        disabled={loadingTokensFor === day.rawDateStr}
+                        className="px-4 py-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors rounded-xl text-sm font-bold flex items-center gap-2"
+                      >
+                        {loadingTokensFor === day.rawDateStr ? <Loader2 className="w-4 h-4 animate-spin" /> : <Activity className="w-4 h-4" />}
+                        View API Costs
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-4 bg-emerald-50/50 px-4 py-2.5 rounded-xl border border-emerald-100">
+                        <div className="flex flex-col">
+                          <span className="text-[11px] font-extrabold text-emerald-600/70 uppercase tracking-widest">Total Cost</span>
+                          <span className="text-[18px] font-black text-emerald-700">{tokenData[day.rawDateStr].grandTotal?.cost || '$0.0000'}</span>
+                        </div>
+                        <div className="h-8 w-px bg-emerald-200/50 mx-2" />
+                        <div className="flex flex-col">
+                          <span className="text-[11px] font-extrabold text-emerald-600/70 uppercase tracking-widest">Tokens Used</span>
+                          <span className="text-[14px] font-bold text-emerald-700">{tokenData[day.rawDateStr].grandTotal?.total || '0'}</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
