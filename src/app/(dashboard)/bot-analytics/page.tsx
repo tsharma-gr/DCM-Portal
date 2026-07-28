@@ -106,7 +106,7 @@ export default function BotAnalyticsPage() {
         if (!isActive) return;
 
         // Group by Date String (YYYY-MM-DD)
-        const groupedByDate: Record<string, Record<string, { count: number, earliestTs: number, latestTs: number }>> = {};
+        const groupedByDate: Record<string, any> = {};
 
         // Process in chunks to avoid blocking the main UI thread during massive loops (e.g., 1 Year of data)
         const processChunk = (startIdx: number) => {
