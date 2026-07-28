@@ -111,7 +111,7 @@ export default function BotStatusPage() {
 
         setTotalProcessed(total);
 
-        const { data: statusData, error: statusError } = await supabase
+        const { data: statusData } = await supabase
           .from("bot_status")
           .select("dcm_type, status, last_updated");
 

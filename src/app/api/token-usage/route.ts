@@ -16,8 +16,8 @@ export async function POST(request: Request) {
     
     // Parse the output string into structured JSON
     const lines = stdout.split('\n');
-    let grandTotal = null;
-    let bots = [];
+    let grandTotal: any = null;
+    const bots: any[] = [];
     
     let currentBot = null;
     let mode = ''; // 'breakdown' or 'total'
@@ -71,7 +71,8 @@ export async function POST(request: Request) {
     }
     
     return NextResponse.json({ success: true, text: stdout, parsed: { bots, grandTotal }, error: stderr });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as Error;
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
