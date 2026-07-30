@@ -389,11 +389,11 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
                 <span className="font-medium text-foreground">{dcmType.length > 15 ? dcmType.substring(0,15) + '...' : dcmType}</span>
               </div>
             </SelectTrigger>
-            <SelectContent className="w-[480px]">
+            <SelectContent className="w-[580px]">
               <div className="mb-1 pb-1 border-b border-border/50">
                 <SelectItem value="All" className="font-semibold text-[var(--violet)]">All Systems</SelectItem>
               </div>
-              <div className="grid grid-cols-2 gap-x-2">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-1">
                 <SelectItem value="Exterior">Exterior</SelectItem>
                 <SelectItem value="Structural">Structural</SelectItem>
                 <SelectItem value="Windows and Doors">Windows and Doors</SelectItem>
