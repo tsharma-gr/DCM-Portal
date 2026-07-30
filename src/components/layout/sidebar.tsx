@@ -48,6 +48,7 @@ const companyTargetingNavItems = [
   { title: "Firesec Company Targeter", href: "/candidates?dcmType=Firesec+Company+Targeter", icon: Target },
   { title: "Waste Company Targeter", href: "/candidates?dcmType=Waste+Company+Targeter", icon: Target },
   { title: "Catering Company Targeter", href: "/candidates?dcmType=Catering+Company+Targeter", icon: Target },
+  { title: "Height & Safety Company Targeter", href: "/candidates?dcmType=Height+%26+Safety+Company+Targeter", icon: Target },
 ];
 
 const bottomNavItems = [

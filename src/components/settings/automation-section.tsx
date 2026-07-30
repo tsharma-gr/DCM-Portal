@@ -22,6 +22,7 @@ const DCM_TYPES = [
   "Firesec DCM",
   "Catering DCM",
   "Catering Company Targeter",
+  "Height & Safety Company Targeter",
   "Height & Safety DCM"
 ];
 
