@@ -413,6 +413,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
                 <SelectItem value="Waste Company Targeter">Waste Company Targeter</SelectItem>
                 <SelectItem value="Catering Company Targeter">Catering Company Targeter</SelectItem>
                 <SelectItem value="Height & Safety Company Targeter">Height & Safety Company Targeter</SelectItem>
+                <SelectItem value="Electrical Company Targeter">Electrical Company Targeter</SelectItem>
                 <SelectItem value="Height & Safety">Height & Safety</SelectItem>
               </div>
             </SelectContent>

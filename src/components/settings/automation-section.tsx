@@ -23,6 +23,7 @@ const DCM_TYPES = [
   "Catering DCM",
   "Catering Company Targeter",
   "Height & Safety Company Targeter",
+  "Electrical Company Targeter",
   "Height & Safety DCM"
 ];
 
