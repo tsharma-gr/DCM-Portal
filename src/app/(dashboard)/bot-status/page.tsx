@@ -29,8 +29,8 @@ const QUEUE2_CONFIG = [
   { name: "Firesec DCM", dcmType: "Firesec" },
   { name: "Estimator DCM", dcmType: "Estimator" },
   { name: "Waste Management DCM", dcmType: "Waste Management / Recycling" },
-  { name: "Waste Company Targeter", dcmType: "Waste Company Targeter" },
   { name: "Height & Safety DCM", dcmType: "Height & Safety" },
+  { name: "Waste Company Targeter", dcmType: "Waste Company Targeter" },
   { name: "Electrical Company Targeter", dcmType: "Electrical Company Targeter" },
 ];
 
