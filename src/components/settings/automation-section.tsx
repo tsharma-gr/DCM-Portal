@@ -20,6 +20,7 @@ const DCM_TYPES = [
   "Health & Safety DCM",
   "Waste Management DCM",
   "Firesec DCM",
+  "Fire Alarm DCM",
   "Catering DCM",
   "Catering Company Targeter",
   "Height & Safety Company Targeter",

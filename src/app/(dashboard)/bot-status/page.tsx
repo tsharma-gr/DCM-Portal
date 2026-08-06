@@ -27,6 +27,7 @@ const QUEUE2_CONFIG = [
   { name: "Scaffolding DCM", dcmType: "Scaffolding" },
   { name: "Temporary Works DCM", dcmType: "Temporary Works Design" },
   { name: "Firesec DCM", dcmType: "Firesec" },
+  { name: "Fire Alarm DCM", dcmType: "Firealaram" },
   { name: "Estimator DCM", dcmType: "Estimator" },
   { name: "Waste Management DCM", dcmType: "Waste Management / Recycling" },
   { name: "Height & Safety DCM", dcmType: "Height & Safety" },
