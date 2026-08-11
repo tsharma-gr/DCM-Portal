@@ -82,6 +82,7 @@ export default function BotStatusPage() {
             .from("candidates")
             .select("dcm_type, processed_timestamp")
             .gte("processed_timestamp", todayIso)
+            .order("processed_timestamp", { ascending: false })
             .range(from, from + step - 1);
 
           if (error) throw error;
