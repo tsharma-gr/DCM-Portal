@@ -51,6 +51,7 @@ const companyTargetingNavItems = [
   { title: "Catering Company Targeter", href: "/candidates?dcmType=Catering+Company+Targeter", icon: Target },
   { title: "Height & Safety Company Targeter", href: "/candidates?dcmType=Height+%26+Safety+Company+Targeter", icon: Target },
   { title: "Electrical Company Targeter", href: "/candidates?dcmType=Electrical+Company+Targeter", icon: Target },
+  { title: "Large Companies Targeter", href: "/candidates?dcmType=Large+Companies+Targeter", icon: Target },
 ];
 
 const bottomNavItems = [

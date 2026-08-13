@@ -33,6 +33,7 @@ const QUEUE2_CONFIG = [
   { name: "Height & Safety DCM", dcmType: "Height & Safety" },
   { name: "Waste Company Targeter", dcmType: "Waste Company Targeter" },
   { name: "Electrical Company Targeter", dcmType: "Electrical Company Targeter" },
+  { name: "Large Companies Targeter", dcmType: "Large Companies Targeter" },
 ];
 
 type BotStatusData = {
