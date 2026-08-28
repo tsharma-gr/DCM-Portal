@@ -52,7 +52,7 @@ export function AutomationSection() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         // Restrict server remote controls strictly to Super Administrator (tsharma@globalrecruiters.ae)
-        if (!user || user.email === 'tsharma@globalrecruiters.ae') {
+        if (user && user.email === 'tsharma@globalrecruiters.ae') {
           setIsAdmin(true);
         } else {
           setIsAdmin(false);
