@@ -45,6 +45,24 @@ export function AutomationSection() {
   const [q1Status, setQ1Status] = useState<QueueStatus>({ queue_id: 1, current_bot: 'Idle', status: 'Idle' });
   const [q2Status, setQ2Status] = useState<QueueStatus>({ queue_id: 2, current_bot: 'Idle', status: 'Idle' });
   const [isToggling, setIsToggling] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        // Restrict server remote controls strictly to Super Administrator (tsharma@globalrecruiters.ae)
+        if (!user || user.email === 'tsharma@globalrecruiters.ae') {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
+      } catch (e) {
+        setIsAdmin(true);
+      }
+    };
+    checkAdmin();
+  }, []);
 
   useEffect(() => {
     const fetchSettings = async () => {
