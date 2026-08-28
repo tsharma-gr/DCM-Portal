@@ -152,7 +152,8 @@ export function AutomationSection() {
       </p>
 
       {/* VPS Master Controls */}
-      <div className="mb-8 p-6 bg-slate-50 border border-slate-200 rounded-[20px] shadow-sm">
+      {isAdmin && (
+        <div className="mb-8 p-6 bg-slate-50 border border-slate-200 rounded-[20px] shadow-sm">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-full bg-[var(--violet)]/10 flex items-center justify-center">
             <div className="w-4 h-4 rounded-full bg-[var(--violet)] animate-pulse" />
@@ -273,6 +274,7 @@ export function AutomationSection() {
           </div>
         </div>
       </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {DCM_TYPES.map((dcm, index) => {
