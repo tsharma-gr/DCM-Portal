@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-
-const SECRET_TOKEN = "tv_queue_master_secret_2026_xyz987";
+import { supabaseAdmin as supabase } from '@/lib/supabase';
 
 export async function POST(request: Request) {
   try {
@@ -14,30 +13,35 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid queue name' }, { status: 400 });
     }
 
-    if (action !== 'pause' && action !== 'resume') {
+    const validActions = ['skip', 'stop', 'pause', 'resume'];
+    if (!validActions.includes(action.toLowerCase())) {
       return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
 
-    const vpsUrl = "https://139-59-191-27.nip.io";
+    const queueId = queue === 'queue1' ? 1 : 2;
 
-    const response = await fetch(vpsUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${SECRET_TOKEN}`
-      },
-      body: JSON.stringify({ queue, action }),
-      cache: "no-store"
-    });
+    // Insert command into Supabase bot_commands table for the VPS Master Scheduler to consume
+    const { data, error } = await supabase
+      .from('bot_commands')
+      .insert([
+        {
+          queue_id: queueId,
+          command: action.toLowerCase(),
+          is_processed: false
+        }
+      ])
+      .select();
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error('VPS Listener Error:', data);
-      return NextResponse.json({ error: data.error || 'Failed to communicate with VPS' }, { status: response.status });
+    if (error) {
+      console.error('Supabase bot_commands Insert Error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, message: data.message || "Success" });
+    return NextResponse.json({ 
+      success: true, 
+      message: `Command '${action}' queued successfully for Queue ${queueId}`,
+      data 
+    });
 
   } catch (error: unknown) {
     console.error('VPS Control Error:', error);
@@ -45,3 +49,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: errMessage }, { status: 500 });
   }
 }
+
