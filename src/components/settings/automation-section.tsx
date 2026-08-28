@@ -106,9 +106,10 @@ export function AutomationSection() {
       if (!res.ok) throw new Error(data.error || 'Failed to send command');
 
       alert(`✅ Command '${action.toUpperCase()}' successfully sent to ${queue.toUpperCase()}! The VPS will execute it within 10 seconds.`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      alert(`Error sending command: ${err.message || err}`);
+      const errMsg = err instanceof Error ? err.message : String(err);
+      alert(`Error sending command: ${errMsg}`);
     } finally {
       setIsToggling(false);
     }
