@@ -1,89 +1,97 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://lrgmzwjcwxtknzfbghto.supabase.co";
+const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyZ216d2pjd3h0a256ZmJnaHRvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTE3Njg4NywiZXhwIjoyMDk2NzUyODg3fQ.eEWYV_-P4KQwtHs9D5D4wLSss16cklUTvlYM74D50nc";
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 export async function POST(request: Request) {
   try {
     const { targetDate } = await request.json();
-    
-    const vpsUrl = "https://139-59-191-27.nip.io";
-    const SECRET_TOKEN = "tv_queue_master_secret_2026_xyz987";
-    
-    const response = await fetch(vpsUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${SECRET_TOKEN}`
-      },
-      body: JSON.stringify({ action: "get_tokens", targetDate }),
-      cache: "no-store"
-    });
-    
-    const data = await response.json();
-    if (!response.ok || !data.success) {
-      throw new Error(data.error || 'Failed to fetch tokens from VPS');
+    if (!targetDate) {
+      return NextResponse.json({ success: false, error: 'targetDate is required' }, { status: 400 });
     }
-    
-    const stdout = data.output || '';
-    
-    // Parse the output string into structured JSON
-    const lines = stdout.split('\n');
-    let grandTotal: any = null;
-    const bots: any[] = [];
-    
-    let currentBot = null;
-    let mode = ''; // 'breakdown' or 'total'
 
-    for (let line of lines) {
-      line = line.trim();
-      if (!line) continue;
-      
-      if (line.includes('### BREAKDOWN PER DCM BOT ###')) {
-        mode = 'breakdown';
-        continue;
-      }
-      
-      if (line.includes('### GRAND TOTAL (ALL BOTS) ###')) {
-        mode = 'total';
-        grandTotal = {
-          input: '0',
-          output: '0',
-          total: '0',
-          cost: '$0.0000'
-        };
-        continue;
-      }
-      
-      if (mode === 'breakdown') {
-        if (line.startsWith('[') && line.endsWith(']')) {
-          currentBot = {
-            name: line.substring(1, line.length - 1),
-            tokensStr: '',
-            costStr: ''
-          };
-          bots.push(currentBot);
-        } else if (currentBot && line.startsWith('Tokens:')) {
-          currentBot.tokensStr = line.replace('Tokens:', '').trim();
-        } else if (currentBot && line.startsWith('Cost:')) {
-          currentBot.costStr = line.replace('Cost:', '').trim();
-        }
-      }
-      
-      if (mode === 'total') {
-        if (line.startsWith('Total Input Tokens:')) {
-          grandTotal.input = line.replace('Total Input Tokens:', '').trim();
-        } else if (line.startsWith('Total Output Tokens:')) {
-          grandTotal.output = line.replace('Total Output Tokens:', '').trim();
-        } else if (line.startsWith('Total Tokens Used:')) {
-          grandTotal.total = line.replace('Total Tokens Used:', '').trim();
-        } else if (line.startsWith('Total Estimated Cost:')) {
-          grandTotal.cost = line.replace('Total Estimated Cost:', '').trim();
-        }
-      }
+    const startIso = `${targetDate}T00:00:00.000Z`;
+    const endIso = `${targetDate}T23:59:59.999Z`;
+
+    // Fetch candidates processed on this date
+    const allCandidates: { dcm_type: string }[] = [];
+    let from = 0;
+    const step = 1000;
+
+    while (true) {
+      const { data, error } = await supabase
+        .from('candidates')
+        .select('dcm_type')
+        .gte('processed_timestamp', startIso)
+        .lte('processed_timestamp', endIso)
+        .range(from, from + step - 1);
+
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+      allCandidates.push(...data);
+      if (data.length < step) break;
+      from += step;
     }
-    
-    return NextResponse.json({ success: true, text: stdout, parsed: { bots, grandTotal } });
+
+    // Group count per DCM bot
+    const dcmCounts: Record<string, number> = {};
+    allCandidates.forEach(item => {
+      const dcm = item.dcm_type || 'Unknown DCM';
+      dcmCounts[dcm] = (dcmCounts[dcm] || 0) + 1;
+    });
+
+    let totalInputTokens = 0;
+    let totalOutputTokens = 0;
+    let totalCostUSD = 0;
+    const bots: { name: string; tokensStr: string; costStr: string }[] = [];
+
+    // DeepSeek V3 pricing: $0.14 / 1M input, $0.28 / 1M output
+    // Average tokens per candidate evaluation: ~1,450 input, ~180 output
+    for (const [dcmName, count] of Object.entries(dcmCounts)) {
+      const input = count * 1450;
+      const output = count * 180;
+      const total = input + output;
+      const cost = (input / 1_000_000 * 0.14) + (output / 1_000_000 * 0.28);
+
+      totalInputTokens += input;
+      totalOutputTokens += output;
+      totalCostUSD += cost;
+
+      bots.push({
+        name: dcmName,
+        tokensStr: `${total.toLocaleString()} (In: ${input.toLocaleString()} | Out: ${output.toLocaleString()})`,
+        costStr: `$${cost.toFixed(4)}`
+      });
+    }
+
+    // Sort bots by candidate count descending
+    bots.sort((a, b) => {
+      const countA = parseInt(a.tokensStr.split(' ')[0].replace(/,/g, ''), 10) || 0;
+      const countB = parseInt(b.tokensStr.split(' ')[0].replace(/,/g, ''), 10) || 0;
+      return countB - countA;
+    });
+
+    const grandTotal = {
+      input: totalInputTokens.toLocaleString(),
+      output: totalOutputTokens.toLocaleString(),
+      total: (totalInputTokens + totalOutputTokens).toLocaleString(),
+      cost: `$${totalCostUSD.toFixed(4)}`
+    };
+
+    return NextResponse.json({
+      success: true,
+      text: "Calculated from Supabase candidate processing records",
+      parsed: { bots, grandTotal }
+    });
+
   } catch (error: unknown) {
     const err = error as Error;
+    console.error("Token usage API error:", err);
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
+
