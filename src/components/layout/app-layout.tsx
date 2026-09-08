@@ -22,7 +22,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             <Header />
           </Suspense>
         </div>
-        <main className="flex-1 px-3 sm:px-6 lg:px-8 pt-2 pb-6 bg-muted/10 overflow-y-auto">
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 pt-2 pb-6 bg-muted/10 overflow-y-auto">
           <div className="mx-auto w-full max-w-7xl">
             {children}
           </div>
@@ -31,4 +31,3 @@ export function AppLayout({ children }: AppLayoutProps) {
     </div>
   );
 }
-

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState } from "react";
@@ -61,11 +60,7 @@ const bottomNavItems = [
 
 import { Suspense } from "react";
 
-interface SidebarProps {
-  onNavigate?: () => void;
-}
-
-function SidebarContent({ onNavigate }: SidebarProps) {
+function SidebarContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentDcmType = searchParams.get("dcmType");
@@ -73,7 +68,7 @@ function SidebarContent({ onNavigate }: SidebarProps) {
   const [isCompanyTargetingOpen, setIsCompanyTargetingOpen] = useState(true);
 
   return (
-    <div className="w-full sm:w-[250px] min-w-[250px] bg-[#16152b] border-none flex flex-col px-4 py-[22px] print:hidden h-full">
+    <div className="w-[250px] min-w-[250px] bg-[#16152b] border-none flex flex-col px-4 py-[22px] print:hidden h-full">
       <div className="flex flex-col items-center justify-center pt-2 pb-6 border-b border-white/5 mb-4 px-2 text-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.png" alt="TalentVerse AI Logo" className="h-[64px] w-auto object-contain mb-3 drop-shadow-[0_4px_12px_rgba(147,83,245,0.4)]" />
@@ -97,7 +92,6 @@ function SidebarContent({ onNavigate }: SidebarProps) {
                 key={item.href}
                 href={item.href}
                 prefetch={true}
-                onClick={onNavigate}
                 className={cn(
                   "flex items-center gap-2.5 px-3 py-2.5 rounded-[10px] text-[14px] font-medium transition-all mb-0.5",
                   isActive 
@@ -149,7 +143,6 @@ function SidebarContent({ onNavigate }: SidebarProps) {
                         key={item.href}
                         href={item.href}
                         prefetch={true}
-                        onClick={onNavigate}
                         className={cn(
                           "flex items-center gap-2.5 px-3 py-2 rounded-[8px] text-[13.5px] font-medium transition-all mb-1 relative",
                           isActive 
@@ -199,7 +192,6 @@ function SidebarContent({ onNavigate }: SidebarProps) {
                         key={item.href}
                         href={item.href}
                         prefetch={true}
-                        onClick={onNavigate}
                         className={cn(
                           "flex items-center gap-2.5 px-3 py-2 rounded-[8px] text-[13.5px] font-medium transition-all mb-1 relative",
                           isActive 
@@ -225,7 +217,6 @@ function SidebarContent({ onNavigate }: SidebarProps) {
           <Link
             key={item.href}
             href={item.href}
-            onClick={onNavigate}
             className="flex items-center gap-2.5 px-3 py-2.5 rounded-[10px] text-[14px] font-medium transition-all mb-0.5 text-slate-400 hover:bg-white/5 hover:text-slate-200"
           >
             <item.icon className="w-[18px] text-center opacity-75" />
@@ -237,7 +228,7 @@ function SidebarContent({ onNavigate }: SidebarProps) {
   );
 }
 
-export function Sidebar({ onNavigate }: SidebarProps) {
+export function Sidebar() {
   return (
     <Suspense fallback={
       <div className="flex h-full w-64 flex-col border-r bg-card/50 backdrop-blur-xl print:hidden">
@@ -246,8 +237,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         </div>
       </div>
     }>
-      <SidebarContent onNavigate={onNavigate} />
+      <SidebarContent />
     </Suspense>
   );
 }
-

@@ -213,40 +213,39 @@ export default function BotAnalyticsPage() {
   };
 
   return (
-  return (
-    <div className="w-full min-h-[calc(100vh-100px)] p-3.5 sm:p-6 bg-transparent">
+    <div className="w-full min-h-[calc(100vh-100px)] p-6 bg-transparent">
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="max-w-[1400px] mx-auto space-y-6 sm:space-y-8"
+        className="max-w-[1400px] mx-auto space-y-8"
       >
         {/* Header Section */}
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/80 backdrop-blur-xl p-4 sm:p-8 rounded-[20px] sm:rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-100/50 relative overflow-hidden">
+        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/80 backdrop-blur-xl p-8 rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-100/50 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-500/5 blur-[100px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/3" />
           
           <div className="flex flex-col relative z-10">
-            <h1 className="text-[22px] sm:text-[28px] font-extrabold tracking-tight flex items-center gap-3 sm:gap-4">
-              <div className="relative shrink-0">
+            <h1 className="text-[28px] font-extrabold tracking-tight flex items-center gap-4">
+              <div className="relative">
                 <div className="absolute inset-0 bg-blue-500 blur-md opacity-20 rounded-xl" />
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-[12px] sm:rounded-[14px] bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg relative z-10">
-                  <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
+                <div className="w-12 h-12 rounded-[14px] bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg relative z-10">
+                  <Activity className="w-6 h-6" />
                 </div>
               </div>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--ink)] to-slate-500">
                 Historical Bot Analytics
               </span>
             </h1>
-            <p className="text-[13px] sm:text-[14px] text-slate-500 mt-1.5 sm:mt-2 font-medium tracking-wide">Review exact run times and durations over the last {timeRange} days to balance queues.</p>
+            <p className="text-[14px] text-slate-500 mt-2 font-medium tracking-wide">Review exact run times and durations over the last {timeRange} days to balance queues.</p>
           </div>
           
-          <div className="relative z-10 flex items-center gap-1.5 bg-white p-1 sm:p-1.5 rounded-[16px] shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-slate-200 overflow-x-auto max-w-full">
+          <div className="relative z-10 flex items-center gap-2 bg-white p-1.5 rounded-[16px] shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-slate-200">
             {[7, 15, 30, 365].map((days) => (
               <button
                 key={days}
                 onClick={() => setTimeRange(days)}
                 className={cn(
-                  "relative px-3 sm:px-4 py-1.5 sm:py-2 rounded-[12px] text-[12px] sm:text-[13px] font-bold transition-colors z-10 shrink-0",
+                  "relative px-4 py-2 rounded-[12px] text-[13px] font-bold transition-colors z-10",
                   timeRange === days
                     ? "text-white"
                     : "text-slate-500 hover:text-slate-800"
