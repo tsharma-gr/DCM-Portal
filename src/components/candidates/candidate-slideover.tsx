@@ -46,7 +46,7 @@ export function CandidateSlideOver({ candidate, isOpen, onClose }: CandidateSlid
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent 
         side="right" 
-        className="w-full !max-w-[90vw] sm:!max-w-[600px] lg:!max-w-[800px] xl:!max-w-[900px] p-0 border-l border-border overflow-y-auto bg-[#F8F9FC]"
+        className="w-full !max-w-full sm:!max-w-[600px] lg:!max-w-[800px] xl:!max-w-[900px] p-0 border-l border-border overflow-y-auto bg-[#F8F9FC]"
       >
         {!candidate ? null : loading ? (
           <div className="flex flex-col items-center justify-center h-full gap-4 text-muted-foreground">

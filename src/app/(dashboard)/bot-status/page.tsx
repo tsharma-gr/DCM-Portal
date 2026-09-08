@@ -247,100 +247,101 @@ export default function BotStatusPage() {
   ];
 
   return (
-    <div className="w-full min-h-[calc(100vh-100px)] p-6 bg-transparent">
+  return (
+    <div className="w-full min-h-[calc(100vh-100px)] p-3.5 sm:p-6 bg-transparent">
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="max-w-[1400px] mx-auto space-y-8"
+        className="max-w-[1400px] mx-auto space-y-6 sm:space-y-8"
       >
         {/* Header Section */}
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/80 backdrop-blur-xl p-8 rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-100/50 relative overflow-hidden">
+        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/80 backdrop-blur-xl p-4 sm:p-8 rounded-[20px] sm:rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-100/50 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[var(--violet)]/5 blur-[100px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/3" />
           
           <div className="flex flex-col relative z-10">
-            <h1 className="text-[28px] font-extrabold tracking-tight flex items-center gap-4">
-              <div className="relative">
+            <h1 className="text-[22px] sm:text-[28px] font-extrabold tracking-tight flex items-center gap-3 sm:gap-4">
+              <div className="relative shrink-0">
                 <div className="absolute inset-0 bg-[var(--violet)] blur-md opacity-20 rounded-xl" />
-                <div className="w-12 h-12 rounded-[14px] bg-gradient-to-br from-[var(--violet)] to-[#EC4899] flex items-center justify-center text-white shadow-lg relative z-10">
-                  <Activity className="w-6 h-6" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-[12px] sm:rounded-[14px] bg-gradient-to-br from-[var(--violet)] to-[#EC4899] flex items-center justify-center text-white shadow-lg relative z-10">
+                  <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--ink)] to-slate-500">
                   Live Server Status
                 </span>
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400/90 bg-slate-50/80 px-2.5 py-1 rounded-[6px] border border-slate-200/50 shadow-sm uppercase tracking-wider cursor-help mt-1 sm:mt-0" title="All times displayed in UK Time (GMT/BST)">
+                <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold text-slate-400/90 bg-slate-50/80 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-[6px] border border-slate-200/50 shadow-sm uppercase tracking-wider cursor-help w-fit" title="All times displayed in UK Time (GMT/BST)">
                   <Globe2 className="w-3 h-3 opacity-70" />
                   UK Time
                 </div>
               </div>
             </h1>
-            <p className="text-[14px] text-slate-500 mt-2 font-medium tracking-wide">Monitor real-time candidate scraping operations running on your VPS.</p>
+            <p className="text-[13px] sm:text-[14px] text-slate-500 mt-1.5 sm:mt-2 font-medium tracking-wide">Monitor real-time candidate scraping operations running on your VPS.</p>
           </div>
-          <Link href="/bot-analytics">
+          <Link href="/bot-analytics" className="w-full sm:w-auto">
             <motion.div 
-              whileHover={{ scale: 1.05 }}
-              className="flex items-center gap-2.5 px-6 py-3 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-200 rounded-full shadow-sm relative z-10 cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-colors"
+              whileHover={{ scale: 1.03 }}
+              className="flex items-center justify-center gap-2.5 px-5 py-2.5 sm:px-6 sm:py-3 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-200 rounded-full shadow-sm relative z-10 cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-colors w-full sm:w-auto"
             >
-              <Activity className="w-4 h-4 text-blue-600" />
-              <span className="text-blue-700 font-bold text-[13px] tracking-wider uppercase">View Historical Analytics</span>
+              <Activity className="w-4 h-4 text-blue-600 shrink-0" />
+              <span className="text-blue-700 font-bold text-[12px] sm:text-[13px] tracking-wider uppercase">View Analytics</span>
             </motion.div>
           </Link>
         </motion.div>
 
         {/* Global Stats Cards */}
-        <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
           <motion.div 
             whileHover={{ y: -5, scale: 1.02 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            className="p-8 rounded-[24px] bg-white border border-slate-100 shadow-[0_8px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_30px_rgba(147,83,245,0.08)] transition-shadow relative overflow-hidden group"
+            className="p-5 sm:p-8 rounded-[20px] sm:rounded-[24px] bg-white border border-slate-100 shadow-[0_8px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_30px_rgba(147,83,245,0.08)] transition-shadow relative overflow-hidden group"
           >
             <div className="absolute -top-10 -right-10 p-6 opacity-[0.03] transform group-hover:scale-110 transition-transform duration-700">
               <Globe2 className="w-40 h-40 text-[var(--violet)]" />
             </div>
-            <div className="w-14 h-14 rounded-[16px] bg-[var(--violet)]/10 flex items-center justify-center mb-5 text-[var(--violet)] shadow-inner">
-              <Globe2 className="w-7 h-7" />
+            <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-[14px] sm:rounded-[16px] bg-[var(--violet)]/10 flex items-center justify-center mb-3 sm:mb-5 text-[var(--violet)] shadow-inner">
+              <Globe2 className="w-5 h-5 sm:w-7 sm:h-7" />
             </div>
-            <div className="text-[14px] text-slate-400 font-bold mb-1 uppercase tracking-widest">Active Portals</div>
-            <div className="text-4xl font-extrabold text-[var(--ink)] tracking-tight">2</div>
-            <div className="text-[14px] text-slate-500 font-semibold mt-2">CV-Library & TotalJobs</div>
+            <div className="text-[12px] sm:text-[14px] text-slate-400 font-bold mb-1 uppercase tracking-widest">Active Portals</div>
+            <div className="text-3xl sm:text-4xl font-extrabold text-[var(--ink)] tracking-tight">2</div>
+            <div className="text-[13px] sm:text-[14px] text-slate-500 font-semibold mt-1.5 sm:mt-2">CV-Library & TotalJobs</div>
           </motion.div>
           
           <motion.div 
             whileHover={{ y: -5, scale: 1.02 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            className="p-8 rounded-[24px] bg-white border border-slate-100 shadow-[0_8px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_30px_rgba(16,185,129,0.08)] transition-shadow relative overflow-hidden group"
+            className="p-5 sm:p-8 rounded-[20px] sm:rounded-[24px] bg-white border border-slate-100 shadow-[0_8px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_30px_rgba(16,185,129,0.08)] transition-shadow relative overflow-hidden group"
           >
             <div className="absolute -top-10 -right-10 p-6 opacity-[0.03] transform group-hover:scale-110 transition-transform duration-700">
               <Users className="w-40 h-40 text-emerald-500" />
             </div>
-            <div className="w-14 h-14 rounded-[16px] bg-emerald-50 flex items-center justify-center mb-5 text-emerald-600 shadow-inner">
-              <Users className="w-7 h-7" />
+            <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-[14px] sm:rounded-[16px] bg-emerald-50 flex items-center justify-center mb-3 sm:mb-5 text-emerald-600 shadow-inner">
+              <Users className="w-5 h-5 sm:w-7 sm:h-7" />
             </div>
-            <div className="text-[14px] text-slate-400 font-bold mb-1 uppercase tracking-widest">Candidates Processed</div>
-            <div className="text-4xl font-extrabold text-[var(--ink)] flex items-center gap-3 tracking-tight">
-              {isLoading ? <Loader2 className="w-8 h-8 animate-spin text-emerald-500" /> : totalProcessed.toLocaleString()}
+            <div className="text-[12px] sm:text-[14px] text-slate-400 font-bold mb-1 uppercase tracking-widest">Candidates Processed</div>
+            <div className="text-3xl sm:text-4xl font-extrabold text-[var(--ink)] flex items-center gap-3 tracking-tight">
+              {isLoading ? <Loader2 className="w-7 h-7 sm:w-8 sm:h-8 animate-spin text-emerald-500" /> : totalProcessed.toLocaleString()}
             </div>
-            <div className="text-[14px] text-emerald-600 font-bold mt-2 flex items-center gap-1.5">
-              <CheckCircle2 className="w-4.5 h-4.5" /> Processed today
+            <div className="text-[13px] sm:text-[14px] text-emerald-600 font-bold mt-1.5 sm:mt-2 flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4" /> Processed today
             </div>
           </motion.div>
 
           <motion.div 
             whileHover={{ y: -5, scale: 1.02 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            className="p-8 rounded-[24px] bg-white border border-slate-100 shadow-[0_8px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_30px_rgba(59,130,246,0.08)] transition-shadow relative overflow-hidden group"
+            className="p-5 sm:p-8 rounded-[20px] sm:rounded-[24px] bg-white border border-slate-100 shadow-[0_8px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_30px_rgba(59,130,246,0.08)] transition-shadow relative overflow-hidden group col-span-1 sm:col-span-2 md:col-span-1"
           >
             <div className="absolute -top-10 -right-10 p-6 opacity-[0.03] transform group-hover:scale-110 transition-transform duration-700">
               <ShieldCheck className="w-40 h-40 text-blue-500" />
             </div>
-            <div className="w-14 h-14 rounded-[16px] bg-blue-50 flex items-center justify-center mb-5 text-blue-600 shadow-inner">
-              <ShieldCheck className="w-7 h-7" />
+            <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-[14px] sm:rounded-[16px] bg-blue-50 flex items-center justify-center mb-3 sm:mb-5 text-blue-600 shadow-inner">
+              <ShieldCheck className="w-5 h-5 sm:w-7 sm:h-7" />
             </div>
-            <div className="text-[14px] text-slate-400 font-bold mb-1 uppercase tracking-widest">Security Bypass</div>
-            <div className="text-4xl font-extrabold text-[var(--ink)] tracking-tight">100%</div>
-            <div className="text-[14px] text-slate-500 font-semibold mt-2">Sessions hijacked successfully</div>
+            <div className="text-[12px] sm:text-[14px] text-slate-400 font-bold mb-1 uppercase tracking-widest">Security Bypass</div>
+            <div className="text-3xl sm:text-4xl font-extrabold text-[var(--ink)] tracking-tight">100%</div>
+            <div className="text-[13px] sm:text-[14px] text-slate-500 font-semibold mt-1.5 sm:mt-2">Sessions hijacked successfully</div>
           </motion.div>
         </motion.div>
 

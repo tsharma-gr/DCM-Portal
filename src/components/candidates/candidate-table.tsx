@@ -360,16 +360,16 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
   return (
     <div className="space-y-4 pt-1">
       {/* Filters Bar */}
-      <div className="flex items-center justify-between gap-[12px] mb-[20px] flex-wrap bg-white/50 border border-border/50 p-2 rounded-[12px] shadow-sm">
-        <div className="flex flex-wrap gap-[12px] items-center">
-          <div className="flex items-center gap-2 ml-1 mr-1 text-muted-foreground">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-[10px] sm:gap-[12px] mb-[16px] sm:mb-[20px] bg-white/50 border border-border/50 p-2 sm:p-2.5 rounded-[12px] shadow-sm">
+        <div className="flex flex-wrap gap-[8px] sm:gap-[12px] items-center">
+          <div className="flex items-center gap-1.5 ml-1 mr-1 text-muted-foreground">
             <Filter className="h-4 w-4" />
-            <span className="text-[12px] font-semibold uppercase tracking-wider">Filters</span>
+            <span className="text-[11px] sm:text-[12px] font-semibold uppercase tracking-wider">Filters</span>
           </div>
           <div className="h-[20px] w-[1px] bg-border mx-1 hidden sm:block"></div>
 
           <Select value={classification} onValueChange={(v) => { if (v) { setClassification(v); setPage(1); } }}>
-            <SelectTrigger className="h-[36px] bg-white border border-border/80 hover:border-border rounded-[8px] px-3 text-[13px] shadow-sm transition-all focus:ring-0 focus:border-[var(--violet)]">
+            <SelectTrigger className="h-[34px] sm:h-[36px] bg-white border border-border/80 hover:border-border rounded-[8px] px-2.5 sm:px-3 text-[12px] sm:text-[13px] shadow-sm transition-all focus:ring-0 focus:border-[var(--violet)] flex-1 sm:flex-none">
               <div className="flex items-center gap-1.5">
                 <span className="text-muted-foreground">Status:</span>
                 <span className="font-medium text-foreground">{classification}</span>
@@ -383,17 +383,17 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
           </Select>
 
           <Select value={dcmType} onValueChange={(v) => { if (v) { setDcmType(v); setPage(1); } }}>
-            <SelectTrigger className="h-[36px] bg-white border border-border/80 hover:border-border rounded-[8px] px-3 text-[13px] shadow-sm transition-all focus:ring-0 focus:border-[var(--violet)]">
+            <SelectTrigger className="h-[34px] sm:h-[36px] bg-white border border-border/80 hover:border-border rounded-[8px] px-2.5 sm:px-3 text-[12px] sm:text-[13px] shadow-sm transition-all focus:ring-0 focus:border-[var(--violet)] flex-1 sm:flex-none">
               <div className="flex items-center gap-1.5">
                 <span className="text-muted-foreground">DCM:</span>
-                <span className="font-medium text-foreground">{dcmType.length > 15 ? dcmType.substring(0,15) + '...' : dcmType}</span>
+                <span className="font-medium text-foreground truncate max-w-[100px] sm:max-w-none">{dcmType.length > 12 ? dcmType.substring(0,12) + '...' : dcmType}</span>
               </div>
             </SelectTrigger>
-            <SelectContent className="w-[580px]">
+            <SelectContent className="w-[90vw] max-w-[580px] sm:w-[580px]">
               <div className="mb-1 pb-1 border-b border-border/50">
                 <SelectItem value="All" className="font-semibold text-[var(--violet)]">All Systems</SelectItem>
               </div>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 max-h-[300px] overflow-y-auto">
                 <SelectItem value="Exterior">Exterior</SelectItem>
                 <SelectItem value="Structural">Structural</SelectItem>
                 <SelectItem value="Windows and Doors">Windows and Doors</SelectItem>
@@ -422,7 +422,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
           </Select>
 
           <Select value={platform} onValueChange={(v) => { if (v) { setPlatform(v); setPage(1); } }}>
-            <SelectTrigger className="h-[36px] bg-white border border-border/80 hover:border-border rounded-[8px] px-3 text-[13px] shadow-sm transition-all focus:ring-0 focus:border-[var(--violet)]">
+            <SelectTrigger className="h-[34px] sm:h-[36px] bg-white border border-border/80 hover:border-border rounded-[8px] px-2.5 sm:px-3 text-[12px] sm:text-[13px] shadow-sm transition-all focus:ring-0 focus:border-[var(--violet)] flex-1 sm:flex-none">
               <div className="flex items-center gap-1.5">
                 <span className="text-muted-foreground">Platform:</span>
                 <span className="font-medium text-foreground">{platform}</span>
@@ -436,7 +436,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
           </Select>
 
           <Select value={limit} onValueChange={(v) => { if (v) { setLimit(v); setPage(1); } }}>
-            <SelectTrigger className="h-[36px] bg-white border border-border/80 hover:border-border rounded-[8px] px-3 text-[13px] shadow-sm transition-all focus:ring-0 focus:border-[var(--violet)] w-[auto]">
+            <SelectTrigger className="h-[34px] sm:h-[36px] bg-white border border-border/80 hover:border-border rounded-[8px] px-2.5 sm:px-3 text-[12px] sm:text-[13px] shadow-sm transition-all focus:ring-0 focus:border-[var(--violet)] w-auto">
               <div className="flex items-center gap-1.5">
                 <span className="text-muted-foreground">Per page:</span>
                 <span className="font-medium text-foreground">{limit}</span>
@@ -451,22 +451,22 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
           </Select>
 
           <div 
-            className="relative flex items-center group h-[36px] bg-white border border-border/80 rounded-[8px] shadow-sm hover:border-border transition-all focus-within:border-[var(--violet)] focus-within:shadow-[0_0_0_2px_rgba(147,83,245,0.1)] px-3 cursor-pointer"
+            className="relative flex items-center group h-[34px] sm:h-[36px] bg-white border border-border/80 rounded-[8px] shadow-sm hover:border-border transition-all focus-within:border-[var(--violet)] focus-within:shadow-[0_0_0_2px_rgba(147,83,245,0.1)] px-2.5 sm:px-3 cursor-pointer flex-1 sm:flex-none"
             onClick={() => dateInputRef.current?.showPicker()}
           >
-            <span className="text-muted-foreground text-[13px] font-medium mr-2 pointer-events-none">Date:</span>
+            <span className="text-muted-foreground text-[12px] sm:text-[13px] font-medium mr-1.5 pointer-events-none">Date:</span>
             <div className="relative flex items-center h-full pointer-events-none">
               <Input 
                 ref={dateInputRef}
                 type="date"
                 value={date}
                 onChange={(e) => { setDate(e.target.value); setPage(1); }}
-                className="w-[105px] p-0 h-auto border-none shadow-none text-[var(--ink)] text-[13px] font-medium focus-visible:ring-0 bg-transparent pointer-events-auto cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-clear-button]:hidden relative z-10"
+                className="w-[100px] sm:w-[105px] p-0 h-auto border-none shadow-none text-[var(--ink)] text-[12px] sm:text-[13px] font-medium focus-visible:ring-0 bg-transparent pointer-events-auto cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-clear-button]:hidden relative z-10"
               />
             </div>
             
-            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-[var(--violet)]/10 ml-1 shrink-0 transition-colors group-hover:bg-[var(--violet)]/20 pointer-events-none">
-              <CalendarIcon className="h-3.5 w-3.5 text-[var(--violet)]" />
+            <div className="flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-md bg-[var(--violet)]/10 ml-1 shrink-0 transition-colors group-hover:bg-[var(--violet)]/20 pointer-events-none">
+              <CalendarIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[var(--violet)]" />
             </div>
 
             {date && (
@@ -474,16 +474,16 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
                 variant="ghost" 
                 size="icon" 
                 onClick={(e) => { e.stopPropagation(); setDate(""); setPage(1); }}
-                className="h-[22px] w-[22px] ml-1 p-0 text-slate-400 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors relative z-20 shrink-0"
+                className="h-[20px] w-[20px] sm:h-[22px] sm:w-[22px] ml-1 p-0 text-slate-400 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors relative z-20 shrink-0"
               >
-                <X className="h-[14px] w-[14px]" />
+                <X className="h-[12px] w-[12px] sm:h-[14px] sm:w-[14px]" />
               </Button>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button onClick={handleExportExcel} className="flex items-center gap-[8px] bg-[var(--violet)] text-white border-none rounded-[10px] p-[10px_16px] text-[13.5px] font-semibold font-inherit cursor-pointer transition-all hover:bg-[var(--violet-deep)] hover:-translate-y-[1px]">
+        <div className="flex items-center gap-2 justify-end shrink-0">
+          <button onClick={handleExportExcel} className="flex items-center justify-center gap-[8px] bg-[var(--violet)] text-white border-none rounded-[10px] px-3 py-2 sm:p-[10px_16px] text-[12.5px] sm:text-[13.5px] font-semibold font-inherit cursor-pointer transition-all hover:bg-[var(--violet-deep)] hover:-translate-y-[1px] w-full sm:w-auto">
             <Download className="h-4 w-4" />
             {selectedIds.size > 0 ? "Export Selected" : "Export Excel"}
           </button>
@@ -497,27 +497,27 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
             initial={{ opacity: 0, y: 50, x: '-50%' }} 
             animate={{ opacity: 1, y: 0, x: '-50%' }}
             exit={{ opacity: 0, y: 50, x: '-50%' }}
-            className="fixed bottom-10 left-[calc(50%_+_125px)] flex items-center gap-3 bg-[#16152b]/70 border border-white/10 rounded-full p-2 pr-3 shadow-[0_8px_32px_rgba(0,0,0,0.2)] z-50 backdrop-blur-xl"
+            className="fixed bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 lg:left-[calc(50%_+_125px)] lg:translate-x-0 flex items-center gap-2 sm:gap-3 bg-[#16152b]/85 border border-white/10 rounded-full p-2 pr-3 shadow-[0_8px_32px_rgba(0,0,0,0.3)] z-50 backdrop-blur-xl max-w-[92vw]"
           >
-            <div className="flex items-center gap-3 pl-3 pr-2 border-r border-white/10">
-              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-[var(--violet)] text-white shadow-sm">
+            <div className="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-3 pr-2 border-r border-white/10">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-[var(--violet)] text-white shadow-sm shrink-0">
                 <CheckSquare className="h-3.5 w-3.5" />
               </div>
-              <span className="font-semibold text-[13.5px] text-white whitespace-nowrap">{selectedIds.size} selected</span>
+              <span className="font-semibold text-[12px] sm:text-[13.5px] text-white whitespace-nowrap">{selectedIds.size} selected</span>
             </div>
             
             <div className="flex items-center gap-1.5">
               <button 
                 onClick={() => setShowDeleteConfirm(true)} 
                 disabled={isBulkUpdating} 
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 text-red-400 rounded-full text-[13px] font-semibold transition-all hover:bg-red-500 hover:text-white disabled:opacity-50 whitespace-nowrap"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-red-500/10 text-red-400 rounded-full text-[12px] sm:text-[13px] font-semibold transition-all hover:bg-red-500 hover:text-white disabled:opacity-50 whitespace-nowrap"
               >
                 {isBulkUpdating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash className="h-3.5 w-3.5" />}
                 Delete
               </button>
               <button 
                 onClick={() => setSelectedIds(new Set())} 
-                className="flex items-center justify-center w-8 h-8 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
                 title="Deselect all"
               >
                 <X className="h-4 w-4" />
@@ -554,14 +554,96 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
         </DialogContent>
       </Dialog>
 
-      {/* Table Section */}
+      {/* Candidates Container (Desktop Table + Mobile Cards) */}
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
         className="bg-card border border-border rounded-[16px] overflow-hidden shadow-[0_1px_2px_rgba(20,15,50,0.03)] flex flex-col"
       >
-        <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-330px)] custom-scrollbar">
+        {/* Mobile View: Cards List (< md) */}
+        <div className="block md:hidden divide-y divide-border">
+          {candidates.length === 0 ? (
+            <div className="flex flex-col items-center justify-center text-center p-8">
+              <div className="w-[48px] h-[48px] rounded-full bg-[var(--violet-glow)] flex items-center justify-center mb-3">
+                <Search className="h-[20px] w-[20px] text-[var(--violet)]" />
+              </div>
+              <h3 className="text-[15px] font-semibold text-[var(--ink)] mb-1">No candidates found</h3>
+              <p className="text-[13px] text-muted-foreground">Try adjusting your filters or search terms.</p>
+            </div>
+          ) : (
+            candidates.map((candidate, i) => {
+              const avatarColors = ["var(--avatar-a)","var(--avatar-b)","var(--avatar-c)","var(--avatar-d)","var(--avatar-e)"];
+              const color = avatarColors[i % avatarColors.length];
+              const initials = candidate.candidate_name ? candidate.candidate_name.split(' ').map((w: string) => w[0]).slice(0,2).join('').toUpperCase() : "??";
+              const pos = (candidate.current_position && candidate.current_position !== "N/A" && candidate.current_position !== "Unknown") 
+                ? candidate.current_position 
+                : (candidate.job_title && candidate.job_title !== "N/A" && candidate.job_title !== "Unknown") 
+                  ? candidate.job_title.split(',')[0].trim() 
+                  : null;
+
+              return (
+                <div 
+                  key={`mobile-${candidate.id}`}
+                  onClick={() => setSelectedCandidate(candidate)}
+                  className="p-3.5 space-y-2.5 hover:bg-[#FBFAFF] active:bg-[#F3EFFE] transition-colors cursor-pointer relative"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div onClick={(e) => e.stopPropagation()} className="pt-0.5">
+                        <input 
+                          type="checkbox" 
+                          className="w-[16px] h-[16px] accent-[var(--violet)] cursor-pointer" 
+                          checked={selectedIds.has(candidate.id)}
+                          onChange={() => toggleSelect(candidate.id)}
+                        />
+                      </div>
+                      <div 
+                        className="w-[36px] h-[36px] rounded-[10px] flex items-center justify-center text-[12px] font-extrabold text-white shrink-0 shadow-sm" 
+                        style={{ background: color }}
+                      >
+                        {initials}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-bold text-[14px] text-[var(--ink)] truncate leading-tight">{candidate.candidate_name}</h4>
+                        {pos && <p className="text-[12px] text-slate-400 truncate mt-0.5">{pos}</p>}
+                      </div>
+                    </div>
+                    <div className="shrink-0">
+                      {getClassificationBadge(candidate.classification)}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100 text-[12px]">
+                    <div className="flex items-center gap-2">
+                      {getStatusBadge(candidate.status)}
+                      <span className="border border-border rounded-[6px] px-2 py-0.5 text-[11px] font-medium text-slate-500">
+                        {candidate.platform_name}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1 text-slate-400 text-[11px]">
+                      {candidate.location && candidate.location !== 'Unknown' && (
+                        <span className="flex items-center gap-1 text-slate-600 truncate max-w-[110px]">
+                          <MapPin className="h-3 w-3 text-[#EC4899] shrink-0" />
+                          <span className="truncate">{candidate.location}</span>
+                        </span>
+                      )}
+                      {candidate.processed_timestamp && (
+                        <span className="font-mono text-slate-400">
+                          {new Date(candidate.processed_timestamp).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Desktop View: Full Table (>= md) */}
+        <div className="hidden md:block overflow-x-auto overflow-y-auto max-h-[calc(100vh-330px)] custom-scrollbar">
           <table className="w-full border-collapse">
             <thead>
               <tr>
@@ -691,8 +773,8 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
         </div>
         
         {/* Pagination */}
-        <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-border">
-          <p className="text-[13.5px] text-slate-500 tracking-wide">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-white border-t border-border">
+          <p className="text-[12.5px] sm:text-[13.5px] text-slate-500 tracking-wide text-center sm:text-left">
             Showing <span className="font-bold text-[var(--ink)]">{candidates.length}</span> of <span className="font-bold text-[var(--ink)]">{localTotalCount}</span> candidates
           </p>
           <div className="flex items-center space-x-1.5">
@@ -706,7 +788,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
               <ChevronLeft className="h-4 w-4" />
             </Button>
             
-            <div className="px-3 py-1 bg-[var(--violet)]/10 text-[var(--violet)] text-[13px] font-bold rounded-[10px] border border-[var(--violet)]/20 mx-1">
+            <div className="px-3 py-1 bg-[var(--violet)]/10 text-[var(--violet)] text-[12.5px] sm:text-[13px] font-bold rounded-[10px] border border-[var(--violet)]/20 mx-1">
               Page {page}
             </div>
             
