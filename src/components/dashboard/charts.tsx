@@ -125,8 +125,8 @@ export function DashboardCharts({ data }: ChartsProps) {
             <CardTitle className="font-heading text-[17px] font-extrabold tracking-tight text-[var(--ink)]">Daily Processing Trend</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-[300px] w-full min-w-0">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <AreaChart data={trendData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                   <defs>
                     <linearGradient id="colorFIT" x1="0" y1="0" x2="0" y2="1">
@@ -160,7 +160,7 @@ export function DashboardCharts({ data }: ChartsProps) {
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
-        className="col-span-3 print:w-full print:break-inside-avoid"
+        className="col-span-3 print:w-full print:break-inside-avoid min-w-0"
       >
         <Card className="h-full bg-card/60 backdrop-blur-md border-border/50 shadow-sm print:border-none print:shadow-none relative overflow-hidden group hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300">
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-pink-500/80 to-rose-500/80"></div>
@@ -168,8 +168,8 @@ export function DashboardCharts({ data }: ChartsProps) {
             <CardTitle className="font-heading text-[17px] font-extrabold tracking-tight text-[var(--ink)]">Classification Overview</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-[300px] w-full min-w-0">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <PieChart>
                   <Pie
                     data={classificationData}
@@ -206,7 +206,7 @@ export function DashboardCharts({ data }: ChartsProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.3 }}
-        className="col-span-4 print:w-full print:break-inside-avoid"
+        className="col-span-4 print:w-full print:break-inside-avoid min-w-0"
       >
         <Card className="h-full bg-card/60 backdrop-blur-md border-border/50 shadow-sm print:border-none print:shadow-none relative overflow-hidden group hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300">
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400/80 to-orange-500/80"></div>
@@ -214,8 +214,8 @@ export function DashboardCharts({ data }: ChartsProps) {
             <CardTitle className="font-heading text-[17px] font-extrabold tracking-tight text-[var(--ink)]">Platform Distribution</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[250px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-[250px] w-full min-w-0">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <BarChart data={platformData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
                   <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />

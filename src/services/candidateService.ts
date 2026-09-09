@@ -62,11 +62,41 @@ export const candidateService = {
   async getDashboardSummary() {
     try {
       const { data, error } = await supabase.rpc("get_dashboard_summary");
-      if (!error && data) {
-        return data;
+      if (!error && data && data.totals) {
+        const t = data.trends || {};
+        
+        const calcTrend = (current: number, previous: number, label: string) => {
+          if (!previous || previous === 0) {
+            return current > 0 ? `+100% from ${label}` : `0% from ${label}`;
+          }
+          const diff = Math.round(((current - previous) / previous) * 100);
+          return `${diff >= 0 ? '+' : ''}${diff}% from ${label}`;
+        };
+
+        const totals: CandidateStats = {
+          total: Number(data.totals.total) || 0,
+          fit: Number(data.totals.fit) || 0,
+          unfit: Number(data.totals.unfit) || 0,
+          processedToday: Number(data.totals.processedToday) || 0,
+          activeDCMs: Number(data.totals.activeDCMs) || 0,
+          trends: {
+            total: calcTrend(Number(t.candidatesThisMonth || 0), Number(t.candidatesLastMonth || 0), "last month"),
+            fit: calcTrend(Number(t.fitThisWeek || 0), Number(t.fitLastWeek || 0), "last week"),
+            unfit: calcTrend(Number(t.unfitThisWeek || 0), Number(t.unfitLastWeek || 0), "last week"),
+            processedToday: "Real-time updates",
+            activeDCMs: `across ${data.totals.uniquePlatforms || 0} platform${(data.totals.uniquePlatforms || 0) !== 1 ? 's' : ''}`
+          }
+        };
+
+        const chartData = (data.chartData || []).map((c: any) => ({
+          ...c,
+          classification: (c.classification === "Pending" ? "Error" : c.classification)
+        }));
+
+        return { totals, chartData };
       }
     } catch (err) {
-      console.warn("RPC get_dashboard_summary not installed yet, falling back to optimized queries", err);
+      console.warn("RPC get_dashboard_summary failed or not installed, falling back", err);
     }
 
     // High performance fallback

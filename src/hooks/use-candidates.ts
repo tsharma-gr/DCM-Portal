@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { candidateService } from "@/services/candidateService";
 import { Candidate, CandidateStats } from "@/types/candidate";
@@ -19,51 +20,28 @@ export function useDashboardData() {
         setIsLoading(true);
       }
       try {
-        const [statsData, chart, { data: recent }] = await Promise.all([
-          candidateService.getDashboardStats(),
-          candidateService.getChartData(),
+        const [summary, { data: recent }] = await Promise.all([
+          candidateService.getDashboardSummary(),
           candidateService.getCandidates(1, 10),
         ]);
         
-        // Accurately calculate active DCMs across all 13k+ candidates
-        const uniqueDCMs = new Set(chart.filter(c => c.dcm_type && c.dcm_type !== "N/A" && c.dcm_type !== "Unknown").map(c => c.dcm_type));
-        statsData.activeDCMs = uniqueDCMs.size;
-        
-        // Calculate dynamic trends
-        const now = new Date();
-        const oneMonthAgo = new Date(now);
-        oneMonthAgo.setMonth(now.getMonth() - 1);
-        const twoMonthsAgo = new Date(now);
-        twoMonthsAgo.setMonth(now.getMonth() - 2);
+        const statsData = summary.totals;
+        const chart = summary.chartData;
 
-        const oneWeekAgo = new Date(now);
-        oneWeekAgo.setDate(now.getDate() - 7);
-        const twoWeeksAgo = new Date(now);
-        twoWeeksAgo.setDate(now.getDate() - 14);
+        // If trends were not computed by RPC (fallback case), compute fallback trend strings safely
+        if (!statsData.trends) {
+          const uniqueDCMs = new Set(chart.filter((c: any) => c.dcm_type && c.dcm_type !== "N/A" && c.dcm_type !== "Unknown").map((c: any) => c.dcm_type));
+          statsData.activeDCMs = uniqueDCMs.size;
+          const uniquePlatforms = new Set(chart.filter((c: any) => c.platform_name && c.platform_name !== "N/A" && c.platform_name !== "Unknown").map((c: any) => c.platform_name));
 
-        const parseDate = (d: string | null | undefined) => d ? new Date(d).getTime() : 0;
-
-        const candidatesThisMonth = chart.filter(c => parseDate(c.processed_timestamp) >= oneMonthAgo.getTime()).length;
-        const candidatesLastMonth = chart.filter(c => parseDate(c.processed_timestamp) >= twoMonthsAgo.getTime() && parseDate(c.processed_timestamp) < oneMonthAgo.getTime()).length;
-        const totalTrendVal = candidatesLastMonth === 0 ? 0 : Math.round(((candidatesThisMonth - candidatesLastMonth) / candidatesLastMonth) * 100);
-
-        const fitThisWeek = chart.filter(c => c.classification === "FIT" && parseDate(c.processed_timestamp) >= oneWeekAgo.getTime()).length;
-        const fitLastWeek = chart.filter(c => c.classification === "FIT" && parseDate(c.processed_timestamp) >= twoWeeksAgo.getTime() && parseDate(c.processed_timestamp) < oneWeekAgo.getTime()).length;
-        const fitTrendVal = fitLastWeek === 0 ? 0 : Math.round(((fitThisWeek - fitLastWeek) / fitLastWeek) * 100);
-
-        const unfitThisWeek = chart.filter(c => c.classification === "UNFIT" && parseDate(c.processed_timestamp) >= oneWeekAgo.getTime()).length;
-        const unfitLastWeek = chart.filter(c => c.classification === "UNFIT" && parseDate(c.processed_timestamp) >= twoWeeksAgo.getTime() && parseDate(c.processed_timestamp) < oneWeekAgo.getTime()).length;
-        const unfitTrendVal = unfitLastWeek === 0 ? 0 : Math.round(((unfitThisWeek - unfitLastWeek) / unfitLastWeek) * 100);
-
-        const uniquePlatforms = new Set(chart.filter(c => c.platform_name && c.platform_name !== "N/A" && c.platform_name !== "Unknown").map(c => c.platform_name));
-
-        statsData.trends = {
-          total: `${totalTrendVal > 0 ? '+' : ''}${totalTrendVal}% from last month`,
-          fit: `${fitTrendVal > 0 ? '+' : ''}${fitTrendVal}% from last week`,
-          unfit: `${unfitTrendVal > 0 ? '+' : ''}${unfitTrendVal}% from last week`,
-          processedToday: "Real-time updates",
-          activeDCMs: `across ${uniquePlatforms.size} platform${uniquePlatforms.size !== 1 ? 's' : ''}`
-        };
+          statsData.trends = {
+            total: "Up to date",
+            fit: "Up to date",
+            unfit: "Up to date",
+            processedToday: "Real-time updates",
+            activeDCMs: `across ${uniquePlatforms.size} platform${uniquePlatforms.size !== 1 ? 's' : ''}`
+          };
+        }
         
         dashboardCache = { stats: statsData, chartData: chart, recentCandidates: recent };
 
