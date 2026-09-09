@@ -192,14 +192,7 @@ export default function BotStatusPage() {
             return bot as BotStatusData;
           });
 
-          // Sort so active & completed bots appear at top, followed by waiting bots
-          return formatted.sort((a, b) => {
-            const statusOrder = { running: 0, completed: 1, pending: 2 };
-            if (statusOrder[a.status] !== statusOrder[b.status]) {
-              return statusOrder[a.status] - statusOrder[b.status];
-            }
-            return b.candidates - a.candidates;
-          });
+          return formatted;
         };
 
         setQ1Bots(processQueue(QUEUE1_CONFIG));
