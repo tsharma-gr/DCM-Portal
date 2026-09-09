@@ -74,33 +74,45 @@ export default function BotStatusPage() {
         startOfToday.setHours(0, 0, 0, 0);
         const todayIso = startOfToday.toISOString();
 
-        const { data: allData, error } = await supabase
-          .from("candidates")
-          .select("dcm_type, processed_timestamp")
-          .gte("processed_timestamp", todayIso)
-          .order("processed_timestamp", { ascending: false })
-          .limit(5000);
-
-        if (error) throw error;
-        const rows = allData || [];
-
         const statsMap: Record<string, { count: number, earliestTs: number, latestTs: number }> = {};
-        const total = rows.length;
+        let total = 0;
 
-        if (rows.length > 0) {
+        // Try RPC first for exact count across all 1952+ candidates without 1000 row truncation
+        const { data: rpcData, error: rpcErr } = await supabase.rpc("get_today_bot_status");
+
+        if (!rpcErr && rpcData) {
+          total = Number(rpcData.totalProcessed) || 0;
+          const dcmStatsArr = rpcData.dcmStats || [];
+          dcmStatsArr.forEach((item: any) => {
+            if (item.dcm_type) {
+              const key = item.dcm_type.trim().toLowerCase();
+              statsMap[key] = {
+                count: Number(item.count) || 0,
+                earliestTs: Number(item.earliestTs) || 0,
+                latestTs: Number(item.latestTs) || 0
+              };
+            }
+          });
+        } else {
+          // Fallback: head count query + pagination
+          const [{ count: exactCount }, { data: allData }] = await Promise.all([
+            supabase.from("candidates").select("*", { count: "exact", head: true }).gte("processed_timestamp", todayIso),
+            supabase.from("candidates").select("dcm_type, processed_timestamp").gte("processed_timestamp", todayIso).order("processed_timestamp", { ascending: false }).limit(2000)
+          ]);
+
+          total = exactCount || (allData || []).length;
+          const rows = allData || [];
+
           rows.forEach(row => {
-            if (!statsMap[row.dcm_type]) {
-              statsMap[row.dcm_type] = { count: 0, earliestTs: Infinity, latestTs: 0 };
+            if (!row.dcm_type) return;
+            const key = row.dcm_type.trim().toLowerCase();
+            if (!statsMap[key]) {
+              statsMap[key] = { count: 0, earliestTs: Infinity, latestTs: 0 };
             }
-            statsMap[row.dcm_type].count += 1;
-            
+            statsMap[key].count += 1;
             const rowTs = new Date(row.processed_timestamp).getTime();
-            if (rowTs > statsMap[row.dcm_type].latestTs) {
-              statsMap[row.dcm_type].latestTs = rowTs;
-            }
-            if (rowTs < statsMap[row.dcm_type].earliestTs) {
-              statsMap[row.dcm_type].earliestTs = rowTs;
-            }
+            if (rowTs > statsMap[key].latestTs) statsMap[key].latestTs = rowTs;
+            if (rowTs < statsMap[key].earliestTs) statsMap[key].earliestTs = rowTs;
           });
         }
 
@@ -113,21 +125,24 @@ export default function BotStatusPage() {
         const realStatusMap: Record<string, { status: string, last_updated: string }> = {};
         if (statusData) {
           statusData.forEach(row => {
-            realStatusMap[row.dcm_type] = {
-              status: row.status,
-              last_updated: row.last_updated
-            };
+            if (row.dcm_type) {
+              realStatusMap[row.dcm_type.trim().toLowerCase()] = {
+                status: row.status,
+                last_updated: row.last_updated
+              };
+            }
           });
         }
 
         const now = Date.now();
         const startOfTodayMs = startOfToday.getTime();
-        const RUNNING_THRESHOLD_MS = 7 * 60 * 1000; // 7 minutes
+        const RUNNING_THRESHOLD_MS = 15 * 60 * 1000; // 15 minutes
 
         const processQueue = (config: typeof QUEUE1_CONFIG) => {
           const processed = config.map(bot => {
-            const stats = statsMap[bot.dcmType] || { count: 0, earliestTs: 0, latestTs: 0 };
-            const realStatusRecord = realStatusMap[bot.dcmType];
+            const key = bot.dcmType.trim().toLowerCase();
+            const stats = statsMap[key] || { count: 0, earliestTs: 0, latestTs: 0 };
+            const realStatusRecord = realStatusMap[key];
             const dbStatus = realStatusRecord?.status;
             const dbLastUpdated = realStatusRecord?.last_updated ? new Date(realStatusRecord.last_updated).getTime() : 0;
 
@@ -135,7 +150,7 @@ export default function BotStatusPage() {
 
             let status: "pending" | "running" | "completed" = "pending";
             let effectiveLatestTs = stats.latestTs > 0 ? stats.latestTs : (isUpdatedToday ? dbLastUpdated : 0);
-            let effectiveEarliestTs = stats.earliestTs < Infinity ? stats.earliestTs : (isUpdatedToday ? dbLastUpdated : 0);
+            let effectiveEarliestTs = stats.earliestTs < Infinity && stats.earliestTs > 0 ? stats.earliestTs : (isUpdatedToday ? dbLastUpdated : 0);
 
             if (dbStatus === "RUNNING" && (isUpdatedToday || now - dbLastUpdated < 30 * 60 * 1000)) {
               status = "running";
@@ -161,7 +176,7 @@ export default function BotStatusPage() {
             };
           });
 
-          return processed.map((bot, index, array) => {
+          const formatted = processed.map((bot) => {
             const formatTime = (ts: number) => ts > 0 ? new Date(ts).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London' }) : "--:--";
 
             if (bot.status === "pending") {
@@ -171,18 +186,19 @@ export default function BotStatusPage() {
 
             const latestStr = formatTime(bot.lastTimestamp);
             const startStr = formatTime(bot.earliestTs);
-            
-            let endStr = bot.status === "running" ? "Running" : latestStr;
-
-            // If this bot completed, check if it's waiting for the next bot in the queue
-            const timeSinceLast = now - bot.lastTimestamp;
-            const nextBot = array[index + 1];
-            if (bot.status === "completed" && nextBot && nextBot.candidates === 0 && timeSinceLast < 15 * 60 * 1000 && bot.lastTimestamp > 0) {
-              endStr += " (Waiting next bot)";
-            }
+            const endStr = bot.status === "running" ? "Running" : latestStr;
 
             bot.timeLabel = `Latest: ${latestStr} | Start: ${startStr} | End: ${endStr}`;
             return bot as BotStatusData;
+          });
+
+          // Sort so active & completed bots appear at top, followed by waiting bots
+          return formatted.sort((a, b) => {
+            const statusOrder = { running: 0, completed: 1, pending: 2 };
+            if (statusOrder[a.status] !== statusOrder[b.status]) {
+              return statusOrder[a.status] - statusOrder[b.status];
+            }
+            return b.candidates - a.candidates;
           });
         };
 

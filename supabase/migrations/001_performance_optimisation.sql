@@ -133,3 +133,43 @@ BEGIN
   RETURN result;
 END;
 $$;
+
+-- 3. Fast RPC function for Live Bot Status page
+CREATE OR REPLACE FUNCTION get_today_bot_status()
+RETURNS json
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  result json;
+  today_start timestamp with time zone := date_trunc('day', NOW());
+BEGIN
+  SELECT json_build_object(
+    'totalProcessed', (
+      SELECT COUNT(*) FROM candidates WHERE processed_timestamp >= today_start
+    ),
+    'dcmStats', (
+      SELECT json_agg(
+        json_build_object(
+          'dcm_type', dcm_type,
+          'count', count_val,
+          'earliestTs', extract(epoch from earliest_ts) * 1000,
+          'latestTs', extract(epoch from latest_ts) * 1000
+        )
+      )
+      FROM (
+        SELECT 
+          dcm_type,
+          COUNT(*) as count_val,
+          MIN(processed_timestamp) as earliest_ts,
+          MAX(processed_timestamp) as latest_ts
+        FROM candidates
+        WHERE processed_timestamp >= today_start
+          AND dcm_type IS NOT NULL
+        GROUP BY dcm_type
+      ) s
+    )
+  ) INTO result;
+
+  RETURN result;
+END;
+$$;
