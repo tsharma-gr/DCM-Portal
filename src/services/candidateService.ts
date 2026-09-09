@@ -59,6 +59,28 @@ export const candidateService = {
     return { data: mappedData as Candidate[], count: count || 0 };
   },
 
+  async getDashboardSummary() {
+    try {
+      const { data, error } = await supabase.rpc("get_dashboard_summary");
+      if (!error && data) {
+        return data;
+      }
+    } catch (err) {
+      console.warn("RPC get_dashboard_summary not installed yet, falling back to optimized queries", err);
+    }
+
+    // High performance fallback
+    const [stats, chartData] = await Promise.all([
+      this.getDashboardStats(),
+      this.getChartData(),
+    ]);
+
+    return {
+      totals: stats,
+      chartData,
+    };
+  },
+
   async getDashboardStats(): Promise<CandidateStats> {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -80,37 +102,24 @@ export const candidateService = {
       fit: fitCount || 0,
       unfit: unfitCount || 0,
       processedToday: processedTodayCount || 0,
-      activeDCMs: 0, // Will be calculated accurately on the frontend from full chart data
+      activeDCMs: 0,
     };
   },
 
   async getChartData() {
-    let allData: any[] = [];
-    const limit = 1000;
-    
-    // 1. Get total count
-    const { count } = await supabase.from("candidates").select("*", { count: "exact", head: true });
-    
-    if (count) {
-      // 2. Fetch all pages concurrently
-      const totalPages = Math.ceil(count / limit);
-      const promises = [];
-      for (let i = 0; i < totalPages; i++) {
-        promises.push(
-          supabase
-            .from("candidates")
-            .select("classification, platform_name, dcm_type, processed_timestamp")
-            .range(i * limit, (i + 1) * limit - 1)
-        );
-      }
-      
-      const results = await Promise.all(promises);
-      results.forEach(res => {
-        if (res.data) allData = allData.concat(res.data);
-      });
+    // Optimized: Fetch recent 2000 records for chart visualization instead of downloading the entire database in a loop
+    const { data, error } = await supabase
+      .from("candidates")
+      .select("classification, platform_name, dcm_type, processed_timestamp")
+      .order("processed_timestamp", { ascending: false })
+      .limit(2000);
+
+    if (error) {
+      console.error("Error fetching chart data:", error);
+      return [];
     }
 
-    return allData.map((c: any) => ({
+    return (data || []).map((c: any) => ({
       ...c,
       classification: (c.classification === "Pending" ? "Error" : c.classification) as "FIT" | "UNFIT" | "Error"
     }));

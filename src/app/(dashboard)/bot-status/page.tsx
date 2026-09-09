@@ -74,31 +74,21 @@ export default function BotStatusPage() {
         startOfToday.setHours(0, 0, 0, 0);
         const todayIso = startOfToday.toISOString();
 
-        let allData: any[] = [];
-        let from = 0;
-        const step = 1000;
-        
-        while (true) {
-          const { data, error } = await supabase
-            .from("candidates")
-            .select("dcm_type, processed_timestamp")
-            .gte("processed_timestamp", todayIso)
-            .order("processed_timestamp", { ascending: false })
-            .range(from, from + step - 1);
+        const { data: allData, error } = await supabase
+          .from("candidates")
+          .select("dcm_type, processed_timestamp")
+          .gte("processed_timestamp", todayIso)
+          .order("processed_timestamp", { ascending: false })
+          .limit(5000);
 
-          if (error) throw error;
-          if (!data || data.length === 0) break;
-
-          allData = allData.concat(data);
-          if (data.length < step) break;
-          from += step;
-        }
+        if (error) throw error;
+        const rows = allData || [];
 
         const statsMap: Record<string, { count: number, earliestTs: number, latestTs: number }> = {};
-        const total = allData.length;
+        const total = rows.length;
 
-        if (allData.length > 0) {
-          allData.forEach(row => {
+        if (rows.length > 0) {
+          rows.forEach(row => {
             if (!statsMap[row.dcm_type]) {
               statsMap[row.dcm_type] = { count: 0, earliestTs: Infinity, latestTs: 0 };
             }

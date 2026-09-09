@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { candidateService } from "@/services/candidateService";
 import { Candidate, CandidateStats } from "@/types/candidate";
 
@@ -94,18 +94,23 @@ export function useCandidatesList(searchParams: Record<string, string | undefine
   
   const [candidates, setCandidates] = useState<Candidate[]>(candidatesCache[cacheKey]?.data || []);
   const [count, setCount] = useState(candidatesCache[cacheKey]?.count || 0);
-  const [isLoading, setIsLoading] = useState(!candidatesCache[cacheKey]);
-  const [isFetching, setIsFetching] = useState(false);
-  const initialLoad = useRef(!candidatesCache[cacheKey]);
+  const [isLoading, setIsLoading] = useState(!candidatesCache[cacheKey] && Object.keys(candidatesCache).length === 0);
+  const [isFetching, setIsFetching] = useState(!candidatesCache[cacheKey]);
 
   useEffect(() => {
     let mounted = true;
     
-    const fetchData = async () => {
+    // If we have cached data for this exact query, set it immediately
+    if (candidatesCache[cacheKey]) {
+      setCandidates(candidatesCache[cacheKey].data);
+      setCount(candidatesCache[cacheKey].count);
+      setIsLoading(false);
+      setIsFetching(false);
+    } else {
       setIsFetching(true);
-      if (initialLoad.current) {
-        setIsLoading(true);
-      }
+    }
+
+    const fetchData = async () => {
       try {
         const page = Number(searchParams.page) || 1;
         const limit = Number(searchParams.limit) || 10;
@@ -130,7 +135,6 @@ export function useCandidatesList(searchParams: Record<string, string | undefine
         if (mounted) {
           setIsLoading(false);
           setIsFetching(false);
-          initialLoad.current = false;
         }
       }
     };

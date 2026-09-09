@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Config options here
+  experimental: {
+    optimizePackageImports: ["lucide-react", "framer-motion", "recharts", "@radix-ui/react-select", "@radix-ui/react-dialog"],
+  },
+  reactStrictMode: true,
 };
 
 export default nextConfig;

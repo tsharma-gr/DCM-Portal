@@ -84,7 +84,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
         setSearch(searchInput);
         setPage(1);
       }
-    }, 1000);
+    }, 300);
     return () => clearTimeout(handler);
   }, [searchInput, search]);
 
