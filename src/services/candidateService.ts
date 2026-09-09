@@ -93,7 +93,18 @@ export const candidateService = {
           classification: (c.classification === "Pending" ? "Error" : c.classification)
         }));
 
-        return { totals, chartData };
+        const chartAggregates = {
+          dailyTrend: data.dailyTrend || [],
+          platformDistribution: data.platformDistribution || [],
+          dcmDistribution: data.dcmDistribution || [],
+          classificationOverview: [
+            { name: "FIT", value: Number(data.totals.fit) || 0 },
+            { name: "UNFIT", value: Number(data.totals.unfit) || 0 },
+            ...(data.totals.error > 0 ? [{ name: "Error", value: Number(data.totals.error) || 0 }] : [])
+          ]
+        };
+
+        return { totals, chartData, chartAggregates };
       }
     } catch (err) {
       console.warn("RPC get_dashboard_summary failed or not installed, falling back", err);

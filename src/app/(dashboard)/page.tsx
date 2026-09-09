@@ -7,7 +7,7 @@ import DashboardLoading from "./loading";
 import { Suspense } from "react";
 
 function DashboardContent() {
-  const { stats, chartData, isLoading } = useDashboardData();
+  const { stats, chartData, chartAggregates, isLoading } = useDashboardData();
 
   if (isLoading || !stats) {
     return <DashboardLoading />;
@@ -22,7 +22,7 @@ function DashboardContent() {
       </div>
 
       <StatCards stats={stats} />
-      <DashboardCharts data={chartData} />
+      <DashboardCharts data={chartData} aggregates={chartAggregates} />
     </div>
   );
 }

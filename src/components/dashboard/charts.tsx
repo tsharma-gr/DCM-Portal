@@ -22,6 +22,12 @@ import { motion } from "framer-motion";
 
 interface ChartsProps {
   data: Pick<Candidate, "classification" | "platform_name" | "dcm_type" | "processed_timestamp">[];
+  aggregates?: {
+    dailyTrend?: { date: string; FIT: number; UNFIT: number }[];
+    classificationOverview?: { name: string; value: number }[];
+    platformDistribution?: { name: string; value: number }[];
+    dcmDistribution?: { name: string; size: number }[];
+  };
 }
 
 const COLORS = {
@@ -32,9 +38,12 @@ const COLORS = {
   Secondary: "#EC4899",
 };
 
-export function DashboardCharts({ data }: ChartsProps) {
+export function DashboardCharts({ data, aggregates }: ChartsProps) {
   // Process Classification Data
   const classificationData = useMemo(() => {
+    if (aggregates?.classificationOverview && aggregates.classificationOverview.length > 0) {
+      return aggregates.classificationOverview;
+    }
     const counts = data.reduce(
       (acc, curr) => {
         const cls = curr.classification || "Error";
@@ -44,10 +53,13 @@ export function DashboardCharts({ data }: ChartsProps) {
       {} as Record<string, number>
     );
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
-  }, [data]);
+  }, [data, aggregates]);
 
   // Process Platform Data
   const platformData = useMemo(() => {
+    if (aggregates?.platformDistribution && aggregates.platformDistribution.length > 0) {
+      return aggregates.platformDistribution;
+    }
     const counts = data.reduce(
       (acc, curr) => {
         const plat = curr.platform_name || "Unknown";
@@ -61,10 +73,17 @@ export function DashboardCharts({ data }: ChartsProps) {
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 5); // top 5
-  }, [data]);
+  }, [data, aggregates]);
 
   // Process Trend Data (Last 7 days)
   const trendData = useMemo(() => {
+    if (aggregates?.dailyTrend && aggregates.dailyTrend.length > 0) {
+      return aggregates.dailyTrend.map(d => ({
+        ...d,
+        date: new Date(d.date).toLocaleDateString('en-GB', { month: 'short', day: 'numeric', timeZone: 'Europe/London' })
+      }));
+    }
+
     const days: Record<string, { date: string; FIT: number; UNFIT: number }> = {};
     
     // Initialize last 7 days
@@ -88,10 +107,18 @@ export function DashboardCharts({ data }: ChartsProps) {
       ...d,
       date: new Date(d.date).toLocaleDateString('en-GB', { month: 'short', day: 'numeric', timeZone: 'Europe/London' })
     }));
-  }, [data]);
+  }, [data, aggregates]);
 
-  // Process DCM Distribution Data for Treemap
+  // Process DCM Distribution Data
   const dcmData = useMemo(() => {
+    const vibrantColors = ["#7C3AED", "#8B5CF6", "#A78BFA", "#3B82F6", "#60A5FA", "#EC4899", "#F472B6", "#10B981", "#34D399", "#F59E0B"];
+    if (aggregates?.dcmDistribution && aggregates.dcmDistribution.length > 0) {
+      return aggregates.dcmDistribution.map((item, index) => ({
+        ...item,
+        fill: vibrantColors[index % vibrantColors.length]
+      }));
+    }
+
     const counts = data.reduce(
       (acc, curr) => {
         const dcm = curr.dcm_type || "Unknown";
@@ -100,7 +127,6 @@ export function DashboardCharts({ data }: ChartsProps) {
       },
       {} as Record<string, number>
     );
-    const vibrantColors = ["#7C3AED", "#8B5CF6", "#A78BFA", "#3B82F6", "#60A5FA", "#EC4899", "#F472B6", "#10B981", "#34D399", "#F59E0B"];
     return Object.entries(counts)
       .filter(([name]) => name && name !== "N/A" && name !== "Unknown")
       .map(([name, value]) => ({ name, size: value }))
@@ -109,7 +135,7 @@ export function DashboardCharts({ data }: ChartsProps) {
         ...item,
         fill: vibrantColors[index % vibrantColors.length]
       }));
-  }, [data]);
+  }, [data, aggregates]);
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 mt-4 print:flex print:flex-col print:gap-8 print:w-full">

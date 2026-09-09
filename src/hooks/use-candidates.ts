@@ -4,11 +4,12 @@ import { candidateService } from "@/services/candidateService";
 import { Candidate, CandidateStats } from "@/types/candidate";
 
 // Simple global cache for dashboard to prevent UI collapse
-let dashboardCache: { stats: CandidateStats; chartData: Pick<Candidate, "classification" | "platform_name" | "dcm_type" | "processed_timestamp">[]; recentCandidates: Candidate[] } | null = null;
+let dashboardCache: { stats: CandidateStats; chartData: Pick<Candidate, "classification" | "platform_name" | "dcm_type" | "processed_timestamp">[]; chartAggregates?: any; recentCandidates: Candidate[] } | null = null;
 
 export function useDashboardData() {
   const [stats, setStats] = useState<CandidateStats | null>(dashboardCache?.stats || null);
   const [chartData, setChartData] = useState<Pick<Candidate, "classification" | "platform_name" | "dcm_type" | "processed_timestamp">[]>(dashboardCache?.chartData || []);
+  const [chartAggregates, setChartAggregates] = useState<any>(dashboardCache?.chartAggregates || null);
   const [recentCandidates, setRecentCandidates] = useState<Candidate[]>(dashboardCache?.recentCandidates || []);
   const [isLoading, setIsLoading] = useState(!dashboardCache);
 
@@ -27,6 +28,7 @@ export function useDashboardData() {
         
         const statsData = summary.totals;
         const chart = summary.chartData;
+        const aggregates = (summary as any).chartAggregates;
 
         // If trends were not computed by RPC (fallback case), compute fallback trend strings safely
         if (!statsData.trends) {
@@ -43,11 +45,12 @@ export function useDashboardData() {
           };
         }
         
-        dashboardCache = { stats: statsData, chartData: chart, recentCandidates: recent };
+        dashboardCache = { stats: statsData, chartData: chart, chartAggregates: aggregates, recentCandidates: recent };
 
         if (mounted) {
           setStats(statsData);
           setChartData(chart);
+          setChartAggregates(aggregates);
           setRecentCandidates(recent);
         }
       } catch (error) {
@@ -61,7 +64,7 @@ export function useDashboardData() {
     return () => { mounted = false; };
   }, []);
 
-  return { stats, chartData, recentCandidates, isLoading };
+  return { stats, chartData, chartAggregates, recentCandidates, isLoading };
 }
 
 // Simple global cache to prevent UI collapse on router.back() scroll restoration

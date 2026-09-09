@@ -61,6 +61,57 @@ BEGIN
       )
       FROM candidates
     ),
+    'dailyTrend', (
+      SELECT json_agg(
+        json_build_object(
+          'date', to_char(d.day_date, 'YYYY-MM-DD'),
+          'FIT', COALESCE(c.fit_count, 0),
+          'UNFIT', COALESCE(c.unfit_count, 0)
+        ) ORDER BY d.day_date ASC
+      )
+      FROM (
+        SELECT generate_series(
+          date_trunc('day', NOW() - INTERVAL '6 days'),
+          date_trunc('day', NOW()),
+          '1 day'::interval
+        ) AS day_date
+      ) d
+      LEFT JOIN (
+        SELECT 
+          date_trunc('day', processed_timestamp) AS day_date,
+          COUNT(*) FILTER (WHERE classification = 'FIT') AS fit_count,
+          COUNT(*) FILTER (WHERE classification = 'UNFIT') AS unfit_count
+        FROM candidates
+        WHERE processed_timestamp >= date_trunc('day', NOW() - INTERVAL '6 days')
+        GROUP BY date_trunc('day', processed_timestamp)
+      ) c ON d.day_date = c.day_date
+    ),
+    'platformDistribution', (
+      SELECT json_agg(
+        json_build_object('name', platform_name, 'value', count_val)
+      )
+      FROM (
+        SELECT platform_name, COUNT(*) as count_val
+        FROM candidates
+        WHERE platform_name IS NOT NULL AND platform_name NOT IN ('N/A', 'Unknown', '')
+        GROUP BY platform_name
+        ORDER BY count_val DESC
+        LIMIT 5
+      ) p
+    ),
+    'dcmDistribution', (
+      SELECT json_agg(
+        json_build_object('name', dcm_type, 'size', count_val)
+      )
+      FROM (
+        SELECT dcm_type, COUNT(*) as count_val
+        FROM candidates
+        WHERE dcm_type IS NOT NULL AND dcm_type NOT IN ('N/A', 'Unknown', '')
+        GROUP BY dcm_type
+        ORDER BY count_val DESC
+        LIMIT 20
+      ) d
+    ),
     'chartData', (
       SELECT json_agg(
         json_build_object(
