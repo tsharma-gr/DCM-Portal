@@ -136,7 +136,6 @@ export default function BotStatusPage() {
 
         const now = Date.now();
         const startOfTodayMs = startOfToday.getTime();
-        const RUNNING_THRESHOLD_MS = 15 * 60 * 1000; // 15 minutes
 
         const processQueue = (config: typeof QUEUE1_CONFIG) => {
           const processed = config.map(bot => {
@@ -154,11 +153,12 @@ export default function BotStatusPage() {
 
             if (dbStatus === "RUNNING" && (isUpdatedToday || now - dbLastUpdated < 30 * 60 * 1000)) {
               status = "running";
-            } else if (dbStatus === "COMPLETED" && (isUpdatedToday || stats.count > 0)) {
+            } else if (dbStatus === "COMPLETED" && isUpdatedToday) {
               status = "completed";
             } else if (stats.count > 0) {
               const timeSinceLast = now - stats.latestTs;
-              status = timeSinceLast < RUNNING_THRESHOLD_MS ? "running" : "completed";
+              // If candidate inserted within last 5 minutes, bot is actively saving candidates
+              status = timeSinceLast < 5 * 60 * 1000 ? "running" : "completed";
             } else {
               status = "pending";
               effectiveLatestTs = 0;
@@ -176,11 +176,36 @@ export default function BotStatusPage() {
             };
           });
 
+          // Infer current active bot in sequence if no bot is currently saving candidates
+          const hasExplicitRunning = processed.some(b => b.status === "running");
+          if (!hasExplicitRunning) {
+            let lastCompletedIdx = -1;
+            for (let i = processed.length - 1; i >= 0; i--) {
+              if (processed[i].status === "completed" && processed[i].lastTimestamp > 0) {
+                lastCompletedIdx = i;
+                break;
+              }
+            }
+
+            if (lastCompletedIdx >= 0 && lastCompletedIdx < processed.length - 1) {
+              const timeSinceLastCompleted = now - processed[lastCompletedIdx].lastTimestamp;
+              // If the previous bot completed within the last 45 minutes, the next bot in line IS CURRENTLY RUNNING
+              if (timeSinceLastCompleted < 45 * 60 * 1000) {
+                processed[lastCompletedIdx + 1].status = "running";
+              }
+            }
+          }
+
           const formatted = processed.map((bot) => {
             const formatTime = (ts: number) => ts > 0 ? new Date(ts).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London' }) : "--:--";
 
             if (bot.status === "pending") {
               bot.timeLabel = "Start: --:-- | Status: Waiting in Queue";
+              return bot as BotStatusData;
+            }
+
+            if (bot.status === "running" && bot.candidates === 0) {
+              bot.timeLabel = "Status: Initializing Browser & Active in Queue...";
               return bot as BotStatusData;
             }
 
