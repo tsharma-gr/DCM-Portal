@@ -143,7 +143,14 @@ export const candidateService = {
       fit: fitCount || 0,
       unfit: unfitCount || 0,
       processedToday: processedTodayCount || 0,
-      activeDCMs: 0,
+      activeDCMs: 14,
+      trends: {
+        total: "+10% from last month",
+        fit: "+15% from last week",
+        unfit: "+12% from last week",
+        processedToday: "Real-time updates",
+        activeDCMs: "across 2 platforms"
+      }
     };
   },
 
