@@ -205,7 +205,7 @@ export default function BotStatusPage() {
             }
 
             if (bot.status === "running" && bot.candidates === 0) {
-              bot.timeLabel = "Status: Initializing Browser & Active in Queue...";
+              bot.timeLabel = "Status: Starting & Initializing Browser in Queue...";
               return bot as BotStatusData;
             }
 
