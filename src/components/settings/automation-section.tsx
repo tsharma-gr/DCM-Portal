@@ -18,6 +18,7 @@ const DCM_TYPES = [
   "Demolition DCM",
   "Passive Fire Protection DCM",
   "Consultancy Civil & Structural DCM",
+  "Consultancy New DCM",
   "Health & Safety DCM",
   "Waste Management DCM",
   "Firesec DCM",
