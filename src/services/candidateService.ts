@@ -62,26 +62,67 @@ export const candidateService = {
   },
 
   async getDashboardSummary() {
-    // Fast, ultra-reliable direct query strategy to avoid RPC 500 statement timeouts
+    try {
+      const response = await db.rpc("get_dashboard_summary");
+      const resData = response?.data as unknown as Record<string, any>;
+      if (!response.error && resData && resData.totals) {
+        const t = resData.trends || {};
+        
+        const calcTrend = (current: number, previous: number, label: string) => {
+          if (!previous || previous === 0) {
+            return current > 0 ? `+100% from ${label}` : `0% from ${label}`;
+          }
+          const diff = Math.round(((current - previous) / previous) * 100);
+          return `${diff >= 0 ? '+' : ''}${diff}% from ${label}`;
+        };
+
+        const totals: CandidateStats = {
+          total: Number(resData.totals.total) || 0,
+          fit: Number(resData.totals.fit) || 0,
+          unfit: Number(resData.totals.unfit) || 0,
+          processedToday: Number(resData.totals.processedToday) || 0,
+          activeDCMs: Number(resData.totals.activeDCMs) || 14,
+          trends: {
+            total: calcTrend(Number(t.candidatesThisMonth || 0), Number(t.candidatesLastMonth || 0), "last month"),
+            fit: calcTrend(Number(t.fitThisWeek || 0), Number(t.fitLastWeek || 0), "last week"),
+            unfit: calcTrend(Number(t.unfitThisWeek || 0), Number(t.unfitLastWeek || 0), "last week"),
+            processedToday: "Real-time updates",
+            activeDCMs: `across ${resData.totals.uniquePlatforms || 2} platform${(resData.totals.uniquePlatforms || 2) !== 1 ? 's' : ''}`
+          }
+        };
+
+        const chartData = (resData.chartData || []).map((c: any) => ({
+          ...c,
+          classification: (c.classification === "Pending" ? "Error" : c.classification)
+        }));
+
+        const chartAggregates = {
+          dailyTrend: resData.dailyTrend || [],
+          platformDistribution: resData.platformDistribution || [],
+          dcmDistribution: resData.dcmDistribution || [],
+          classificationOverview: [
+            { name: "FIT", value: Number(resData.totals.fit) || 0 },
+            { name: "UNFIT", value: Number(resData.totals.unfit) || 0 },
+            ...(resData.totals.error > 0 ? [{ name: "Error", value: Number(resData.totals.error) || 0 }] : [])
+          ]
+        };
+
+        return { totals, chartData, chartAggregates };
+      }
+    } catch {
+      // Direct fast fallback below
+    }
+
+    // High performance fallback
     const [stats, chartData] = await Promise.all([
       this.getDashboardStats(),
       this.getChartData(),
     ]);
 
-    const chartAggregates = {
-      dailyTrend: [],
-      platformDistribution: [],
-      dcmDistribution: [],
-      classificationOverview: [
-        { name: "FIT", value: stats.fit },
-        { name: "UNFIT", value: stats.unfit },
-      ]
-    };
-
     return {
       totals: stats,
       chartData,
-      chartAggregates,
+      chartAggregates: undefined, // Let charts.tsx calculate dynamically from candidate dataset
     };
   },
 
@@ -94,19 +135,24 @@ export const candidateService = {
       { count: fitCount },
       { count: unfitCount },
       { count: processedTodayCount },
+      { data: activeDcmData }
     ] = await Promise.all([
       db.from("candidates").select("*", { count: "exact", head: true }),
       db.from("candidates").select("*", { count: "exact", head: true }).eq("classification", "FIT"),
       db.from("candidates").select("*", { count: "exact", head: true }).eq("classification", "UNFIT"),
       db.from("candidates").select("*", { count: "exact", head: true }).gte("processed_timestamp", today.toISOString()),
+      db.from("candidates").select("dcm_type").not("dcm_type", "is", null).limit(1000)
     ]);
+
+    const activeDcmSet = new Set((activeDcmData || []).map((item: any) => item.dcm_type).filter((t: string) => t && t !== "N/A" && t !== "Unknown"));
+    const activeDcmCount = activeDcmSet.size > 0 ? activeDcmSet.size : 14;
 
     return {
       total: totalCount || 0,
       fit: fitCount || 0,
       unfit: unfitCount || 0,
       processedToday: processedTodayCount || 0,
-      activeDCMs: 14,
+      activeDCMs: activeDcmCount,
       trends: {
         total: "Up to date",
         fit: "Up to date",
@@ -118,12 +164,12 @@ export const candidateService = {
   },
 
   async getChartData() {
-    // Optimized: Fetch recent 2000 records for chart visualization instead of downloading the entire database in a loop
+    // Optimized: Fetch recent 10000 records for chart visualization
     const { data, error } = await db
       .from("candidates")
       .select("classification, platform_name, dcm_type, processed_timestamp")
       .order("processed_timestamp", { ascending: false })
-      .limit(2000);
+      .limit(10000);
 
     if (error) {
       console.error("Error fetching chart data:", error);
