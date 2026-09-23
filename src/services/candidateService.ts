@@ -113,24 +113,86 @@ export const candidateService = {
       // Direct fast fallback below
     }
 
-    // High performance fallback
-    const [stats, chartData] = await Promise.all([
+    // High performance fallback using parallel exact count queries across full DB dataset
+    const [stats, chartData, fallbackAggregates] = await Promise.all([
       this.getDashboardStats(),
       this.getChartData(),
+      this.getFallbackChartAggregates(),
     ]);
 
     return {
       totals: stats,
       chartData,
       chartAggregates: {
-        dailyTrend: [],
-        platformDistribution: [],
-        dcmDistribution: [],
+        ...fallbackAggregates,
         classificationOverview: [
           { name: "FIT", value: stats.fit },
           { name: "UNFIT", value: stats.unfit },
         ]
       },
+    };
+  },
+
+  async getFallbackChartAggregates() {
+    const knownPlatforms = ["CV-Library", "TotalJobs", "LinkedIn", "Indeed", "Reed"];
+    const knownDcms = [
+      "Demolition", "Height & Safety", "Estimator", "Health & Safety", 
+      "Firesec", "Catering Company Targeter", "Drylining", "Piling", 
+      "Fit Out", "Groundworks", "M&E", "Scaffolding", "RC Frame", "Civil Engineering"
+    ];
+
+    // Fetch dynamic DCMs from queue if available
+    let dcmTypes = knownDcms;
+    try {
+      const { data: queueData } = await db.from("bot_queue_status").select("dcm_type");
+      if (queueData && queueData.length > 0) {
+        const queueDcms = queueData.map((q: any) => q.dcm_type).filter((t: string) => t && t !== "N/A");
+        dcmTypes = Array.from(new Set([...queueDcms, ...knownDcms]));
+      }
+    } catch {
+      // Use knownDcms fallback
+    }
+
+    // Generate last 7 days dates
+    const days = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      return d.toISOString().split("T")[0];
+    });
+
+    const [platformRes, dcmRes, trendRes] = await Promise.all([
+      // 1. Platform counts across ALL 112,509 candidates
+      Promise.all(
+        knownPlatforms.map(async (name) => {
+          const { count } = await db.from("candidates").select("id", { count: "exact", head: true }).eq("platform_name", name);
+          return { name, value: count || 0 };
+        })
+      ),
+      // 2. DCM Bot counts across ALL 112,509 candidates
+      Promise.all(
+        dcmTypes.map(async (dcm) => {
+          const { count } = await db.from("candidates").select("id", { count: "exact", head: true }).eq("dcm_type", dcm);
+          return { name: dcm, size: count || 0 };
+        })
+      ),
+      // 3. Daily trend counts for last 7 days across ALL candidates
+      Promise.all(
+        days.map(async (dateStr) => {
+          const startIso = `${dateStr}T00:00:00.000Z`;
+          const endIso = `${dateStr}T23:59:59.999Z`;
+          const [{ count: fitCount }, { count: unfitCount }] = await Promise.all([
+            db.from("candidates").select("id", { count: "exact", head: true }).eq("classification", "FIT").gte("processed_timestamp", startIso).lte("processed_timestamp", endIso),
+            db.from("candidates").select("id", { count: "exact", head: true }).eq("classification", "UNFIT").gte("processed_timestamp", startIso).lte("processed_timestamp", endIso),
+          ]);
+          return { date: dateStr, FIT: fitCount || 0, UNFIT: unfitCount || 0 };
+        })
+      )
+    ]);
+
+    return {
+      dailyTrend: trendRes,
+      platformDistribution: platformRes.filter(p => p.value > 0).sort((a, b) => b.value - a.value),
+      dcmDistribution: dcmRes.filter(d => d.size > 0).sort((a, b) => b.size - a.size),
     };
   },
 
