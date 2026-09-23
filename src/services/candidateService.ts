@@ -114,17 +114,19 @@ export const candidateService = {
     }
 
     // High performance fallback using parallel exact count queries across full DB dataset
-    const [stats, chartData, fallbackAggregates] = await Promise.all([
-      this.getDashboardStats(),
+    const fallbackAggregates = await this.getFallbackChartAggregates();
+    const [stats, chartData] = await Promise.all([
+      this.getDashboardStats(fallbackAggregates.activeDcmCount),
       this.getChartData(),
-      this.getFallbackChartAggregates(),
     ]);
 
     return {
       totals: stats,
       chartData,
       chartAggregates: {
-        ...fallbackAggregates,
+        dailyTrend: fallbackAggregates.dailyTrend,
+        platformDistribution: fallbackAggregates.platformDistribution,
+        dcmDistribution: fallbackAggregates.dcmDistribution,
         classificationOverview: [
           { name: "FIT", value: stats.fit },
           { name: "UNFIT", value: stats.unfit },
@@ -135,22 +137,28 @@ export const candidateService = {
 
   async getFallbackChartAggregates() {
     const knownPlatforms = ["CV-Library", "TotalJobs", "LinkedIn", "Indeed", "Reed"];
-    const knownDcms = [
+    const allDcmTypesList = [
       "Demolition", "Height & Safety", "Estimator", "Health & Safety", 
       "Firesec", "Catering Company Targeter", "Drylining", "Piling", 
-      "Fit Out", "Groundworks", "M&E", "Scaffolding", "RC Frame", "Civil Engineering"
+      "Fit Out", "Groundworks", "M&E", "Scaffolding", "RC Frame", "Civil Engineering",
+      "Exterior DCM", "Structural DCM", "Windows and Doors DCM", "BID DCM", "Estimator DCM",
+      "QS DCM", "Scaffolding DCM", "Temporary Works Design DCM", "Demolition DCM",
+      "Passive Fire Protection DCM", "Consultancy Civil & Structural DCM", "Consultancy New DCM",
+      "Health & Safety DCM", "Waste Management DCM", "Firesec DCM", "Fire Alarm DCM",
+      "Catering DCM", "Height & Safety Company Targeter", "Electrical Company Targeter",
+      "Large Companies Targeter", "Height & Safety DCM"
     ];
 
-    // Fetch dynamic DCMs from queue if available
-    let dcmTypes = knownDcms;
+    // Fetch dynamic DCMs from automation_settings if available
+    let dcmTypes = allDcmTypesList;
     try {
-      const { data: queueData } = await db.from("bot_queue_status").select("dcm_type");
-      if (queueData && queueData.length > 0) {
-        const queueDcms = queueData.map((q: any) => q.dcm_type).filter((t: string) => t && t !== "N/A");
-        dcmTypes = Array.from(new Set([...queueDcms, ...knownDcms]));
+      const { data: settingsData } = await db.from("automation_settings").select("dcm_type");
+      if (settingsData && settingsData.length > 0) {
+        const found = settingsData.map((s: any) => s.dcm_type).filter((t: string) => t && t !== "N/A");
+        dcmTypes = Array.from(new Set([...found, ...allDcmTypesList]));
       }
     } catch {
-      // Use knownDcms fallback
+      // Use allDcmTypesList fallback
     }
 
     // Generate last 7 days dates
@@ -189,14 +197,17 @@ export const candidateService = {
       )
     ]);
 
+    const activeDcmCount = dcmRes.filter(d => d.size > 0).length || 14;
+
     return {
       dailyTrend: trendRes,
       platformDistribution: platformRes.filter(p => p.value > 0).sort((a, b) => b.value - a.value),
       dcmDistribution: dcmRes.filter(d => d.size > 0).sort((a, b) => b.size - a.size),
+      activeDcmCount,
     };
   },
 
-  async getDashboardStats(): Promise<CandidateStats> {
+  async getDashboardStats(activeDcmCount = 14): Promise<CandidateStats> {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -205,16 +216,12 @@ export const candidateService = {
       { count: fitCount },
       { count: unfitCount },
       { count: processedTodayCount },
-      { data: queueStatusData }
     ] = await Promise.all([
       db.from("candidates").select("*", { count: "exact", head: true }),
       db.from("candidates").select("*", { count: "exact", head: true }).eq("classification", "FIT"),
       db.from("candidates").select("*", { count: "exact", head: true }).eq("classification", "UNFIT"),
       db.from("candidates").select("*", { count: "exact", head: true }).gte("processed_timestamp", today.toISOString()),
-      db.from("bot_queue_status").select("queue_id")
     ]);
-
-    const activeDcmCount = (queueStatusData && queueStatusData.length > 0) ? queueStatusData.length : 14;
 
     return {
       total: totalCount || 0,
