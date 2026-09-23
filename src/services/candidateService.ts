@@ -62,64 +62,7 @@ export const candidateService = {
   },
 
   async getDashboardSummary() {
-    try {
-      let response = await db.rpc("get_dashboard_summary");
-      if (response.error) {
-        // Retry once after 200ms delay in case of transient cold-start database connection pool delay
-        await new Promise((resolve) => setTimeout(resolve, 200));
-        response = await db.rpc("get_dashboard_summary");
-      }
-      const { data, error } = response;
-      const resData = data as unknown as Record<string, any>;
-      if (!error && resData && resData.totals) {
-        const t = resData.trends || {};
-        
-        const calcTrend = (current: number, previous: number, label: string) => {
-          if (!previous || previous === 0) {
-            return current > 0 ? `+100% from ${label}` : `0% from ${label}`;
-          }
-          const diff = Math.round(((current - previous) / previous) * 100);
-          return `${diff >= 0 ? '+' : ''}${diff}% from ${label}`;
-        };
-
-        const totals: CandidateStats = {
-          total: Number(resData.totals.total) || 0,
-          fit: Number(resData.totals.fit) || 0,
-          unfit: Number(resData.totals.unfit) || 0,
-          processedToday: Number(resData.totals.processedToday) || 0,
-          activeDCMs: Number(resData.totals.activeDCMs) || 0,
-          trends: {
-            total: calcTrend(Number(t.candidatesThisMonth || 0), Number(t.candidatesLastMonth || 0), "last month"),
-            fit: calcTrend(Number(t.fitThisWeek || 0), Number(t.fitLastWeek || 0), "last week"),
-            unfit: calcTrend(Number(t.unfitThisWeek || 0), Number(t.unfitLastWeek || 0), "last week"),
-            processedToday: "Real-time updates",
-            activeDCMs: `across ${resData.totals.uniquePlatforms || 0} platform${(resData.totals.uniquePlatforms || 0) !== 1 ? 's' : ''}`
-          }
-        };
-
-        const chartData = (resData.chartData || []).map((c: any) => ({
-          ...c,
-          classification: (c.classification === "Pending" ? "Error" : c.classification)
-        }));
-
-        const chartAggregates = {
-          dailyTrend: resData.dailyTrend || [],
-          platformDistribution: resData.platformDistribution || [],
-          dcmDistribution: resData.dcmDistribution || [],
-          classificationOverview: [
-            { name: "FIT", value: Number(resData.totals.fit) || 0 },
-            { name: "UNFIT", value: Number(resData.totals.unfit) || 0 },
-            ...(resData.totals.error > 0 ? [{ name: "Error", value: Number(resData.totals.error) || 0 }] : [])
-          ]
-        };
-
-        return { totals, chartData, chartAggregates };
-      }
-    } catch (err) {
-      console.warn("RPC get_dashboard_summary failed or not installed, falling back", err);
-    }
-
-    // High performance fallback
+    // Fast, ultra-reliable direct query strategy to avoid RPC 500 statement timeouts
     const [stats, chartData] = await Promise.all([
       this.getDashboardStats(),
       this.getChartData(),
