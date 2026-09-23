@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Candidate } from "@/types/candidate";
 import {
@@ -39,6 +39,12 @@ const COLORS = {
 };
 
 export function DashboardCharts({ data, aggregates }: ChartsProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Process Classification Data
   const classificationData = useMemo(() => {
     if (aggregates?.classificationOverview && aggregates.classificationOverview.length > 0) {
@@ -136,6 +142,8 @@ export function DashboardCharts({ data, aggregates }: ChartsProps) {
         fill: vibrantColors[index % vibrantColors.length]
       }));
   }, [data, aggregates]);
+
+  if (!mounted) return null;
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 mt-4 print:flex print:flex-col print:gap-8 print:w-full">
@@ -292,7 +300,7 @@ export function DashboardCharts({ data, aggregates }: ChartsProps) {
                       <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                         <motion.div 
                           initial={{ width: 0 }}
-                          animate={{ width: `${Math.max(2, (dcm.size / dcmData[0].size) * 100)}%` }}
+                          animate={{ width: `${Math.max(2, (dcm.size / dcmData[0]?.size || 1) * 100)}%` }}
                           transition={{ duration: 1, delay: 0.2 + (0.1 * index), ease: [0.25, 0.1, 0.25, 1] }}
                           className="h-full rounded-full"
                           style={{ backgroundColor: dcm.fill }}

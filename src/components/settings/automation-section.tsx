@@ -58,7 +58,7 @@ export function AutomationSection() {
         } else {
           setIsAdmin(false);
         }
-      } catch (e) {
+      } catch {
         setIsAdmin(true);
       }
     };
@@ -94,10 +94,13 @@ export function AutomationSection() {
   useEffect(() => {
     const fetchStatuses = async () => {
       try {
-        const { data, error } = await supabase.from('bot_queue_status').select('*');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data, error } = await supabase.from('bot_queue_status' as any).select('*');
         if (data && !error) {
-          const q1 = data.find(q => q.queue_id === 1);
-          const q2 = data.find(q => q.queue_id === 2);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const q1 = (data as any[]).find((q: any) => q.queue_id === 1);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const q2 = (data as any[]).find((q: any) => q.queue_id === 2);
           if (q1) setQ1Status(q1);
           if (q2) setQ2Status(q2);
         }

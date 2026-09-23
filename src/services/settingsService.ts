@@ -1,4 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { supabaseAdmin as supabase } from "@/lib/supabase";
+
+const db = supabase as any;
 
 export interface AutomationSetting {
   id?: string;
@@ -12,7 +15,7 @@ export interface AutomationSetting {
 
 export const settingsService = {
   async getAutomationSettings(): Promise<AutomationSetting[]> {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from("automation_settings")
       .select("*")
       .order("dcm_type", { ascending: true });
@@ -26,7 +29,7 @@ export const settingsService = {
 
   async updateAutomationSetting(setting: AutomationSetting): Promise<AutomationSetting> {
     // First check if it exists
-    const { data: existing } = await supabase
+    const { data: existing } = await db
       .from("automation_settings")
       .select("id")
       .eq("dcm_type", setting.dcm_type)
@@ -43,7 +46,7 @@ export const settingsService = {
     let result;
     if (existing) {
       // Update
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("automation_settings")
         .update(payload)
         .eq("dcm_type", setting.dcm_type)
@@ -53,7 +56,7 @@ export const settingsService = {
       result = data;
     } else {
       // Insert
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("automation_settings")
         .insert(payload)
         .select()

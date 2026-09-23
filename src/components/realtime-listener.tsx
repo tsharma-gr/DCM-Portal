@@ -16,7 +16,8 @@ export function RealtimeListener() {
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "candidates" },
-        (payload) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (payload: any) => {
           const newCandidate = payload.new;
           if (newCandidate.classification === "FIT") {
             toast.success(`🎉 AI found a new FIT candidate for ${newCandidate.dcm_type || 'a DCM'}!`, {

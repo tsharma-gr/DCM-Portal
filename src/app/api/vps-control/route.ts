@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server';
 import { supabaseAdmin as supabase } from '@/lib/supabase';
 
@@ -21,8 +22,8 @@ export async function POST(request: Request) {
     const queueId = queue === 'queue1' ? 1 : 2;
 
     // Insert command into Supabase bot_commands table for the VPS Master Scheduler to consume
-    const { data, error } = await supabase
-      .from('bot_commands')
+    const { data, error } = await (supabase
+      .from('bot_commands' as any) as any)
       .insert([
         {
           queue_id: queueId,

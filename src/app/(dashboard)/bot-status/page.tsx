@@ -104,7 +104,7 @@ export default function BotStatusPage() {
           total = exactCount || (allData || []).length;
           const rows = allData || [];
 
-          rows.forEach(row => {
+          rows.forEach((row: any) => {
             if (!row.dcm_type) return;
             const key = row.dcm_type.trim().toLowerCase();
             if (!statsMap[key]) {
@@ -125,7 +125,7 @@ export default function BotStatusPage() {
 
         const realStatusMap: Record<string, { status: string, last_updated: string }> = {};
         if (statusData) {
-          statusData.forEach(row => {
+          statusData.forEach((row: any) => {
             if (row.dcm_type) {
               realStatusMap[row.dcm_type.trim().toLowerCase()] = {
                 status: row.status,

@@ -2,6 +2,8 @@
 import { supabaseAdmin as supabase } from "@/lib/supabase";
 import { Candidate, CandidateStats } from "@/types/candidate";
 
+const db = supabase as any;
+
 export const candidateService = {
   async getCandidates(
     page = 1,
@@ -14,7 +16,7 @@ export const candidateService = {
       date?: string;
     }
   ) {
-    let query = supabase
+    let query = db
       .from("candidates")
       .select("*", { count: "exact" })
       .order("processed_timestamp", { ascending: false });
@@ -61,9 +63,16 @@ export const candidateService = {
 
   async getDashboardSummary() {
     try {
-      const { data, error } = await supabase.rpc("get_dashboard_summary");
-      if (!error && data && data.totals) {
-        const t = data.trends || {};
+      let response = await db.rpc("get_dashboard_summary");
+      if (response.error) {
+        // Retry once after 200ms delay in case of transient cold-start database connection pool delay
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        response = await db.rpc("get_dashboard_summary");
+      }
+      const { data, error } = response;
+      const resData = data as unknown as Record<string, any>;
+      if (!error && resData && resData.totals) {
+        const t = resData.trends || {};
         
         const calcTrend = (current: number, previous: number, label: string) => {
           if (!previous || previous === 0) {
@@ -74,33 +83,33 @@ export const candidateService = {
         };
 
         const totals: CandidateStats = {
-          total: Number(data.totals.total) || 0,
-          fit: Number(data.totals.fit) || 0,
-          unfit: Number(data.totals.unfit) || 0,
-          processedToday: Number(data.totals.processedToday) || 0,
-          activeDCMs: Number(data.totals.activeDCMs) || 0,
+          total: Number(resData.totals.total) || 0,
+          fit: Number(resData.totals.fit) || 0,
+          unfit: Number(resData.totals.unfit) || 0,
+          processedToday: Number(resData.totals.processedToday) || 0,
+          activeDCMs: Number(resData.totals.activeDCMs) || 0,
           trends: {
             total: calcTrend(Number(t.candidatesThisMonth || 0), Number(t.candidatesLastMonth || 0), "last month"),
             fit: calcTrend(Number(t.fitThisWeek || 0), Number(t.fitLastWeek || 0), "last week"),
             unfit: calcTrend(Number(t.unfitThisWeek || 0), Number(t.unfitLastWeek || 0), "last week"),
             processedToday: "Real-time updates",
-            activeDCMs: `across ${data.totals.uniquePlatforms || 0} platform${(data.totals.uniquePlatforms || 0) !== 1 ? 's' : ''}`
+            activeDCMs: `across ${resData.totals.uniquePlatforms || 0} platform${(resData.totals.uniquePlatforms || 0) !== 1 ? 's' : ''}`
           }
         };
 
-        const chartData = (data.chartData || []).map((c: any) => ({
+        const chartData = (resData.chartData || []).map((c: any) => ({
           ...c,
           classification: (c.classification === "Pending" ? "Error" : c.classification)
         }));
 
         const chartAggregates = {
-          dailyTrend: data.dailyTrend || [],
-          platformDistribution: data.platformDistribution || [],
-          dcmDistribution: data.dcmDistribution || [],
+          dailyTrend: resData.dailyTrend || [],
+          platformDistribution: resData.platformDistribution || [],
+          dcmDistribution: resData.dcmDistribution || [],
           classificationOverview: [
-            { name: "FIT", value: Number(data.totals.fit) || 0 },
-            { name: "UNFIT", value: Number(data.totals.unfit) || 0 },
-            ...(data.totals.error > 0 ? [{ name: "Error", value: Number(data.totals.error) || 0 }] : [])
+            { name: "FIT", value: Number(resData.totals.fit) || 0 },
+            { name: "UNFIT", value: Number(resData.totals.unfit) || 0 },
+            ...(resData.totals.error > 0 ? [{ name: "Error", value: Number(resData.totals.error) || 0 }] : [])
           ]
         };
 
@@ -116,9 +125,20 @@ export const candidateService = {
       this.getChartData(),
     ]);
 
+    const chartAggregates = {
+      dailyTrend: [],
+      platformDistribution: [],
+      dcmDistribution: [],
+      classificationOverview: [
+        { name: "FIT", value: stats.fit },
+        { name: "UNFIT", value: stats.unfit },
+      ]
+    };
+
     return {
       totals: stats,
       chartData,
+      chartAggregates,
     };
   },
 
@@ -132,10 +152,10 @@ export const candidateService = {
       { count: unfitCount },
       { count: processedTodayCount },
     ] = await Promise.all([
-      supabase.from("candidates").select("*", { count: "exact", head: true }),
-      supabase.from("candidates").select("*", { count: "exact", head: true }).eq("classification", "FIT"),
-      supabase.from("candidates").select("*", { count: "exact", head: true }).eq("classification", "UNFIT"),
-      supabase.from("candidates").select("*", { count: "exact", head: true }).gte("processed_timestamp", today.toISOString()),
+      db.from("candidates").select("*", { count: "exact", head: true }),
+      db.from("candidates").select("*", { count: "exact", head: true }).eq("classification", "FIT"),
+      db.from("candidates").select("*", { count: "exact", head: true }).eq("classification", "UNFIT"),
+      db.from("candidates").select("*", { count: "exact", head: true }).gte("processed_timestamp", today.toISOString()),
     ]);
 
     return {
@@ -145,9 +165,9 @@ export const candidateService = {
       processedToday: processedTodayCount || 0,
       activeDCMs: 14,
       trends: {
-        total: "+10% from last month",
-        fit: "+15% from last week",
-        unfit: "+12% from last week",
+        total: "Up to date",
+        fit: "Up to date",
+        unfit: "Up to date",
         processedToday: "Real-time updates",
         activeDCMs: "across 2 platforms"
       }
@@ -156,7 +176,7 @@ export const candidateService = {
 
   async getChartData() {
     // Optimized: Fetch recent 2000 records for chart visualization instead of downloading the entire database in a loop
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from("candidates")
       .select("classification, platform_name, dcm_type, processed_timestamp")
       .order("processed_timestamp", { ascending: false })
@@ -174,17 +194,18 @@ export const candidateService = {
   },
 
   async getCandidateById(id: string): Promise<Candidate | null> {
-    const { data, error } = await supabase.from("candidates").select("*").eq("id", id).single();
+    const { data, error } = await db.from("candidates").select("*").eq("id", id).single();
     if (error || !data) return null;
     
+    const candidateData = data as unknown as Record<string, any>;
     return {
-      ...data,
-      classification: (data.classification as string) === "Pending" ? "Error" : data.classification
+      ...candidateData,
+      classification: (candidateData.classification as string) === "Pending" ? "Error" : candidateData.classification
     } as Candidate;
   },
 
   async updateCandidateStatus(id: string, status: string): Promise<void> {
-    const { error } = await supabase
+    const { error } = await db
       .from("candidates")
       .update({ status })
       .eq("id", id);
@@ -195,7 +216,7 @@ export const candidateService = {
   },
 
   async getCandidateComments(candidateId: string) {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from("candidate_comments")
       .select("*")
       .eq("candidate_id", candidateId)
@@ -209,7 +230,7 @@ export const candidateService = {
   },
 
   async addCandidateComment(candidateId: string, authorEmail: string, comment: string) {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from("candidate_comments")
       .insert([
         {
@@ -229,7 +250,7 @@ export const candidateService = {
   },
 
   async editCandidateComment(commentId: string, newCommentText: string) {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from("candidate_comments")
       .update({ comment: newCommentText })
       .eq("id", commentId)
@@ -244,7 +265,7 @@ export const candidateService = {
   },
 
   async deleteCandidateComment(commentId: string) {
-    const { error } = await supabase
+    const { error } = await db
       .from("candidate_comments")
       .delete()
       .eq("id", commentId);
@@ -256,7 +277,7 @@ export const candidateService = {
   },
 
   async deleteCandidate(id: string): Promise<void> {
-    const { error } = await supabase.from("candidates").delete().eq("id", id);
+    const { error } = await db.from("candidates").delete().eq("id", id);
     if (error) throw error;
   },
 
@@ -266,7 +287,7 @@ export const candidateService = {
       dbUpdates.classification = "Pending";
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from("candidates")
       .update(dbUpdates)
       .eq("id", id)
@@ -278,9 +299,10 @@ export const candidateService = {
       throw new Error(`Failed to update candidate: ${error.message}`);
     }
     
+    const candidateData = data as unknown as Record<string, any>;
     return {
-      ...data,
-      classification: (data.classification as string) === "Pending" ? "Error" : data.classification
+      ...candidateData,
+      classification: (candidateData.classification as string) === "Pending" ? "Error" : candidateData.classification
     } as Candidate;
   },
 
@@ -290,7 +312,7 @@ export const candidateService = {
       dbUpdates.classification = "Pending";
     }
 
-    const { error } = await supabase
+    const { error } = await db
       .from("candidates")
       .update(dbUpdates)
       .in("id", ids);
@@ -302,7 +324,7 @@ export const candidateService = {
   },
 
   async bulkDeleteCandidates(ids: string[]): Promise<void> {
-    const { error } = await supabase
+    const { error } = await db
       .from("candidates")
       .delete()
       .in("id", ids);

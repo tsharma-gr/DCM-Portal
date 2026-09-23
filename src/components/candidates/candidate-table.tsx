@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
@@ -220,7 +221,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'candidates' },
-          (payload) => {
+          (payload: any) => {
             console.log("REALTIME INSERT RECEIVED:", payload);
             const newCandidate = payload.new as Candidate;
             const filters = filtersRef.current;
@@ -249,7 +250,7 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
         .on(
           'postgres_changes',
           { event: 'UPDATE', schema: 'public', table: 'candidates' },
-          (payload) => {
+          (payload: any) => {
             console.log("REALTIME UPDATE RECEIVED:", payload);
             const updated = payload.new as Candidate;
             setCandidates(prev => prev.map(c => c.id === updated.id ? updated : c));
@@ -258,13 +259,13 @@ export function CandidateTable({ candidates: initialCandidates, totalCount }: Ca
         .on(
           'postgres_changes',
           { event: 'DELETE', schema: 'public', table: 'candidates' },
-          (payload) => {
+          (payload: any) => {
             console.log("REALTIME DELETE RECEIVED:", payload);
             setCandidates(prev => prev.filter(c => c.id !== payload.old.id));
             setLocalTotalCount(prev => Math.max(0, prev - 1));
           }
         )
-        .subscribe((status, err) => {
+        .subscribe((status: any, err: any) => {
           console.log("REALTIME SUBSCRIPTION STATUS:", status, err);
         });
 
