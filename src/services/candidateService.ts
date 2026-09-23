@@ -122,7 +122,15 @@ export const candidateService = {
     return {
       totals: stats,
       chartData,
-      chartAggregates: undefined, // Let charts.tsx calculate dynamically from candidate dataset
+      chartAggregates: {
+        dailyTrend: [],
+        platformDistribution: [],
+        dcmDistribution: [],
+        classificationOverview: [
+          { name: "FIT", value: stats.fit },
+          { name: "UNFIT", value: stats.unfit },
+        ]
+      },
     };
   },
 
@@ -135,17 +143,16 @@ export const candidateService = {
       { count: fitCount },
       { count: unfitCount },
       { count: processedTodayCount },
-      { data: activeDcmData }
+      { data: queueStatusData }
     ] = await Promise.all([
       db.from("candidates").select("*", { count: "exact", head: true }),
       db.from("candidates").select("*", { count: "exact", head: true }).eq("classification", "FIT"),
       db.from("candidates").select("*", { count: "exact", head: true }).eq("classification", "UNFIT"),
       db.from("candidates").select("*", { count: "exact", head: true }).gte("processed_timestamp", today.toISOString()),
-      db.from("candidates").select("dcm_type").not("dcm_type", "is", null).limit(1000)
+      db.from("bot_queue_status").select("queue_id")
     ]);
 
-    const activeDcmSet = new Set((activeDcmData || []).map((item: any) => item.dcm_type).filter((t: string) => t && t !== "N/A" && t !== "Unknown"));
-    const activeDcmCount = activeDcmSet.size > 0 ? activeDcmSet.size : 14;
+    const activeDcmCount = (queueStatusData && queueStatusData.length > 0) ? queueStatusData.length : 14;
 
     return {
       total: totalCount || 0,
